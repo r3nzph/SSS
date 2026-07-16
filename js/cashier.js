@@ -29,7 +29,7 @@ window.handleLogout = () => {
   try { Audit.logAction('LOGOUT', `User "${Auth.getState().user}" logged out`); } catch(e) {}
   Session.clearSession();
   Auth.clearSession();
-  window.location.href = 'login.html';
+  Session.redirectToIndex();
 };
 window.toggleTheme = () => Theme.toggle();
 
@@ -42,12 +42,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const session = Session.restoreSession();
 
   if (!session) {
-    window.location.href = 'login.html';
+    Session.redirectToIndex();
     return;
   }
 
-  // Validate role — cashier page is for cashier only
-  if (!Session.isCashier(session.role)) {
+  // Validate role — cashier page is for cashiers and admins
+  if (!Session.canAccessCashierPage(session.role)) {
     Session.redirectByRole(session.role);
     return;
   }

@@ -1,13 +1,12 @@
 {
   "name": "sarisari-store-pos",
   "version": "2.0.0",
-  "description": "Sari-Sari Store POS — Modular Web Application",
+  "description": "Sari-Sari Store POS — Pure Static Web Application",
   "scripts": {
-    "start": "npx http-server public -p 3000 -c-1",
-    "dev": "npx http-server . -p 3000 -c-1 --cors",
-    "electron": "electron ."
+    "start": "python3 -m http.server 8080",
+    "dev": "python3 -m http.server 8080",
+    "serve:php": "php -S localhost:8080"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "keywords": ["pos", "sari-sari-store", "inventory", "static"],
+  "license": "MIT"
 }

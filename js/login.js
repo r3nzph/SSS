@@ -119,7 +119,7 @@ const Login = {
     } catch(e) {}
     Session.clearSession();
     Auth.clearSession();
-    window.location.href = 'login.html';
+    Session.redirectToIndex();
   }
 };
 

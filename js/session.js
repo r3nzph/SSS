@@ -117,7 +117,7 @@ function clearRememberedUser() {
 function getPageForRole(role) {
   if (role === 'admin' || role === 'superadmin') return 'admin.html';
   if (role === 'cashier') return 'cashier.html';
-  return 'login.html';
+  return 'index.html';
 }
 
 /**
@@ -128,14 +128,24 @@ function redirectByRole(role) {
 }
 
 /**
+ * Redirect to the index page (for guests / logout).
+ */
+function redirectToIndex() {
+  window.location.href = 'index.html';
+}
+
+/**
  * Validate that the current page matches the user's role.
  * Redirects to the correct page if mismatch.
  * Returns true if page is correct, false if redirected.
  */
 function validatePageAccess(session) {
-  if (!session) return false;
+  if (!session) {
+    redirectToIndex();
+    return false;
+  }
 
-  const currentPage = window.location.pathname.split('/').pop() || 'login.html';
+  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
   const expectedPage = getPageForRole(session.role);
 
   if (currentPage !== expectedPage) {
@@ -159,6 +169,14 @@ function isCashier(role) {
   return role === 'cashier';
 }
 
+/**
+ * Check if the user's role can access the cashier page.
+ * Admins are allowed by default (configurable).
+ */
+function canAccessCashierPage(role) {
+  return role === 'cashier' || role === 'admin' || role === 'superadmin';
+}
+
 export default {
   saveSession,
   restoreSession,
@@ -168,8 +186,10 @@ export default {
   clearRememberedUser,
   redirectByRole,
   getPageForRole,
+  redirectToIndex,
   validatePageAccess,
   isAdmin,
   isCashier,
+  canAccessCashierPage,
   SESSION_DURATION
 };
