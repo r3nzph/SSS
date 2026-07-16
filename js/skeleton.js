@@ -57,8 +57,8 @@ const Skeleton = {
     let html = '';
     for (let i = 0; i < count; i++) {
       html += `
-        <div class="pos-product-card" style="pointer-events:none">
-          <div class="skeleton skeleton-image" style="height:50px;margin-bottom:8px"></div>
+        <div style="background:var(--bg-card);border:1px solid var(--border-glass);border-radius:var(--radius-md);padding:12px 10px;text-align:center">
+          <div class="skeleton skeleton-image" style="height:50px;width:60%;margin:0 auto 8px;border-radius:var(--radius-sm)"></div>
           <div class="skeleton skeleton-text" style="width:70%;margin:0 auto 4px"></div>
           <div class="skeleton skeleton-text" style="width:40%;margin:0 auto"></div>
         </div>`;

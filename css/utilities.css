@@ -669,23 +669,8 @@
   border-radius: var(--radius-md);
 }
 
-/* --- Skeleton table row --- */
-.skeleton-table-row {
-  display: grid;
-  grid-template-columns: 60px 1fr 80px 80px 80px 100px;
-  gap: var(--gap-xs);
-  align-items: center;
-  padding: 12px var(--gap-sm);
-  border-bottom: 1px solid var(--table-border);
-}
-.skeleton-table-row .skeleton {
-  margin: 0;
-}
-
-/* --- Skeleton table (full wrapper) --- */
-.skeleton-table .skeleton-table-row:last-child {
-  border-bottom: none;
-}
+/* --- Skeleton table row — used by Skeleton.showTable() JS utility --- */
+/* Note: showTable() generates individual <tr> elements, not this class */
 
 /* --- Skeleton line (inline text placeholder) --- */
 .skeleton-line {

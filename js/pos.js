@@ -17,6 +17,8 @@ let _discountPercent = 0;
 let _previousCategory = 'all';
 let _paymentMethod = 'cash';  // cash | gcash | card
 
+import Skeleton from './skeleton.js';
+
 const CashierPOS = {
   /**
    * Master render — everything the cashier sees.
@@ -101,6 +103,13 @@ const CashierPOS = {
     const skeleton = document.getElementById('posLoadingSkeleton');
     const empty = document.getElementById('posEmptyState');
     if (!grid) return;
+
+    // Show shimmer skeleton while preparing grid
+    if (!Auth.state.db || !Auth.state.db.products) {
+      Skeleton.showProductGrid('posProductGrid', 12);
+      if (skeleton) skeleton.classList.add('hidden');
+      return;
+    }
 
     const data = Auth.state.db;
     if (!data || !data.products) {

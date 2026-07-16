@@ -90,33 +90,42 @@ const AdminModule = {
   },
 
   _showViewSkeletons(view) {
-    switch (view) {
-      case 'admin':
-        Skeleton.showKpiGrid('kpiContainer', 6);
-        Skeleton.showChart('salesChart');
-        Skeleton.showChart('topProductsChart');
-        break;
-      case 'inventory':
-        Skeleton.showAlerts('lowStockAlerts', 2);
-        Skeleton.showTable('inventoryTable', 8);
-        break;
-      case 'audit':
-        Skeleton.showTable('auditLogBody', 10);
-        break;
-      case 'usermanager':
-        Skeleton.showCards('umCardsContainer', 6);
-        break;
-      case 'admin-suppliers':
-        Skeleton.showTable('suppliersTable', 5);
-        break;
-      case 'admin-pos':
-        Skeleton.showTable('poTable', 5);
-        break;
-      case 'salesreports':
-        Skeleton.hide('srContent');
-        document.getElementById('srContent') && (document.getElementById('srContent').innerHTML = '<div class="skeleton skeleton-block"></div>');
-        break;
-    }
+    // Use requestAnimationFrame to ensure browser paints skeletons before data loads
+    requestAnimationFrame(() => {
+      switch (view) {
+        case 'admin':
+          Skeleton.showKpiGrid('kpiContainer', 6);
+          Skeleton.showChart('salesChart');
+          Skeleton.showChart('topProductsChart');
+          break;
+        case 'inventory':
+          Skeleton.showAlerts('lowStockAlerts', 2);
+          Skeleton.showTable('inventoryTable', 8);
+          break;
+        case 'audit':
+          Skeleton.showTable('auditLogBody', 10);
+          break;
+        case 'usermanager':
+          Skeleton.showCards('umCardsContainer', 6);
+          break;
+        case 'admin-suppliers':
+          Skeleton.showTable('suppliersTable', 5);
+          break;
+        case 'admin-pos':
+          Skeleton.showTable('poTable', 5);
+          break;
+        case 'salesreports': {
+          const srContent = document.getElementById('srContent');
+          if (srContent) srContent.innerHTML = '<div class="skeleton skeleton-block"></div>';
+          // Add skeletons for filter bar and tab bar too
+          const srFilterBar = document.getElementById('srFilterBar');
+          if (srFilterBar) Skeleton.showToolbar('srFilterBar');
+          const srTabs = document.getElementById('srTabs');
+          if (srTabs) srTabs.innerHTML = '<div class="skeleton skeleton-toolbar" style="height:36px"></div>';
+          break;
+        }
+      }
+    });
   },
 
   _exposeGlobals() {
