@@ -23,6 +23,7 @@ import Pricing from './pricing.js';
 import Backup from './backup.js';
 import History from './history.js';
 import Accounts from './accounts.js';
+import Skeleton from './skeleton.js';
 
 const AdminModule = {
   _initialized: false,
@@ -52,6 +53,9 @@ const AdminModule = {
 
     this._currentView = view;
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+
+    // Show skeletons for data-heavy views
+    this._showViewSkeletons(view);
 
     const sectionMap = {
       'admin-suppliers': { panel: 'admin', sectionId: 'admin-suppliers-section' },
@@ -83,6 +87,36 @@ const AdminModule = {
       item.classList.remove('active');
       if (item.dataset.view === view) item.classList.add('active');
     });
+  },
+
+  _showViewSkeletons(view) {
+    switch (view) {
+      case 'admin':
+        Skeleton.showKpiGrid('kpiContainer', 6);
+        Skeleton.showChart('salesChart');
+        Skeleton.showChart('topProductsChart');
+        break;
+      case 'inventory':
+        Skeleton.showAlerts('lowStockAlerts', 2);
+        Skeleton.showTable('inventoryTable', 8);
+        break;
+      case 'audit':
+        Skeleton.showTable('auditLogBody', 10);
+        break;
+      case 'usermanager':
+        Skeleton.showCards('umCardsContainer', 6);
+        break;
+      case 'admin-suppliers':
+        Skeleton.showTable('suppliersTable', 5);
+        break;
+      case 'admin-pos':
+        Skeleton.showTable('poTable', 5);
+        break;
+      case 'salesreports':
+        Skeleton.hide('srContent');
+        document.getElementById('srContent') && (document.getElementById('srContent').innerHTML = '<div class="skeleton skeleton-block"></div>');
+        break;
+    }
   },
 
   _exposeGlobals() {

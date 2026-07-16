@@ -11,6 +11,7 @@ import CashierPOS from './pos.js';
 import Sales from './sales.js';
 import StorageService from './storage.js';
 import Audit from './audit.js';
+import Skeleton from './skeleton.js';
 
 const CashierModule = {
   _initialized: false,
@@ -43,8 +44,14 @@ const CashierModule = {
       item.classList.remove('active');
       if (item.dataset.view === view) item.classList.add('active');
     });
-    if (view === 'cashier-transactions') this._renderTransactions();
-    if (view === 'cashier-receipts') this._renderReceipts();
+    if (view === 'cashier-transactions') {
+      Skeleton.showTable('cashierTransactionsBody', 5);
+      setTimeout(() => this._renderTransactions(), 50);
+    }
+    if (view === 'cashier-receipts') {
+      Skeleton.showTable('cashierReceiptsBody', 5);
+      setTimeout(() => this._renderReceipts(), 50);
+    }
     if (view === 'cashier-profile') this._renderProfile();
   },
 
@@ -81,7 +88,7 @@ const CashierModule = {
     const state = Auth.getState();
     const data = state.db;
     if (!data || !data.transactions) {
-      container.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No transactions found.</td></tr>';
+      container.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No transactions found.</td></tr>';
       return;
     }
     let transactions = data.transactions.filter(tx => tx.cashier === state.user);

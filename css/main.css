@@ -140,13 +140,29 @@ body {
 .radius-full { border-radius: var(--radius-full); }
 
 .w-full { width: 100%; }
+.flex-2 { flex: 2; }
+.flex-shrink-0 { flex-shrink: 0; }
 .cursor-pointer { cursor: pointer; }
 .cursor-not-allowed { cursor: not-allowed; }
 .user-select-none { user-select: none; }
 .overflow-hidden { overflow: hidden; }
 .overflow-auto { overflow: auto; }
+.overflow-y-auto { overflow-y: auto; }
 .relative { position: relative; }
 .absolute { position: absolute; }
+
+/* Padding directional */
+.py-xs { padding-top: var(--space-xs); padding-bottom: var(--space-xs); }
+.py-sm { padding-top: var(--space-sm); padding-bottom: var(--space-sm); }
+.px-0 { padding-left: 0; padding-right: 0; }
+
+/* Margin directional */
+.mt-xs { margin-top: var(--space-xs); }
+.mt-sm { margin-top: var(--space-sm); }
+.mt-md { margin-top: var(--space-md); }
+
+/* Font size aliases — maps inline values to design system */
+.fs-1-4 { font-size: 1.4rem; }
 
 /* ============================================================
    PRICE CELL

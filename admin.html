@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/admin.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
 </head>
 <body>
 
@@ -75,8 +76,8 @@
             <div class="sidebar-user-role" id="currentUserRole">admin</div>
           </div>
         </div>
-        <button class="btn btn-ghost btn-sm btn-logout" onclick="handleLogout()" style="margin-bottom:6px;">🚪 Logout</button>
-        <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" id="themeToggleBtn" style="width:100%;font-size:0.83rem;">🌙 Dark</button>
+        <button class="btn btn-ghost btn-sm btn-logout mb-xs" onclick="handleLogout()">🚪 Logout</button>
+        <button class="btn btn-ghost btn-sm w-full" onclick="toggleTheme()" id="themeToggleBtn">🌙 Dark</button>
       </div>
     </aside>
 
@@ -161,7 +162,7 @@
               <button class="btn btn-ghost btn-sm" onclick="Purchasing.exportPOsCSV()">📤 Export CSV</button>
             </div>
             <h4>Purchase Orders</h4>
-            <div class="table-container"><table><thead><tr><th onclick="Purchasing.setSort('poNumber')" class="sortable" style="cursor:pointer;">PO # ↕</th><th onclick="Purchasing.setSort('supplierName')" class="sortable" style="cursor:pointer;">Supplier ↕</th><th>Items</th><th onclick="Purchasing.setSort('total')" class="sortable" style="cursor:pointer;">Total ↕</th><th onclick="Purchasing.setSort('status')" class="sortable" style="cursor:pointer;">Status ↕</th><th>Actions</th></tr></thead><tbody id="poTable"></tbody></table></div>
+            <div class="table-container"><table><thead><tr><th onclick="Purchasing.setSort('poNumber')" class="sortable" class="cursor-pointer">PO # ↕</th><th onclick="Purchasing.setSort('supplierName')" class="sortable" class="cursor-pointer">Supplier ↕</th><th>Items</th><th onclick="Purchasing.setSort('total')" class="sortable" class="cursor-pointer">Total ↕</th><th onclick="Purchasing.setSort('status')" class="sortable" class="cursor-pointer">Status ↕</th><th>Actions</th></tr></thead><tbody id="poTable"></tbody></table></div>
             <div class="inv-footer">
               <span id="poSummary" class="inv-summary">Loading...</span>
               <div id="poPagination" class="inv-pagination"></div>
@@ -190,15 +191,15 @@
             <div class="table-container" style="max-height:400px;overflow-y:auto;">
               <table>
                 <thead><tr>
-                  <th style="cursor:pointer;" onclick="StockAdjustments.setSort('adjNumber')">Adj # ↕</th>
+                  <th class="cursor-pointer" onclick="StockAdjustments.setSort('adjNumber')">Adj # ↕</th>
                   <th>Product</th><th>Old Stock</th><th>New Stock</th><th>Diff</th><th>Type</th><th>Reason</th><th>User</th>
-                  <th style="cursor:pointer;" onclick="StockAdjustments.setSort('createdAt')">Date ↕</th>
+                  <th class="cursor-pointer" onclick="StockAdjustments.setSort('createdAt')">Date ↕</th>
                 </tr></thead>
                 <tbody id="adjHistoryBody"></tbody>
               </table>
             </div>
             <div class="inv-footer">
-              <span id="adjSummary" class="inv-summary" style="font-size:0.8rem;color:var(--text-muted);"></span>
+              <span id="adjSummary" class="inv-summary" class="text-sm text-muted"></span>
               <div id="adjPagination" class="inv-pagination"></div>
             </div>
           </div>
@@ -272,9 +273,9 @@
 
         <!-- REPORTS LINK -->
         <div class="section-collapsible">
-          <h3 onclick="AdminModule.switchView('salesreports')" style="cursor:pointer;">📊 Reports & Analytics ▸</h3>
+          <h3 onclick="AdminModule.switchView('salesreports')" class="cursor-pointer">📊 Reports & Analytics ▸</h3>
           <div class="section-content">
-            <p style="color:var(--text-muted);font-size:0.85rem;padding:8px 0;">Reports have been moved to the unified <strong>Sales & Reports</strong> panel. <br><a href="#" onclick="AdminModule.switchView('salesreports');return false;" style="color:var(--accent-primary);">Click here to open →</a></p>
+            <p style="color:var(--text-muted);font-size:0.85rem;padding:8px 0;">Reports have been moved to the unified <strong>Sales & Reports</strong> panel. <br><a href="#" onclick="AdminModule.switchView('salesreports');return false;" class="text-accent">Click here to open →</a></p>
           </div>
         </div>
       </section>
@@ -368,7 +369,7 @@
         </div>
 
         <div id="cfgContent" class="cfg-content">
-          <p style="text-align:center;color:var(--text-muted);padding:40px;">Loading settings...</p>
+          <p class="text-center text-muted p-lg">Loading settings...</p>
         </div>
       </section>
 
@@ -377,7 +378,7 @@
         <h2>👥 User Management & RBAC</h2>
 
         <div class="um-toolbar">
-          <div class="inv-search-wrap" style="flex:1;">
+          <div class="inv-search-wrap" class="flex-1">
             <input type="text" id="umSearch" placeholder="Search by name, username, email, role..." oninput="UserManager.setFilter('search', this.value)" class="inv-search-input">
           </div>
           <select id="umRoleFilter" onchange="UserManager.setFilter('role', this.value)" class="inv-filter-select" style="min-width:130px;">
@@ -408,7 +409,7 @@
         <div id="srFilterBar" class="sr-filter-bar"></div>
         <div id="srTabs" class="sr-tab-bar"></div>
         <div id="srContent" class="sr-content">
-          <p style="text-align:center;color:var(--text-muted);padding:40px;">Loading...</p>
+          <p class="text-center text-muted p-lg">Loading...</p>
         </div>
       </section>
 
@@ -591,7 +592,7 @@
                 <small>Max 2MB</small>
               </div>
               <input type="file" id="invImageInput" accept="image/*"
-                onchange="Inventory.handleImageUpload(this.files[0])" style="display:none">
+                onchange="Inventory.handleImageUpload(this.files[0])" class="hidden">
             </div>
             <button class="btn btn-sm btn-ghost" onclick="Inventory.removeImage()" style="margin-top:4px;width:100%;">✕ Remove Image</button>
           </div>
@@ -641,7 +642,7 @@
       </div>
       <table>
         <thead><tr><th>Product</th><th>Ordered</th><th>Receive Qty</th><th>Damaged</th><th>Cost</th></tr></thead>
-        <tbody id="recItemsBody"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Loading...</td></tr></tbody>
+        <tbody id="recItemsBody"><tr><td colspan="5" class="text-center text-muted">Loading...</td></tr></tbody>
       </table>
       <div id="recTotals" style="display:flex;justify-content:flex-end;gap:20px;padding:10px 0;border-top:1px solid var(--border-glass);margin-top:8px;"></div>
     </div>
@@ -691,7 +692,7 @@
       </div>
       <table>
         <thead><tr><th>Product</th><th>Qty</th><th>Cost</th><th>Total</th><th style="width:40px;"></th></tr></thead>
-        <tbody id="poItemsTableBody"><tr><td colspan="4" style="text-align:center;color:var(--text-muted);">No items added yet.</td></tr></tbody>
+        <tbody id="poItemsTableBody"><tr><td colspan="4" class="text-center text-muted">No items added yet.</td></tr></tbody>
       </table>
       <div style="display:flex;justify-content:flex-end;gap:24px;padding:10px 0;border-top:1px solid var(--border-glass);margin-top:8px;font-size:0.95rem;">
         <span>Total Qty: <strong id="poTotalQty">0</strong></span>
@@ -713,7 +714,7 @@
       <button class="modal-close" onclick="Purchasing.closePODetail()">✕</button>
     </div>
     <div class="modal-body" id="poDetailContent" style="padding:20px 24px;">
-      <p style="color:var(--text-muted);">Loading...</p>
+      <p class="text-muted">Loading...</p>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="Purchasing.closePODetail()">Close</button>
@@ -778,11 +779,11 @@
       </div>
       <div id="adjQtyWarning" class="hidden" style="background:var(--danger-bg);border:1px solid var(--danger);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:10px;color:var(--danger);font-size:0.85rem;"></div>
       <div id="adjConfirmSection" class="hidden" style="background:var(--success-bg);border:1px solid var(--success);border-radius:var(--radius-md);padding:14px 16px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-          <span style="font-size:1.2rem;">✅</span>
-          <span style="font-weight:600;">Ready to Apply</span>
+        <div class="flex-middle gap-xs mb-xs">
+          <span class="text-xl">✅</span>
+          <span class="font-semibold">Ready to Apply</span>
         </div>
-        <div style="font-size:0.85rem;color:var(--text-secondary);">The adjustment will be recorded in the audit trail and applied immediately.</div>
+        <div class="text-sm text-secondary">The adjustment will be recorded in the audit trail and applied immediately.</div>
       </div>
     </div>
     <div class="modal-footer">
@@ -824,7 +825,7 @@
         <label>Password *</label>
         <input id="umPassword" type="password" placeholder="Min 6 chars, include uppercase, number & special char">
       </div>
-      <small id="umPasswordHint" class="hidden" style="color:var(--text-muted);display:block;margin-bottom:10px;">Leave blank to keep current password.</small>
+      <small id="umPasswordHint" class="hidden" class="text-muted block mb-xs">Leave blank to keep current password.</small>
       <div class="form-row">
         <div class="form-group">
           <label>Role</label>
@@ -844,9 +845,9 @@
           </select>
         </div>
       </div>
-      <div class="form-group" style="display:flex;align-items:center;gap:10px;padding:8px 0;">
-        <input type="checkbox" id="umForcePw" style="width:18px;height:18px;">
-        <label for="umForcePw" style="margin:0;font-size:0.85rem;">Force password change on next login</label>
+      <div class="form-group" class="flex-middle gap-xs py-xs">
+        <input type="checkbox" id="umForcePw" >
+        <label for="umForcePw" class="m-0 text-sm">Force password change on next login</label>
       </div>
     </div>
     <div class="modal-footer">
@@ -864,7 +865,7 @@
       <button class="modal-close" onclick="UserManager.closePermsModal()">✕</button>
     </div>
     <div class="modal-body" id="umPermsBody" style="padding:16px 20px;max-height:450px;overflow-y:auto;">
-      <p style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</p>
+      <p class="text-center text-muted p-sm">Loading...</p>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="UserManager.closePermsModal()">Close</button>
@@ -880,7 +881,7 @@
       <button class="modal-close" onclick="UserManager.closeProfileModal()">✕</button>
     </div>
     <div class="modal-body" id="umProfileContent" style="padding:20px 24px;max-height:520px;overflow-y:auto;">
-      <p style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</p>
+      <p class="text-center text-muted p-sm">Loading...</p>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="UserManager.closeProfileModal()">Close</button>
@@ -896,7 +897,7 @@
       <button class="modal-close" onclick="StockAdjustments.closeTimelineModal()">✕</button>
     </div>
     <div class="modal-body" id="adjTimelineContent" style="padding:20px 24px;max-height:500px;overflow-y:auto;">
-      <p style="text-align:center;color:var(--text-muted);padding:30px;">Loading...</p>
+      <p class="text-center text-muted p-md">Loading...</p>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="StockAdjustments.closeTimelineModal()">Close</button>

@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="css/cashier.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/utilities.css">
 </head>
 <body>
 
@@ -51,8 +52,8 @@
             <div class="sidebar-user-role" id="currentUserRole">cashier</div>
           </div>
         </div>
-        <button class="btn btn-ghost btn-sm btn-logout" onclick="handleLogout()" style="margin-bottom:6px;">🚪 Logout</button>
-        <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" id="themeToggleBtn" style="width:100%;font-size:0.83rem;">🌙 Dark</button>
+        <button class="btn btn-ghost btn-sm btn-logout mb-xs" onclick="handleLogout()">🚪 Logout</button>
+        <button class="btn btn-ghost btn-sm w-full" onclick="toggleTheme()" id="themeToggleBtn">🌙 Dark</button>
       </div>
     </aside>
 
@@ -131,9 +132,9 @@
                   <span>Tax (12%)</span>
                   <span id="posTax">₱0.00</span>
                 </div>
-                <div class="pos-summary-row pos-summary-discount" id="posDiscountRow" style="display:none;">
+                <div class="pos-summary-row pos-summary-discount" id="posDiscountRow" class="hidden">
                   <span>Discount</span>
-                  <span id="posDiscount" style="color:var(--success);">−₱0.00</span>
+                  <span id="posDiscount" class="text-success">−₱0.00</span>
                 </div>
                 <div class="pos-summary-row pos-summary-total">
                   <span>TOTAL</span>
@@ -179,14 +180,14 @@
                 </div>
               </div>
 
-              <div class="pos-payment-row" id="posNonCashPayment" style="display:none;">
+              <div class="pos-payment-row" id="posNonCashPayment" class="hidden">
                 <div class="pos-payment-label">Reference # (optional)</div>
                 <div class="pos-payment-input-group">
-                  <input type="text" id="posRefNumber" placeholder="e.g. GCash ref or last 4 digits" class="pos-tendered-input" style="font-size:1rem;text-align:left;">
+                  <input type="text" id="posRefNumber" placeholder="e.g. GCash ref or last 4 digits" class="pos-tendered-input" class="text-base text-left">
                 </div>
               </div>
 
-              <div class="pos-change-row" id="posChangeRow" style="display:none;">
+              <div class="pos-change-row" id="posChangeRow" class="hidden">
                 <span class="pos-change-label">Change Due</span>
                 <span class="pos-change-amount" id="posChangeAmount">₱0.00</span>
               </div>
@@ -225,7 +226,7 @@
       <section id="cashier-transactions" class="panel" data-module="cashier">
         <h2>🧾 My Transactions</h2>
         <div class="inv-toolbar">
-          <div class="inv-search-wrap" style="flex:1;">
+          <div class="inv-search-wrap" class="flex-1">
             <input type="text" id="ctSearch" placeholder="Search by receipt # or item..." oninput="CashierModule.filterTransactions(this.value)" class="inv-search-input">
           </div>
         </div>
@@ -233,7 +234,7 @@
           <table>
             <thead><tr><th>Receipt #</th><th>Date</th><th>Items</th><th>Total</th><th>View</th></tr></thead>
             <tbody id="cashierTransactionsBody">
-              <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No transactions found.</td></tr>
+              <tr><td colspan="5" class="text-center text-muted">No transactions found.</td></tr>
             </tbody>
           </table>
         </div>
@@ -246,7 +247,7 @@
           <table>
             <thead><tr><th>Receipt #</th><th>Date</th><th>Items</th><th>Total</th><th>Action</th></tr></thead>
             <tbody id="cashierReceiptsBody">
-              <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No receipts found.</td></tr>
+              <tr><td colspan="5" class="text-center text-muted">No receipts found.</td></tr>
             </tbody>
           </table>
         </div>
@@ -255,33 +256,33 @@
       <!-- === MY PROFILE PANEL === -->
       <section id="cashier-profile" class="panel" data-module="cashier">
         <h2>👤 My Profile</h2>
-        <div class="profile-card" style="background:var(--bg-glass);border-radius:var(--radius-md);padding:30px;max-width:480px;">
-          <div class="profile-avatar" style="font-size:3rem;text-align:center;margin-bottom:16px;">👤</div>
+        <div class="profile-card" class="p-lg" style="background:var(--bg-glass);border-radius:var(--radius-md);max-width:480px;">
+          <div class="profile-avatar" class="text-center mb-sm" style="font-size:3rem;">👤</div>
           <div class="profile-field">
-            <label style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;">Name</label>
-            <div id="profileName" style="font-size:1.2rem;font-weight:600;">—</div>
+            <label class="text-sm text-muted uppercase">Name</label>
+            <div id="profileName" class="text-xl font-semibold">—</div>
           </div>
-          <div class="profile-field" style="margin-top:12px;">
-            <label style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;">Username</label>
-            <div id="profileUsername" style="font-size:1rem;">—</div>
+          <div class="profile-field" class="mt-sm">
+            <label class="text-sm text-muted uppercase">Username</label>
+            <div id="profileUsername" class="text-base">—</div>
           </div>
-          <div class="profile-field" style="margin-top:12px;">
-            <label style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;">Role</label>
-            <div id="profileRole" style="font-size:1rem;">cashier</div>
+          <div class="profile-field" class="mt-sm">
+            <label class="text-sm text-muted uppercase">Role</label>
+            <div id="profileRole" class="text-base">cashier</div>
           </div>
-          <div class="profile-field" style="margin-top:12px;">
-            <label style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;">Email</label>
-            <div id="profileEmail" style="font-size:1rem;">—</div>
+          <div class="profile-field" class="mt-sm">
+            <label class="text-sm text-muted uppercase">Email</label>
+            <div id="profileEmail" class="text-base">—</div>
           </div>
-          <div class="profile-field" style="margin-top:12px;">
-            <label style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;">Contact</label>
-            <div id="profileContact" style="font-size:1rem;">—</div>
+          <div class="profile-field" class="mt-sm">
+            <label class="text-sm text-muted uppercase">Contact</label>
+            <div id="profileContact" class="text-base">—</div>
           </div>
-          <div class="profile-field" style="margin-top:12px;">
-            <label style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;">Last Login</label>
-            <div id="profileLastLogin" style="font-size:1rem;">—</div>
+          <div class="profile-field" class="mt-sm">
+            <label class="text-sm text-muted uppercase">Last Login</label>
+            <div id="profileLastLogin" class="text-base">—</div>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="CashierModule.changePassword()" style="margin-top:20px;">🔑 Change Password</button>
+          <button class="btn btn-primary btn-sm" onclick="CashierModule.changePassword()" class="mt-md">🔑 Change Password</button>
         </div>
       </section>
 
