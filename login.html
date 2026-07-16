@@ -6,44 +6,109 @@
   <title>Sari-Sari Store POS — Login</title>
   <link rel="stylesheet" href="css/theme.css">
   <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/login.css">
+<script>
+  // Forgot Password handler — standalone, doesn't depend on any module
+  window.handleForgotPassword = function() {
+    alert('Please contact your administrator to reset your password.');
+  };
+</script>
 </head>
 <body>
 
 <!-- ============================================================
-     LOGIN PAGE
+     SPLIT SCREEN LAYOUT
      ============================================================ -->
-<div id="loginGate" class="login-page">
-  <div class="login-card">
-    <h1>🏪 Sari-Sari POS</h1>
-    <p class="login-subtitle">Login to your account</p>
+<div class="login-split">
 
-    <div class="input-group">
-      <input type="text" id="username" placeholder="Username" autocomplete="username">
+  <!-- ==================== LEFT PANEL — Branding ==================== -->
+  <div class="login-left">
+    <div class="login-branding">
+      <div class="login-logo">🏪</div>
+      <h1>Sari-Sari POS</h1>
+      <p class="login-sub">Point of Sale System</p>
+      <p class="login-desc">
+        Streamline your store operations with powerful sales tracking,
+        inventory management, and real-time analytics — all in one place.
+      </p>
     </div>
 
-    <div class="input-group">
-      <input type="password" id="password" placeholder="Password" autocomplete="current-password">
-      <button type="button" class="password-toggle" id="passwordToggle" onclick="togglePassword('password','passwordToggle')" title="Show password">👁️</button>
+    <div class="login-features">
+      <div class="login-feature-card">
+        <span class="login-feature-icon">💰</span>
+        <div class="login-feature-title">Sales Management</div>
+        <div class="login-feature-desc">Process transactions fast with an intuitive POS interface</div>
+      </div>
+      <div class="login-feature-card">
+        <span class="login-feature-icon">📦</span>
+        <div class="login-feature-title">Inventory Tracking</div>
+        <div class="login-feature-desc">Monitor stock levels and get low-stock alerts</div>
+      </div>
+      <div class="login-feature-card">
+        <span class="login-feature-icon">📊</span>
+        <div class="login-feature-title">Reports & Analytics</div>
+        <div class="login-feature-desc">Visualize sales data with charts and export reports</div>
+      </div>
+      <div class="login-feature-card">
+        <span class="login-feature-icon">👥</span>
+        <div class="login-feature-title">User Management</div>
+        <div class="login-feature-desc">Role-based access for admins and cashiers</div>
+      </div>
     </div>
-
-    <label class="remember-row">
-      <input type="checkbox" id="rememberMe" checked>
-      <span>Remember me</span>
-    </label>
-
-    <button class="btn-login" onclick="handleLogin()">Login</button>
-
-    <small class="login-hint">
-      Default: admin / admin123<br>
-      Manage accounts in Admin Dashboard
-    </small>
   </div>
+
+  <!-- ==================== RIGHT PANEL — Login Card ==================== -->
+  <div class="login-right">
+    <div class="login-card-wrap">
+      <div class="login-card-header">
+        <h2>Welcome Back</h2>
+        <p>Sign in to your account to continue</p>
+      </div>
+
+      <div class="login-form">
+
+        <!-- Username -->
+        <div class="login-field">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Enter your username" autocomplete="username" autofocus>
+        </div>
+
+        <!-- Password -->
+        <div class="login-field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+          <button type="button" class="password-toggle" id="passwordToggle" onclick="togglePassword('password','passwordToggle')" title="Show password">👁️</button>
+        </div>
+
+        <!-- Remember & Forgot -->
+        <div class="login-options">
+          <label class="login-remember">
+            <input type="checkbox" id="rememberMe" checked>
+            <span>Remember me</span>
+          </label>
+          <button type="button" class="login-forgot" onclick="handleForgotPassword()">Forgot Password?</button>
+        </div>
+
+        <!-- Login Button -->
+        <button class="btn-login" onclick="handleLogin()">Sign In</button>
+
+      </div>
+    </div>
+
+    <div class="login-footer">
+      <div class="login-version">v2.0.0</div>
+      <div class="login-copyright">&copy; 2026 Sari-Sari Store POS. All rights reserved.</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ============================================================
-     SCRIPTS — ES Modules (Phase 2)
+     SCRIPTS
      ============================================================ -->
-<script type="module" src="js/app.js"></script>
+<script type="module" src="js/login-app.js"></script>
 
 </body>
 </html>

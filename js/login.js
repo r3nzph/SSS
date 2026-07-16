@@ -8,43 +8,48 @@ import Auth from './auth.js';
 import Session from './session.js';
 import Audit from './audit.js';
 import { getInputValue } from './utils.js';
-import UI from './ui.js';
 import StorageService from './storage.js';
 
 const Login = {
+  _ui: null,
+
+  setUI(uiModule) {
+    this._ui = uiModule;
+  },
+
   async handleLogin() {
     const username = getInputValue('username');
     const password = getInputValue('password');
 
     if (!username || !password) {
-      UI.toast('Please enter username and password.', 'warning');
+      this._ui.toast('Please enter username and password.', 'warning');
       return;
     }
 
-    UI.showLoading('Signing in...');
+    this._ui.showLoading('Signing in...');
 
     try {
       const data = StorageService.readRaw();
       const user = (data.users || []).find(u => u.username === username);
 
       if (!user) {
-        UI.hideLoading();
-        UI.toast('Invalid username or password!', 'error');
+        this._ui.hideLoading();
+        this._ui.toast('Invalid username or password!', 'error');
         return;
       }
 
       // Check account lockout
       if (user.lockedUntil && new Date(user.lockedUntil) > new Date()) {
         const remaining = Math.ceil((new Date(user.lockedUntil) - new Date()) / 60000);
-        UI.hideLoading();
-        UI.toast(`Account is locked. Try again in ${remaining} minute(s).`, 'error', 5000);
+        this._ui.hideLoading();
+        this._ui.toast(`Account is locked. Try again in ${remaining} minute(s).`, 'error', 5000);
         return;
       }
 
       // Check account status
       if (user.status === 'disabled' || user.status === 'archived') {
-        UI.hideLoading();
-        UI.toast('This account is disabled. Contact your administrator.', 'error');
+        this._ui.hideLoading();
+        this._ui.toast('This account is disabled. Contact your administrator.', 'error');
         return;
       }
 
@@ -63,11 +68,11 @@ const Login = {
         });
 
         const attemptsLeft = Math.max(0, 5 - attempts);
-        UI.hideLoading();
+        this._ui.hideLoading();
         if (attemptsLeft > 0) {
-          UI.toast(`Invalid username or password! ${attemptsLeft} attempt(s) remaining.`, 'error');
+          this._ui.toast(`Invalid username or password! ${attemptsLeft} attempt(s) remaining.`, 'error');
         } else {
-          UI.toast('Account locked due to too many failed attempts. Try again in 15 minutes.', 'error', 5000);
+          this._ui.toast('Account locked due to too many failed attempts. Try again in 15 minutes.', 'error', 5000);
         }
         return;
       }
@@ -100,20 +105,20 @@ const Login = {
       // Log audit
       await Audit.logAction('LOGIN', `User "${username}" logged in as ${role}`);
 
-      UI.hideLoading();
+      this._ui.hideLoading();
 
       // Redirect based on role
       Session.redirectByRole(role);
 
     } catch (e) {
-      UI.hideLoading();
+      this._ui.hideLoading();
       console.error('Login error:', e);
-      UI.toast('Login failed. Please try again.', 'error');
+      this._ui.toast('Login failed. Please try again.', 'error');
     }
   },
 
   handleLogout() {
-    UI.showLoading('Logging out...');
+    this._ui.showLoading('Logging out...');
     try {
       Audit.logAction('LOGOUT', `User "${Auth.getState().user}" logged out`);
     } catch(e) {}

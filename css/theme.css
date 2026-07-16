@@ -1,93 +1,241 @@
 /* ===============================
-   THEME SYSTEM — CSS Custom Properties
-   Extracted from main.css
+   DESIGN SYSTEM — Centralized CSS Variables
+   Single source of truth for the entire application.
+   Login page, Admin, Cashier — all share the same tokens.
    =============================== */
 
 :root {
-  --bg-primary: #0f0f1a;
-  --bg-secondary: #1a1a2e;
-  --bg-card: #1e1e36;
-  --bg-card-hover: #262642;
-  --bg-glass: rgba(255,255,255,0.04);
-  --bg-glass-strong: rgba(255,255,255,0.08);
-  --bg-glass-hover: rgba(255,255,255,0.07);
-  --bg-elevated: #252542;
+  /* ---- Background Colors ---- */
+  --bg-primary: #0B1020;
+  --bg-secondary: #141B34;
+  --bg-tertiary: #1a1a3a;
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --bg-card-hover: rgba(255, 255, 255, 0.08);
+  --bg-glass: rgba(255, 255, 255, 0.06);
+  --bg-glass-hover: rgba(255, 255, 255, 0.10);
+  --bg-glass-strong: rgba(255, 255, 255, 0.12);
+  --bg-elevated: #1e1e3a;
+  --bg-input: rgba(255, 255, 255, 0.06);
+  --bg-input-hover: rgba(255, 255, 255, 0.09);
+  --bg-input-focus: rgba(108, 92, 231, 0.10);
+  --bg-sidebar: rgba(255, 255, 255, 0.03);
+  --bg-sidebar-active: rgba(108, 92, 231, 0.12);
 
-  --border-glass: rgba(255,255,255,0.07);
-  --border-glass-hover: rgba(255,255,255,0.12);
-  --border-light: rgba(255,255,255,0.05);
+  /* ---- Border Colors ---- */
+  --border-glass: rgba(255, 255, 255, 0.08);
+  --border-glass-hover: rgba(255, 255, 255, 0.15);
+  --border-glass-strong: rgba(255, 255, 255, 0.18);
+  --border-input: rgba(255, 255, 255, 0.10);
+  --border-input-hover: rgba(255, 255, 255, 0.18);
+  --border-input-focus: #6c5ce7;
 
-  --text-primary: rgba(255,255,255,0.9);
-  --text-secondary: rgba(255,255,255,0.6);
-  --text-muted: rgba(255,255,255,0.35);
-  --text-inverse: rgba(0,0,0,0.85);
+  /* ---- Text Colors ---- */
+  --text-primary: rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(255, 255, 255, 0.60);
+  --text-muted: rgba(255, 255, 255, 0.35);
+  --text-dim: rgba(255, 255, 255, 0.20);
+  --text-inverse: rgba(0, 0, 0, 0.85);
+  --text-placeholder: rgba(255, 255, 255, 0.30);
 
-  --accent-primary: #6c5ce7;
-  --accent-primary-hover: #7c6ff0;
-  --accent-secondary: #a29bfe;
-  --accent-gradient: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  /* ---- Accent Colors ---- */
+  --accent-primary: #6D5DFC;
+  --accent-primary-hover: #8B7CFF;
+  --accent-secondary: #8B7CFF;
+  --accent-gradient: linear-gradient(135deg, #6D5DFC, #8B7CFF);
+  --accent-glow: rgba(109, 93, 252, 0.30);
+  --accent-glow-strong: rgba(109, 93, 252, 0.45);
+  --accent-subtle: rgba(109, 93, 252, 0.12);
+  --accent-border: rgba(109, 93, 252, 0.25);
 
-  --success: #00b894;
-  --success-bg: rgba(0,184,148,0.12);
-  --warning: #fdcb6e;
-  --warning-bg: rgba(253,203,110,0.12);
-  --danger: #e17055;
-  --danger-bg: rgba(225,112,85,0.12);
+  /* ---- Semantic Colors ---- */
+  --success: #10B981;
+  --success-bg: rgba(16, 185, 129, 0.12);
+  --success-border: rgba(16, 185, 129, 0.25);
+  --warning: #F59E0B;
+  --warning-bg: rgba(245, 158, 11, 0.12);
+  --warning-border: rgba(245, 158, 11, 0.25);
+  --danger: #EF4444;
+  --danger-bg: rgba(239, 68, 68, 0.12);
+  --danger-border: rgba(239, 68, 68, 0.25);
   --info: #74b9ff;
-  --info-bg: rgba(116,185,255,0.12);
+  --info-bg: rgba(116, 185, 255, 0.12);
+  --info-border: rgba(116, 185, 255, 0.25);
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  /* ---- Border Radius ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
   --radius-xl: 24px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
-  --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
-  --shadow-glow: 0 0 20px rgba(108,92,231,0.3);
+  --radius-full: 9999px;
 
-  --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
-  --font-size-xs: 0.7rem;
-  --font-size-sm: 0.8rem;
-  --font-size-base: 0.9rem;
-  --font-size-lg: 1.1rem;
-  --font-size-xl: 1.4rem;
-  --font-size-xxl: 2rem;
+  /* ---- Shadows ---- */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 30px var(--accent-glow);
+  --shadow-glow-strong: 0 0 50px var(--accent-glow);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 25px 60px rgba(0, 0, 0, 0.5);
+  --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.4);
 
+  /* ---- Typography ---- */
+  --font-family: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+
+  /* ---- Font Sizes ---- */
+  --text-xs: 0.70rem;
+  --text-sm: 0.78rem;
+  --text-base: 0.88rem;
+  --text-md: 0.95rem;
+  --text-lg: 1.05rem;
+  --text-xl: 1.20rem;
+  --text-2xl: 1.40rem;
+  --text-3xl: 1.70rem;
+  --text-4xl: 2.20rem;
+
+  /* ---- Font Weights ---- */
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ---- Line Heights ---- */
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+
+  /* ---- Spacing Scale ---- */
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 32px;
+  --space-xl: 48px;
+
+  /* ---- Grid Gaps ---- */
+  --gap-2xs: 4px;
+  --gap-xs: 8px;
+  --gap-sm: 16px;
+  --gap-md: 24px;
+  --gap-lg: 32px;
+
+  /* ---- Transitions ---- */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.20s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.50s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ---- Z-Index Scale ---- */
   --z-sidebar: 100;
   --z-header: 200;
-  --z-overlay: 300;
-  --z-modal: 400;
-  --z-toast: 500;
-  --z-tooltip: 600;
+  --z-dropdown: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+  --z-tooltip: 700;
 
+  /* ---- Layout Dimensions ---- */
   --sidebar-width: 220px;
-  --sidebar-collapsed-width: 60px;
-  --header-height: 52px;
-  --toggle-width: 40px;
-  --toggle-height: 22px;
-  --avatar-size: 36px;
+  --sidebar-collapsed: 60px;
 
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.25s ease;
-  --transition-slow: 0.4s ease;
+  /* ---- Toggle Switch ---- */
+  --toggle-width: 44px;
+  --toggle-height: 24px;
+  --toggle-knob: 20px;
+  --toggle-offset: 2px;
+
+  /* ---- Avatar Dimensions ---- */
+  --avatar-sm: 32px;
+  --avatar-md: 44px;
+  --avatar-lg: 64px;
+
+  /* ---- Form Control Dimensions ---- */
+  --form-padding-x: 14px;
+  --form-padding-y: 10px;
+  --form-radius: var(--radius-md);
+  --form-transition: var(--transition-base);
+  --form-font-size: var(--text-base);
+
+  /* ---- Table ---- */
+  --table-header-bg: rgba(255, 255, 255, 0.03);
+  --table-row-hover: rgba(255, 255, 255, 0.03);
+  --table-border: rgba(255, 255, 255, 0.04);
+
+  /* ---- Scrollbar ---- */
+  --scrollbar-size: 6px;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
 }
 
+/* ===============================
+   LIGHT MODE OVERRIDES
+   =============================== */
+
 :root.light-mode {
-  --bg-primary: #f8f9fa;
+  --bg-primary: #f0f2f5;
   --bg-secondary: #ffffff;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f0f0f5;
-  --bg-glass: rgba(0,0,0,0.03);
-  --bg-glass-strong: rgba(0,0,0,0.06);
-  --bg-glass-hover: rgba(0,0,0,0.05);
+  --bg-tertiary: #e8ecf1;
+  --bg-card: rgba(255, 255, 255, 0.70);
+  --bg-card-hover: rgba(255, 255, 255, 0.90);
+  --bg-glass: rgba(255, 255, 255, 0.50);
+  --bg-glass-hover: rgba(255, 255, 255, 0.70);
+  --bg-glass-strong: rgba(255, 255, 255, 0.80);
   --bg-elevated: #ffffff;
+  --bg-input: #ffffff;
+  --bg-input-hover: #f8f9fa;
+  --bg-input-focus: #ffffff;
+  --bg-sidebar: rgba(255, 255, 255, 0.85);
+  --bg-sidebar-active: rgba(108, 92, 231, 0.08);
 
-  --border-glass: rgba(0,0,0,0.08);
-  --border-glass-hover: rgba(0,0,0,0.12);
+  --border-glass: rgba(0, 0, 0, 0.08);
+  --border-glass-hover: rgba(0, 0, 0, 0.15);
+  --border-glass-strong: rgba(0, 0, 0, 0.20);
+  --border-input: rgba(0, 0, 0, 0.12);
+  --border-input-hover: rgba(0, 0, 0, 0.20);
+  --border-input-focus: #6c5ce7;
 
-  --text-primary: rgba(0,0,0,0.85);
-  --text-secondary: rgba(0,0,0,0.55);
-  --text-muted: rgba(0,0,0,0.3);
-  --text-inverse: rgba(255,255,255,0.9);
+  --text-primary: rgba(0, 0, 0, 0.85);
+  --text-secondary: rgba(0, 0, 0, 0.55);
+  --text-muted: rgba(0, 0, 0, 0.30);
+  --text-dim: rgba(0, 0, 0, 0.18);
+  --text-inverse: rgba(255, 255, 255, 0.90);
+  --text-placeholder: rgba(0, 0, 0, 0.25);
+
+  --accent-primary: #6D5DFC;
+  --accent-primary-hover: #5a4bd1;
+  --accent-secondary: #8B7CFF;
+  --accent-gradient: linear-gradient(135deg, #6D5DFC, #8B7CFF);
+  --accent-glow: rgba(109, 93, 252, 0.20);
+  --accent-glow-strong: rgba(109, 93, 252, 0.30);
+  --accent-subtle: rgba(109, 93, 252, 0.08);
+
+  --success: #10B981;
+  --success-bg: rgba(16, 185, 129, 0.10);
+  --success-border: rgba(16, 185, 129, 0.25);
+  --warning: #F59E0B;
+  --warning-bg: rgba(245, 158, 11, 0.10);
+  --warning-border: rgba(245, 158, 11, 0.25);
+  --danger: #EF4444;
+  --danger-bg: rgba(239, 68, 68, 0.10);
+  --danger-border: rgba(239, 68, 68, 0.25);
+  --info: #0984e3;
+  --info-bg: rgba(9, 132, 227, 0.10);
+  --info-border: rgba(9, 132, 227, 0.25);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.10);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.12);
+  --shadow-glow: 0 0 30px rgba(108, 92, 231, 0.15);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --shadow-modal: 0 12px 48px rgba(0, 0, 0, 0.15);
+  --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.10);
+
+  --table-header-bg: rgba(0, 0, 0, 0.03);
+  --table-row-hover: rgba(0, 0, 0, 0.02);
+  --table-border: rgba(0, 0, 0, 0.04);
+
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
 }
