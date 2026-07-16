@@ -30,30 +30,6 @@ A web-based **Point-of-Sale (POS)** and **Inventory Management System** built fo
 * Search products
 * View available stock
 
-## 🛠️ Tech Stack
-
-* **Frontend:** *(Add your framework, e.g., React, Vue, Blade, etc.)*
-* **Backend:** *(Laravel / Node.js / etc.)*
-* **Database:** *(MySQL / PostgreSQL / etc.)*
-* **Styling:** *(Tailwind CSS / Bootstrap / etc.)*
-
-## 🚀 Getting Started
-
-```bash
-# Clone the repository
-git clone https://github.com/your-username/sari-sari-store.git
-
-# Go to the project folder
-cd sari-sari-store
-
-# Install dependencies
-# (Example)
-npm install
-
-# Start the development server
-npm run dev
-```
-
 ## 📄 License
 
 This project is licensed under the MIT License.
