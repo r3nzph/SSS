@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sari-Sari Store POS — Admin</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<div id="mainApp">
+  <div id="appContent">
+
+    <!-- === SIDEBAR === -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <h2>🏪 Aking Tindahan</h2>
+        <div class="sidebar-subtitle">Admin Panel</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-module-section" data-module="admin">
+          <a class="nav-item active nav-admin-btn" data-view="admin" onclick="AdminModule.switchView('admin')">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">Dashboard</span>
+          </a>
+          <a class="nav-item nav-inventory-btn" data-view="inventory" onclick="AdminModule.switchView('inventory')">
+            <span class="nav-icon">📦</span>
+            <span class="nav-label">Inventory</span>
+          </a>
+          <a class="nav-item" data-view="admin-suppliers" onclick="AdminModule.switchView('admin-suppliers')">
+            <span class="nav-icon">🏭</span>
+            <span class="nav-label">Suppliers</span>
+          </a>
+          <a class="nav-item" data-view="admin-pos" onclick="AdminModule.switchView('admin-pos')">
+            <span class="nav-icon">📥</span>
+            <span class="nav-label">Purchase Orders</span>
+          </a>
+          <a class="nav-item" data-view="admin-receiving" onclick="AdminModule.switchView('admin-receiving')">
+            <span class="nav-icon">📤</span>
+            <span class="nav-label">Stock Receiving</span>
+          </a>
+          <a class="nav-item" data-view="admin-adjustments" onclick="AdminModule.switchView('admin-adjustments')">
+            <span class="nav-icon">🔧</span>
+            <span class="nav-label">Stock Adjustment</span>
+          </a>
+          <a class="nav-item" data-view="salesreports" onclick="AdminModule.switchView('salesreports')">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">Sales & Reports</span>
+          </a>
+          <a class="nav-item nav-audit-btn" data-view="audit" onclick="AdminModule.switchView('audit')">
+            <span class="nav-icon">📋</span>
+            <span class="nav-label">Activity Log</span>
+          </a>
+          <a class="nav-item" data-view="usermanager" onclick="AdminModule.switchView('usermanager')">
+            <span class="nav-icon">👥</span>
+            <span class="nav-label">User Management</span>
+          </a>
+          <a class="nav-item" data-view="configcenter" onclick="AdminModule.switchView('configcenter')">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">Settings</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" id="userAvatar">A</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="currentUserDisplay"></div>
+            <div class="sidebar-user-role" id="currentUserRole">admin</div>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm btn-logout" onclick="handleLogout()" style="margin-bottom:6px;">🚪 Logout</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" id="themeToggleBtn" style="width:100%;font-size:0.83rem;">🌙 Dark</button>
+      </div>
+    </aside>
+
+    <!-- === MAIN CONTENT === -->
+    <main class="main-content">
+
+      <!-- === DASHBOARD PANEL === -->
+      <section id="admin" class="panel active" data-module="admin">
+        <h2>⚙️ Admin Dashboard</h2>
+
+        <div id="kpiContainer" class="kpi-grid"></div>
+
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-card-body"><canvas id="salesChart"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-body"><canvas id="topProductsChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- PRODUCT MANAGEMENT -->
+        <div class="section-collapsible">
+          <h3 onclick="this.parentElement.classList.toggle('collapsed')">📦 Product Management ▾</h3>
+          <div class="section-content">
+            <div class="add-product">
+              <input id="pName" placeholder="Product Name">
+              <input id="pPrice" type="number" step="0.01" placeholder="Price (₱)">
+              <input id="pCost" type="number" step="0.01" placeholder="Cost (₱)">
+              <input id="pStock" type="number" placeholder="Stock">
+              <button class="btn btn-success" onclick="addNewProduct()">Add Product</button>
+              <button class="btn btn-ghost hidden" id="cancelEditBtn" onclick="cancelEdit()">Cancel</button>
+            </div>
+            <div class="search-bar">
+              <input type="text" id="adminProductSearch" placeholder="Search products..." oninput="filterAdminProducts(this.value)">
+            </div>
+            <div class="table-container"><table><thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Cost</th><th>Stock</th><th>Actions</th></tr></thead><tbody id="adminTable"></tbody></table></div>
+          </div>
+        </div>
+
+        <!-- SUPPLIERS -->
+        <div class="section-collapsible" id="admin-suppliers-section">
+          <h3 onclick="this.parentElement.classList.toggle('collapsed')">🏭 Suppliers ▾</h3>
+          <div class="section-content">
+            <div class="inv-toolbar">
+              <div class="inv-search-wrap">
+                <input type="text" id="supSearch" placeholder="Search suppliers..." oninput="Suppliers.setFilter('search', this.value)" class="inv-search-input">
+              </div>
+              <div class="inv-stock-filters">
+                <button class="btn btn-sm btn-ghost sup-filter-btn active" data-filter="active" onclick="Suppliers.setFilter('status','active')">✅ Active</button>
+                <button class="btn btn-sm btn-ghost sup-filter-btn" data-filter="inactive" onclick="Suppliers.setFilter('status','inactive')">⏸️ Inactive</button>
+                <button class="btn btn-sm btn-ghost sup-filter-btn" data-filter="archived" onclick="Suppliers.setFilter('status','archived')">📁 Archived</button>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="Suppliers.showAddModal()">+ Add Supplier</button>
+            </div>
+            <div class="table-container"><table><thead><tr><th>Company Name</th><th>Contact Person</th><th>Phone</th><th>Email</th><th>Status</th><th style="width:130px;">Actions</th></tr></thead><tbody id="suppliersTable"></tbody></table></div>
+            <div class="inv-footer">
+              <span class="inv-summary"></span>
+              <div id="supPagination" class="inv-pagination"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PURCHASE ORDERS & STOCK -->
+        <div class="section-collapsible" id="admin-pos-section">
+          <h3 onclick="this.parentElement.classList.toggle('collapsed')">📥 Purchase Orders & Stock ▾</h3>
+          <div class="section-content">
+            <div class="inv-toolbar">
+              <div class="inv-search-wrap">
+                <input type="text" id="poSearch" placeholder="Search POs..." oninput="Purchasing.setFilter('search', this.value)" class="inv-search-input">
+              </div>
+              <select onchange="Purchasing.setFilter('status', this.value)" class="inv-filter-select" style="min-width:120px;">
+                <option value="">All Status</option>
+                <option value="draft">Draft</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="partial">Partially Received</option>
+                <option value="received">Fully Received</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="Purchasing.showCreatePOModal()">+ New PO</button>
+              <button class="btn btn-ghost btn-sm" onclick="Purchasing.exportPOsCSV()">📤 Export CSV</button>
+            </div>
+            <h4>Purchase Orders</h4>
+            <div class="table-container"><table><thead><tr><th onclick="Purchasing.setSort('poNumber')" class="sortable" style="cursor:pointer;">PO # ↕</th><th onclick="Purchasing.setSort('supplierName')" class="sortable" style="cursor:pointer;">Supplier ↕</th><th>Items</th><th onclick="Purchasing.setSort('total')" class="sortable" style="cursor:pointer;">Total ↕</th><th onclick="Purchasing.setSort('status')" class="sortable" style="cursor:pointer;">Status ↕</th><th>Actions</th></tr></thead><tbody id="poTable"></tbody></table></div>
+            <div class="inv-footer">
+              <span id="poSummary" class="inv-summary">Loading...</span>
+              <div id="poPagination" class="inv-pagination"></div>
+            </div>
+            <h4 id="admin-receiving-section">Receiving History</h4>
+            <div class="table-container" style="max-height:250px;overflow-y:auto;"><table><thead><tr><th>Receipt #</th><th>PO #</th><th>Supplier</th><th>Items</th><th>Total</th><th>Date</th></tr></thead><tbody id="recHistoryBody"></tbody></table></div>
+            <h4 id="admin-adjustments-section">📊 Stock Adjustment History</h4>
+            <div class="inv-toolbar" style="margin-bottom:8px;">
+              <div class="inv-search-wrap">
+                <input type="text" id="adjSearch" placeholder="Search..." oninput="StockAdjustments.setFilter('search', this.value)" class="inv-search-input">
+              </div>
+              <select id="adjTypeFilter" onchange="StockAdjustments.setFilter('type', this.value)" class="inv-filter-select" style="min-width:130px;">
+                <option value="">All Types</option>
+                <option value="damaged">💔 Damaged</option>
+                <option value="expired">⏰ Expired</option>
+                <option value="lost">🔍 Lost / Theft</option>
+                <option value="customer_return">🔄 Customer Return</option>
+                <option value="supplier_return">📤 Supplier Return</option>
+                <option value="count_correction">📊 Count Correction</option>
+                <option value="manual">✏️ Manual</option>
+                <option value="other">📝 Other</option>
+              </select>
+              <button class="btn btn-warning btn-sm" onclick="StockAdjustments.showAdjustModal()">🔧 New Adjustment</button>
+              <button class="btn btn-ghost btn-sm" onclick="StockAdjustments.exportCSV()">📤 Export CSV</button>
+            </div>
+            <div class="table-container" style="max-height:400px;overflow-y:auto;">
+              <table>
+                <thead><tr>
+                  <th style="cursor:pointer;" onclick="StockAdjustments.setSort('adjNumber')">Adj # ↕</th>
+                  <th>Product</th><th>Old Stock</th><th>New Stock</th><th>Diff</th><th>Type</th><th>Reason</th><th>User</th>
+                  <th style="cursor:pointer;" onclick="StockAdjustments.setSort('createdAt')">Date ↕</th>
+                </tr></thead>
+                <tbody id="adjHistoryBody"></tbody>
+              </table>
+            </div>
+            <div class="inv-footer">
+              <span id="adjSummary" class="inv-summary" style="font-size:0.8rem;color:var(--text-muted);"></span>
+              <div id="adjPagination" class="inv-pagination"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SALES HISTORY -->
+        <div class="section-collapsible">
+          <h3 onclick="this.parentElement.classList.toggle('collapsed')">📜 Sales History ▾</h3>
+          <div class="section-content">
+            <div class="table-container"><table><thead><tr><th>Date</th><th>Items</th><th>Qty</th><th>Total</th><th>Cashier</th></tr></thead><tbody id="salesTable"></tbody></table></div>
+          </div>
+        </div>
+
+        <!-- USER ACCOUNTS -->
+        <div class="section-collapsible">
+          <h3 onclick="this.parentElement.classList.toggle('collapsed')">👥 User Accounts ▾</h3>
+          <div class="section-content">
+            <div class="add-user">
+              <input id="uName" placeholder="Username">
+              <input id="uPassword" type="password" placeholder="Password">
+              <small id="userPasswordHint" class="hidden user-pw-hint">Leave blank to keep password</small>
+              <select id="uRole"><option value="cashier">Cashier</option><option value="admin">Admin</option></select>
+              <button class="btn btn-success btn-save-user" onclick="saveUser()">Add User</button>
+              <button class="btn btn-ghost hidden" id="cancelUserEditBtn" onclick="cancelUserEdit()">Cancel</button>
+            </div>
+            <div class="table-container"><table><thead><tr><th>ID</th><th>Username</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div>
+          </div>
+        </div>
+
+        <!-- STORE SETTINGS -->
+        <div class="section-collapsible">
+          <h3 onclick="this.parentElement.classList.toggle('collapsed')">⚙️ Store Settings ▾</h3>
+          <div class="section-content">
+            <div id="settingsSummary"></div>
+            <div class="settings-form">
+              <input id="setStoreName" placeholder="Store Name">
+              <input id="setStoreAddress" placeholder="Store Address">
+              <input id="setReceiptFooter" placeholder="Receipt Footer">
+              <input id="setTaxRate" type="number" step="0.1" placeholder="Tax Rate (%)">
+              <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- BACKUP / RESTORE -->
+        <div class="section-collapsible">
+          <h3 onclick="this.parentElement.classList.toggle('collapsed')">💾 Backup & Restore ▾</h3>
+          <div class="section-content">
+            <div id="backupInfo"></div>
+            <div class="action-bar">
+              <button class="btn btn-primary" onclick="exportData()">📤 Export Backup</button>
+              <button class="btn btn-warning" onclick="importData()">📥 Import Backup</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRICING -->
+        <div class="section-collapsible">
+          <h3 onclick="this.parentElement.classList.toggle('collapsed')">💰 Pricing Management ▾</h3>
+          <div class="section-content">
+            <div id="priceAlerts"></div>
+            <div class="action-bar">
+              <button class="btn btn-primary" onclick="Pricing.bulkPriceUpdate()">📊 Bulk Price Update</button>
+            </div>
+            <h4>Price Change History</h4>
+            <div class="table-container" style="max-height:320px;overflow-y:auto;">
+              <table><thead><tr><th>Date</th><th>Product</th><th>Old Price</th><th>New Price</th><th>Change</th><th>By</th></tr></thead><tbody id="priceHistoryBody"></tbody></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- REPORTS LINK -->
+        <div class="section-collapsible">
+          <h3 onclick="AdminModule.switchView('salesreports')" style="cursor:pointer;">📊 Reports & Analytics ▸</h3>
+          <div class="section-content">
+            <p style="color:var(--text-muted);font-size:0.85rem;padding:8px 0;">Reports have been moved to the unified <strong>Sales & Reports</strong> panel. <br><a href="#" onclick="AdminModule.switchView('salesreports');return false;" style="color:var(--accent-primary);">Click here to open →</a></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- === INVENTORY PANEL === -->
+      <section id="inventory" class="panel" data-module="admin">
+        <h2>📦 Inventory Management</h2>
+
+        <div class="alerts-section">
+          <h3>⚠️ Alerts</h3>
+          <div id="lowStockAlerts"></div>
+        </div>
+
+        <div class="inv-toolbar">
+          <div class="inv-search-wrap">
+            <input type="text" id="invSearch" placeholder="Search by name, barcode, category, brand..." oninput="Inventory.setFilter('search', this.value)" class="inv-search-input">
+          </div>
+          <select id="invCategoryFilter" onchange="Inventory.setFilter('category', this.value)" class="inv-filter-select">
+            <option value="">All Categories</option>
+          </select>
+          <div class="inv-stock-filters">
+            <button class="btn btn-sm btn-ghost inv-filter-btn active" data-filter="all" onclick="Inventory.setFilter('stock','all');this.parentElement.querySelectorAll('.inv-filter-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">All</button>
+            <button class="btn btn-sm btn-ghost inv-filter-btn" data-filter="in" onclick="Inventory.setFilter('stock','in');this.parentElement.querySelectorAll('.inv-filter-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">✅ In Stock</button>
+            <button class="btn btn-sm btn-ghost inv-filter-btn" data-filter="low" onclick="Inventory.setFilter('stock','low');this.parentElement.querySelectorAll('.inv-filter-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">⚠️ Low</button>
+            <button class="btn btn-sm btn-ghost inv-filter-btn" data-filter="out" onclick="Inventory.setFilter('stock','out');this.parentElement.querySelectorAll('.inv-filter-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">🚫 Out</button>
+            <button class="btn btn-sm btn-ghost inv-filter-btn" data-filter="archived" onclick="Inventory.setFilter('stock','archived');this.parentElement.querySelectorAll('.inv-filter-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">📁 Archived</button>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="Inventory.showAddModal()">+ Add Product</button>
+        </div>
+
+        <div id="invBulkBar" class="inv-bulk-bar hidden">
+          <span id="invBulkCount">0 selected</span>
+          <button class="btn btn-sm btn-ghost" onclick="Inventory.selectAll()">Select All Page</button>
+          <button class="btn btn-sm btn-warning" onclick="Inventory.bulkArchive()">📁 Archive</button>
+          <button class="btn btn-sm btn-success" onclick="Inventory.bulkRestore()">↩️ Restore</button>
+          <button class="btn btn-sm btn-danger" onclick="Inventory.bulkDelete()">🗑 Delete</button>
+          <button class="btn btn-sm btn-ghost" onclick="Inventory.bulkExport()">📤 Export CSV</button>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px;"><input type="checkbox" onchange="Inventory.selectAll()"></th>
+                <th style="width:50px;">Image</th>
+                <th onclick="Inventory.setSort('name')" class="sortable">Product ↕</th>
+                <th onclick="Inventory.setSort('price')" class="sortable">Selling Price ↕</th>
+                <th onclick="Inventory.setSort('cost')" class="sortable">Buying Price ↕</th>
+                <th onclick="Inventory.setSort('profit')" class="sortable">Profit ↕</th>
+                <th onclick="Inventory.setSort('stock')" class="sortable">Stock ↕</th>
+                <th style="width:120px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTable"></tbody>
+          </table>
+        </div>
+
+        <div class="inv-footer">
+          <span id="invSummary" class="inv-summary">Loading...</span>
+          <div id="invPagination" class="inv-pagination"></div>
+        </div>
+      </section>
+
+      <!-- === AUDIT LOG PANEL === -->
+      <section id="audit" class="panel" data-module="admin">
+        <h2>📋 Activity Log</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr><th>Timestamp</th><th>Role</th><th>User</th><th>Action</th><th>Details</th></tr>
+            </thead>
+            <tbody id="auditLogBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- === CONFIG CENTER PANEL === -->
+      <section id="configcenter" class="panel" data-module="admin">
+        <h2>⚙️ Settings & System Configuration</h2>
+
+        <div class="cfg-tabs">
+          <button class="btn btn-sm btn-ghost cfg-tab-btn active" data-tab="store" onclick="ConfigCenter.switchTab('store')">🏪 Store</button>
+          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="receipt" onclick="ConfigCenter.switchTab('receipt')">🧾 Receipt</button>
+          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="inventory" onclick="ConfigCenter.switchTab('inventory')">📦 Inventory</button>
+          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="sales" onclick="ConfigCenter.switchTab('sales')">💰 Sales</button>
+          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="notifications" onclick="ConfigCenter.switchTab('notifications')">🔔 Notifications</button>
+          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="security" onclick="ConfigCenter.switchTab('security')">🔒 Security</button>
+          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="appearance" onclick="ConfigCenter.switchTab('appearance')">🎨 Appearance</button>
+          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="maintenance" onclick="ConfigCenter.switchTab('maintenance')">🛠️ Maintenance</button>
+          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="backup" onclick="ConfigCenter.switchTab('backup')">🛡️ Backup</button>
+        </div>
+
+        <div id="cfgContent" class="cfg-content">
+          <p style="text-align:center;color:var(--text-muted);padding:40px;">Loading settings...</p>
+        </div>
+      </section>
+
+      <!-- === USER MANAGEMENT PANEL === -->
+      <section id="usermanager" class="panel" data-module="admin">
+        <h2>👥 User Management & RBAC</h2>
+
+        <div class="um-toolbar">
+          <div class="inv-search-wrap" style="flex:1;">
+            <input type="text" id="umSearch" placeholder="Search by name, username, email, role..." oninput="UserManager.setFilter('search', this.value)" class="inv-search-input">
+          </div>
+          <select id="umRoleFilter" onchange="UserManager.setFilter('role', this.value)" class="inv-filter-select" style="min-width:130px;">
+            <option value="">All Roles</option>
+          </select>
+          <select onchange="UserManager.setFilter('status', this.value)" class="inv-filter-select" style="min-width:120px;">
+            <option value="">All Status</option>
+            <option value="active">✅ Active</option>
+            <option value="disabled">⏸️ Disabled</option>
+            <option value="archived">📁 Archived</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="UserManager.showAddModal()">+ Add User</button>
+          <button class="btn btn-ghost btn-sm" onclick="UserManager.changeOwnPassword()">🔑 Change My Password</button>
+        </div>
+
+        <div id="umCardsContainer" class="um-cards-grid"></div>
+
+        <div class="inv-footer">
+          <span id="umSummary" class="inv-summary">Loading...</span>
+          <div id="umPagination" class="inv-pagination"></div>
+        </div>
+      </section>
+
+      <!-- === SALES & REPORTS PANEL === -->
+      <section id="salesreports" class="panel" data-module="admin">
+        <h2>📊 Sales & Reports</h2>
+
+        <div id="srFilterBar" class="sr-filter-bar"></div>
+        <div id="srTabs" class="sr-tab-bar"></div>
+        <div id="srContent" class="sr-content">
+          <p style="text-align:center;color:var(--text-muted);padding:40px;">Loading...</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============================================================
+     SHARED MODALS
+     ============================================================ -->
+
+<!-- RECEIPT MODAL -->
+<div id="receiptModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>🧾 Receipt</h2>
+      <button class="modal-close" onclick="closeReceipt()">✕</button>
+    </div>
+    <div class="receipt-body">
+      <div class="receipt-store-info">
+        <strong>Sari-Sari Store</strong><br>
+        <small id="receiptDate"></small>
+      </div>
+      <div class="receipt-meta">
+        <span>Receipt #<b id="receiptId"></b></span>
+        <span>Cashier: <b id="receiptCashier"></b></span>
+      </div>
+      <table class="receipt-table">
+        <thead>
+          <tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+        </thead>
+        <tbody id="receiptItems"></tbody>
+      </table>
+      <div class="receipt-total">
+        <strong>Total: <span id="receiptTotal">₱0.00</span></strong>
+      </div>
+      <div class="receipt-footer">
+        <p>Thank you for your purchase! ❤️</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeReceipt()">Close</button>
+      <button class="btn btn-primary" onclick="printReceipt()">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUPPLIER MODAL -->
+<div id="supModalOverlay" class="modal-overlay">
+  <div class="modal-content" style="max-width:540px;">
+    <div class="modal-header">
+      <h2 id="supModalTitle">Add Supplier</h2>
+      <button class="modal-close" onclick="Suppliers.closeModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px 24px;">
+      <div class="form-group">
+        <label>Company Name *</label>
+        <input id="supCompany" placeholder="Company or supplier name">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Contact Person</label>
+          <input id="supContact" placeholder="Full name">
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input id="supPhone" placeholder="Phone number">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email</label>
+          <input id="supEmail" type="email" placeholder="Email address">
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="supStatus">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Address</label>
+        <textarea id="supAddress" rows="2" placeholder="Complete address"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea id="supNotes" rows="2" placeholder="Additional notes..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Suppliers.closeModal()">Cancel</button>
+      <button class="btn btn-success" onclick="Suppliers.saveSupplier()">💾 Save Supplier</button>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT MODAL -->
+<div id="invModalOverlay" class="modal-overlay">
+  <div id="invProductModal" class="modal-content" style="max-width:620px;">
+    <div class="modal-header">
+      <h2 id="invModalTitle">Add Product</h2>
+      <button class="modal-close" onclick="Inventory.closeModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px 24px;">
+      <div class="inv-modal-grid">
+        <div class="inv-modal-left">
+          <div class="form-group">
+            <label>Product Name *</label>
+            <input id="invName" placeholder="Product name">
+          </div>
+          <div class="form-group">
+            <label>Barcode</label>
+            <input id="invBarcode" placeholder="Barcode / SKU">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category</label>
+              <input id="invCategory" placeholder="e.g. Beverages">
+            </div>
+            <div class="form-group">
+              <label>Brand</label>
+              <input id="invBrand" placeholder="Brand name">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Selling Price (₱) *</label>
+              <input id="invSellPrice" type="number" step="0.01" placeholder="0.00">
+            </div>
+            <div class="form-group">
+              <label>Buying Price (₱)</label>
+              <input id="invBuyPrice" type="number" step="0.01" placeholder="0.00">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Stock *</label>
+              <input id="invStock" type="number" placeholder="0">
+            </div>
+            <div class="form-group">
+              <label>Min Stock Alert</label>
+              <input id="invMinStock" type="number" placeholder="5">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Supplier</label>
+            <input id="invSupplier" placeholder="Supplier name">
+          </div>
+          <div class="form-group">
+            <label>Unit</label>
+            <select id="invUnit">
+              <option value="pcs">Piece (pcs)</option>
+              <option value="pack">Pack</option>
+              <option value="bottle">Bottle</option>
+              <option value="can">Can</option>
+              <option value="box">Box</option>
+              <option value="kg">Kilogram (kg)</option>
+              <option value="g">Gram (g)</option>
+              <option value="L">Liter (L)</option>
+              <option value="mL">Milliliter (mL)</option>
+              <option value="sack">Sack</option>
+              <option value="tray">Tray</option>
+              <option value="dozen">Dozen</option>
+            </select>
+          </div>
+        </div>
+        <div class="inv-modal-right">
+          <div class="form-group">
+            <label>Product Image</label>
+            <div class="inv-image-upload"
+              onclick="document.getElementById('invImageInput').click()"
+              ondragover="event.preventDefault()"
+              ondrop="Inventory.handleImageDrop(event)">
+              <img id="invImagePreview" class="inv-image-preview hidden" alt="">
+              <div id="invImagePlaceholder" class="inv-image-placeholder">
+                <span class="inv-upload-icon">📷</span>
+                <span>Click or drag image here</span>
+                <small>Max 2MB</small>
+              </div>
+              <input type="file" id="invImageInput" accept="image/*"
+                onchange="Inventory.handleImageUpload(this.files[0])" style="display:none">
+            </div>
+            <button class="btn btn-sm btn-ghost" onclick="Inventory.removeImage()" style="margin-top:4px;width:100%;">✕ Remove Image</button>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="invDescription" rows="3" placeholder="Product description..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Inventory.closeModal()">Cancel</button>
+      <button class="btn btn-success" onclick="Inventory.saveProduct()">💾 Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- STOCK RECEIVING MODAL -->
+<div id="receivingModalOverlay" class="modal-overlay">
+  <div class="modal-content" style="max-width:720px;">
+    <div class="modal-header">
+      <h2>📥 Stock Receiving</h2>
+      <button class="modal-close" onclick="Receiving.closeModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px;">
+      <div id="recPOInfo" style="font-size:1rem;margin-bottom:10px;"></div>
+      <div id="recProgress"></div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div class="form-group">
+          <label>Receipt #</label>
+          <strong id="recNumber" style="display:block;padding:8px 0;font-size:1rem;"></strong>
+        </div>
+        <div class="form-group">
+          <label>Delivery Date</label>
+          <input id="recDate" type="date">
+        </div>
+      </div>
+      <div class="form-row" style="margin-bottom:10px;">
+        <div class="form-group">
+          <label>Reference #</label>
+          <input id="recReference" placeholder="DR / Invoice #">
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input id="recNotes" placeholder="Receiving notes...">
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Product</th><th>Ordered</th><th>Receive Qty</th><th>Damaged</th><th>Cost</th></tr></thead>
+        <tbody id="recItemsBody"><tr><td colspan="5" style="text-align:center;color:var(--text-muted);">Loading...</td></tr></tbody>
+      </table>
+      <div id="recTotals" style="display:flex;justify-content:flex-end;gap:20px;padding:10px 0;border-top:1px solid var(--border-glass);margin-top:8px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Receiving.closeModal()">Cancel</button>
+      <button class="btn btn-success" onclick="Receiving.confirmReceiving()">📥 Confirm Receiving</button>
+    </div>
+  </div>
+</div>
+
+<!-- PURCHASE ORDER MODAL -->
+<div id="poModalOverlay" class="modal-overlay">
+  <div class="modal-content" style="max-width:700px;">
+    <div class="modal-header">
+      <h2 id="poModalTitle">Create Purchase Order</h2>
+      <button class="modal-close" onclick="Purchasing.closePOModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px;">
+      <div class="form-group">
+        <label>Supplier *</label>
+        <select id="poSupplierSelect"><option value="">-- Select Supplier --</option></select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Expected Delivery Date</label>
+          <input id="poExpectedDate" type="date">
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <input id="poNotes" placeholder="PO notes...">
+        </div>
+      </div>
+      <div style="background:var(--bg-glass);border-radius:var(--radius-md);padding:12px;margin:12px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:end;">
+        <div style="flex:2;min-width:120px;">
+          <label style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:2px;">Product</label>
+          <input id="poItemName" placeholder="Product name" style="padding:8px 12px;">
+        </div>
+        <div style="flex:1;min-width:60px;">
+          <label style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:2px;">Qty</label>
+          <input id="poItemQty" type="number" value="1" min="1" style="padding:8px 12px;">
+        </div>
+        <div style="flex:1;min-width:80px;">
+          <label style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;display:block;margin-bottom:2px;">Cost (₱)</label>
+          <input id="poItemCost" type="number" step="0.01" placeholder="0.00" style="padding:8px 12px;">
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="Purchasing.addPOItem()" style="margin-bottom:1px;">+ Add</button>
+      </div>
+      <table>
+        <thead><tr><th>Product</th><th>Qty</th><th>Cost</th><th>Total</th><th style="width:40px;"></th></tr></thead>
+        <tbody id="poItemsTableBody"><tr><td colspan="4" style="text-align:center;color:var(--text-muted);">No items added yet.</td></tr></tbody>
+      </table>
+      <div style="display:flex;justify-content:flex-end;gap:24px;padding:10px 0;border-top:1px solid var(--border-glass);margin-top:8px;font-size:0.95rem;">
+        <span>Total Qty: <strong id="poTotalQty">0</strong></span>
+        <span>Total Cost: <strong id="poTotalCost" class="price-cell">₱0.00</strong></span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Purchasing.closePOModal()">Cancel</button>
+      <button class="btn btn-success" onclick="Purchasing.savePO()">💾 Save Purchase Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- PO DETAIL MODAL -->
+<div id="poDetailOverlay" class="modal-overlay">
+  <div class="modal-content" style="max-width:600px;">
+    <div class="modal-header">
+      <h2 id="poDetailTitle">Purchase Order Details</h2>
+      <button class="modal-close" onclick="Purchasing.closePODetail()">✕</button>
+    </div>
+    <div class="modal-body" id="poDetailContent" style="padding:20px 24px;">
+      <p style="color:var(--text-muted);">Loading...</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="Purchasing.closePODetail()">Close</button>
+      <button class="btn btn-primary" onclick="Purchasing.printPO()">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+
+<!-- STOCK ADJUSTMENT MODAL -->
+<div id="adjModalOverlay" class="modal-overlay">
+  <div class="modal-content" style="max-width:580px;">
+    <div class="modal-header">
+      <h2 id="adjModalTitle">🔧 Stock Adjustment</h2>
+      <button class="modal-close" onclick="StockAdjustments.closeModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px 24px;">
+      <div class="form-group">
+        <label>Product *</label>
+        <input type="text" id="adjProductSearch" placeholder="Type to search..." oninput="StockAdjustments._quickProductSearch()" style="margin-bottom:6px;">
+        <select id="adjProductSelect" onchange="StockAdjustments._onProductSelect()" size="5" style="height:auto;min-height:80px;">
+          <option value="">-- Select Product --</option>
+        </select>
+      </div>
+      <div style="background:var(--bg-glass);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;">
+        <div>
+          <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Current Stock</div>
+          <div id="adjOldStock" style="font-size:1.4rem;font-weight:700;color:var(--text-primary);">—</div>
+        </div>
+        <div>
+          <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">Adjustment</div>
+          <div id="adjDifference" style="font-size:1.4rem;font-weight:700;">—</div>
+        </div>
+        <div>
+          <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px;">New Stock</div>
+          <div id="adjNewStockPreview" style="font-size:1.4rem;font-weight:700;color:var(--accent-secondary);">—</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Adjustment Quantity *</label>
+          <input id="adjQty" type="number" placeholder="e.g. -5 or +10" oninput="StockAdjustments._previewAdjustment()">
+          <small style="color:var(--text-muted);font-size:0.75rem;">Use negative (-) to decrease, positive (+) to increase</small>
+        </div>
+        <div class="form-group">
+          <label>Adjustment Type *</label>
+          <select id="adjType" onchange="StockAdjustments._previewAdjustment()">
+            <option value="">-- Select Type --</option>
+            <option value="damaged">💔 Damaged</option>
+            <option value="expired">⏰ Expired</option>
+            <option value="lost">🔍 Lost / Theft</option>
+            <option value="customer_return">🔄 Customer Return</option>
+            <option value="supplier_return">📤 Supplier Return</option>
+            <option value="count_correction">📊 Inventory Count Correction</option>
+            <option value="manual">✏️ Manual Correction</option>
+            <option value="other">📝 Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Reason *</label>
+        <textarea id="adjReason" rows="2" placeholder="Enter detailed reason for this adjustment..." oninput="StockAdjustments._previewAdjustment()"></textarea>
+      </div>
+      <div id="adjQtyWarning" class="hidden" style="background:var(--danger-bg);border:1px solid var(--danger);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:10px;color:var(--danger);font-size:0.85rem;"></div>
+      <div id="adjConfirmSection" class="hidden" style="background:var(--success-bg);border:1px solid var(--success);border-radius:var(--radius-md);padding:14px 16px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+          <span style="font-size:1.2rem;">✅</span>
+          <span style="font-weight:600;">Ready to Apply</span>
+        </div>
+        <div style="font-size:0.85rem;color:var(--text-secondary);">The adjustment will be recorded in the audit trail and applied immediately.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="StockAdjustments.closeModal()">Cancel</button>
+      <button class="btn btn-warning" onclick="StockAdjustments.confirmAdjustment()">🔧 Confirm Adjustment</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER MANAGEMENT MODAL -->
+<div id="umModalOverlay" class="modal-overlay">
+  <div class="modal-content" style="max-width:540px;">
+    <div class="modal-header">
+      <h2 id="umModalTitle">Add User</h2>
+      <button class="modal-close" onclick="UserManager.closeModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px 24px;">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input id="umFullName" placeholder="Full name">
+        </div>
+        <div class="form-group">
+          <label>Username *</label>
+          <input id="umUsername" placeholder="Username (min 3 chars)">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email</label>
+          <input id="umEmail" type="email" placeholder="Email address">
+        </div>
+        <div class="form-group">
+          <label>Contact #</label>
+          <input id="umContact" placeholder="Contact number">
+        </div>
+      </div>
+      <div id="umPasswordField" class="form-group">
+        <label>Password *</label>
+        <input id="umPassword" type="password" placeholder="Min 6 chars, include uppercase, number & special char">
+      </div>
+      <small id="umPasswordHint" class="hidden" style="color:var(--text-muted);display:block;margin-bottom:10px;">Leave blank to keep current password.</small>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Role</label>
+          <select id="umRole">
+            <option value="cashier">Cashier</option>
+            <option value="admin">Admin</option>
+            <option value="superadmin">Super Admin</option>
+            <option value="inventory">Inventory Staff</option>
+            <option value="readonly">Read-Only Manager</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="umStatus">
+            <option value="active">Active</option>
+            <option value="disabled">Disabled</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px;padding:8px 0;">
+        <input type="checkbox" id="umForcePw" style="width:18px;height:18px;">
+        <label for="umForcePw" style="margin:0;font-size:0.85rem;">Force password change on next login</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="UserManager.closeModal()">Cancel</button>
+      <button class="btn btn-success" onclick="UserManager.saveUser()">💾 Save User</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER PERMISSIONS MODAL -->
+<div id="umPermsOverlay" class="modal-overlay" onclick="if(event.target===this)UserManager.closePermsModal()">
+  <div class="modal-content" style="max-width:520px;">
+    <div class="modal-header">
+      <h2 id="umPermsTitle">🔐 Permissions</h2>
+      <button class="modal-close" onclick="UserManager.closePermsModal()">✕</button>
+    </div>
+    <div class="modal-body" id="umPermsBody" style="padding:16px 20px;max-height:450px;overflow-y:auto;">
+      <p style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="UserManager.closePermsModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER PROFILE MODAL -->
+<div id="umProfileOverlay" class="modal-overlay" onclick="if(event.target===this)UserManager.closeProfileModal()">
+  <div class="modal-content" style="max-width:580px;">
+    <div class="modal-header">
+      <h2 id="umProfileTitle">👤 User Profile</h2>
+      <button class="modal-close" onclick="UserManager.closeProfileModal()">✕</button>
+    </div>
+    <div class="modal-body" id="umProfileContent" style="padding:20px 24px;max-height:520px;overflow-y:auto;">
+      <p style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="UserManager.closeProfileModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- STOCK TIMELINE MODAL -->
+<div id="adjTimelineOverlay" class="modal-overlay" onclick="if(event.target===this)StockAdjustments.closeTimelineModal()">
+  <div class="modal-content" style="max-width:600px;">
+    <div class="modal-header">
+      <h2 id="adjTimelineTitle">📊 Stock Timeline</h2>
+      <button class="modal-close" onclick="StockAdjustments.closeTimelineModal()">✕</button>
+    </div>
+    <div class="modal-body" id="adjTimelineContent" style="padding:20px 24px;max-height:500px;overflow-y:auto;">
+      <p style="text-align:center;color:var(--text-muted);padding:30px;">Loading...</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="StockAdjustments.closeTimelineModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCRIPTS — ES Modules (Phase 2)
+     ============================================================ -->
+<script type="module" src="js/admin.js"></script>
+
+</body>
+</html>

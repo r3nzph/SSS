@@ -1,0 +1,13 @@
+{
+  "name": "sarisari-store-pos",
+  "version": "2.0.0",
+  "description": "Sari-Sari Store POS — Modular Web Application",
+  "scripts": {
+    "start": "npx http-server public -p 3000 -c-1",
+    "dev": "npx http-server . -p 3000 -c-1 --cors",
+    "electron": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

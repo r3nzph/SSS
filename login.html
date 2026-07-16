@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sari-Sari Store POS — Login</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<!-- ============================================================
+     LOGIN PAGE
+     ============================================================ -->
+<div id="loginGate" class="login-page">
+  <div class="login-card">
+    <h1>🏪 Sari-Sari POS</h1>
+    <p class="login-subtitle">Login to your account</p>
+
+    <div class="input-group">
+      <input type="text" id="username" placeholder="Username" autocomplete="username">
+    </div>
+
+    <div class="input-group">
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+      <button type="button" class="password-toggle" id="passwordToggle" onclick="togglePassword('password','passwordToggle')" title="Show password">👁️</button>
+    </div>
+
+    <label class="remember-row">
+      <input type="checkbox" id="rememberMe" checked>
+      <span>Remember me</span>
+    </label>
+
+    <button class="btn-login" onclick="handleLogin()">Login</button>
+
+    <small class="login-hint">
+      Default: admin / admin123<br>
+      Manage accounts in Admin Dashboard
+    </small>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCRIPTS — ES Modules (Phase 2)
+     ============================================================ -->
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>

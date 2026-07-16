@@ -1,0 +1,7 @@
+import Auth from './auth.js'; import UI from './ui.js'; import { getInputValue, escapeHtml } from './utils.js'; import StorageService from './storage.js';
+const Settings = {
+  loadSettings(){const s=StorageService.load('settings','main');if(!s)return;['setStoreName','setStoreAddress','setReceiptFooter','setTaxRate'].forEach(id=>{const el=document.getElementById(id);if(el&&s[id.replace('set','').replace('Store','storeName').replace('Address','storeAddress').replace('Receipt','receiptFooter').replace('Tax','taxRate')])el.value=s[id.replace('set','').replace('Store','storeName').replace('Address','storeAddress').replace('Receipt','receiptFooter').replace('Tax','taxRate')]||''})},
+  renderSettingsSummary(){const el=document.getElementById('settingsSummary');if(!el)return;const s=StorageService.load('settings','main');if(!s){el.textContent='No settings';return}el.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;padding:8px 0;"><div><small style="color:var(--text-muted)">Store</small><div>${escapeHtml(s.storeName||'')}</div></div><div><small style="color:var(--text-muted)">Tax</small><div>${s.taxRate||0}%</div></div></div>`},
+  async saveSettings(){const fields={storeName:getInputValue('setStoreName'),storeAddress:getInputValue('setStoreAddress'),receiptFooter:getInputValue('setReceiptFooter'),taxRate:parseFloat(getInputValue('setTaxRate'))||0};StorageService.update('settings','main',fields);Auth.setDb(StorageService.readRaw());UI.toast('Settings saved!','success')}
+};
+export default Settings;

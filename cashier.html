@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sari-Sari Store POS — Cashier</title>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/cashier.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+</head>
+<body>
+
+<div id="mainApp">
+  <div id="appContent">
+
+    <!-- === SIDEBAR === -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <h2>🏪 Aking Tindahan</h2>
+        <div class="sidebar-subtitle">POS Terminal</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-module-section" data-module="cashier">
+          <a class="nav-item active" data-view="cashier" onclick="CashierModule.switchView('cashier')">
+            <span class="nav-icon">🛒</span>
+            <span class="nav-label">Point of Sale</span>
+          </a>
+          <a class="nav-item" data-view="cashier-transactions" onclick="CashierModule.switchView('cashier-transactions')">
+            <span class="nav-icon">🧾</span>
+            <span class="nav-label">Transactions</span>
+          </a>
+          <a class="nav-item" data-view="cashier-receipts" onclick="CashierModule.switchView('cashier-receipts')">
+            <span class="nav-icon">📄</span>
+            <span class="nav-label">Receipts</span>
+          </a>
+          <a class="nav-item" data-view="cashier-profile" onclick="CashierModule.switchView('cashier-profile')">
+            <span class="nav-icon">👤</span>
+            <span class="nav-label">My Profile</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-user-avatar" id="userAvatar">C</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name" id="currentUserDisplay"></div>
+            <div class="sidebar-user-role" id="currentUserRole">cashier</div>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm btn-logout" onclick="handleLogout()" style="margin-bottom:6px;">🚪 Logout</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleTheme()" id="themeToggleBtn" style="width:100%;font-size:0.83rem;">🌙 Dark</button>
+      </div>
+    </aside>
+
+    <!-- === MAIN CONTENT === -->
+    <main class="main-content">
+
+      <!-- === POINT OF SALE PANEL === -->
+      <section id="cashier" class="panel pos-panel active" data-module="cashier">
+
+        <div class="pos-topbar">
+          <div class="pos-topbar-left">
+            <span class="pos-store-name" id="posStoreName">🏪 Aking Tindahan</span>
+          </div>
+          <div class="pos-topbar-center">
+            <span class="pos-datetime" id="posDateTime"></span>
+            <span class="pos-shift-badge" id="posShiftBadge">🟢 Active</span>
+          </div>
+          <div class="pos-topbar-right">
+            <span class="pos-cashier-name" id="posCashierName">👤 Cashier</span>
+            <button class="btn btn-ghost btn-sm" onclick="handleLogout()" title="Logout">🚪</button>
+          </div>
+        </div>
+
+        <div class="pos-body">
+          <div class="pos-left">
+            <div class="pos-search-row">
+              <div class="pos-search-wrap">
+                <input type="text" id="posSearch" placeholder="🔍 Search product..." oninput="Cashier.filterProducts(this.value)" class="pos-search-input" autofocus>
+              </div>
+              <input type="text" id="posBarcode" placeholder="📷 Scan barcode..." onkeydown="Cashier.handleBarcode(event)" class="pos-barcode-input"
+                title="Scan or type barcode then press Enter">
+            </div>
+
+            <div class="pos-categories" id="posCategories"></div>
+
+            <div id="posLoadingSkeleton" class="pos-skeleton hidden">
+              <div class="pos-skeleton-grid">
+                <div class="pos-skeleton-card"></div>
+                <div class="pos-skeleton-card"></div>
+                <div class="pos-skeleton-card"></div>
+                <div class="pos-skeleton-card"></div>
+                <div class="pos-skeleton-card"></div>
+                <div class="pos-skeleton-card"></div>
+              </div>
+            </div>
+
+            <div id="posProductGrid" class="pos-product-grid"></div>
+
+            <div id="posEmptyState" class="pos-empty hidden">
+              <div class="pos-empty-icon">📦</div>
+              <div class="pos-empty-text">No products found</div>
+            </div>
+          </div>
+
+          <div class="pos-right">
+            <div class="pos-cart-panel">
+              <div class="pos-cart-header">
+                <span>🛍️ Current Sale</span>
+                <span class="pos-cart-count" id="posCartCount">0 items</span>
+              </div>
+
+              <div class="pos-cart-items" id="posCartItems">
+                <div class="pos-cart-empty">
+                  <span class="pos-cart-empty-icon">🛒</span>
+                  <span>Cart is empty</span>
+                  <span class="pos-cart-empty-hint">Scan or tap products to add</span>
+                </div>
+              </div>
+
+              <div class="pos-cart-summary">
+                <div class="pos-summary-row">
+                  <span>Subtotal</span>
+                  <span id="posSubtotal">₱0.00</span>
+                </div>
+                <div class="pos-summary-row pos-summary-tax">
+                  <span>Tax (12%)</span>
+                  <span id="posTax">₱0.00</span>
+                </div>
+                <div class="pos-summary-row pos-summary-discount" id="posDiscountRow" style="display:none;">
+                  <span>Discount</span>
+                  <span id="posDiscount" style="color:var(--success);">−₱0.00</span>
+                </div>
+                <div class="pos-summary-row pos-summary-total">
+                  <span>TOTAL</span>
+                  <span id="posTotal">₱0.00</span>
+                </div>
+              </div>
+
+              <div class="pos-discount-row">
+                <input type="number" id="posDiscountInput" placeholder="Discount %" min="0" max="100" step="1"
+                  oninput="Cashier.updateDiscount(this.value)" class="pos-discount-input">
+                <button class="btn btn-sm btn-ghost" onclick="Cashier.clearDiscount()" title="Clear discount">✕</button>
+              </div>
+
+              <div class="pos-payment-methods">
+                <button class="pos-pm-btn active" data-method="cash" onclick="Cashier.selectPaymentMethod('cash')">
+                  <span class="pos-pm-icon">💵</span>
+                  <span class="pos-pm-label">Cash</span>
+                </button>
+                <button class="pos-pm-btn" data-method="gcash" onclick="Cashier.selectPaymentMethod('gcash')">
+                  <span class="pos-pm-icon">📱</span>
+                  <span class="pos-pm-label">GCash</span>
+                </button>
+                <button class="pos-pm-btn" data-method="card" onclick="Cashier.selectPaymentMethod('card')">
+                  <span class="pos-pm-icon">💳</span>
+                  <span class="pos-pm-label">Card</span>
+                </button>
+              </div>
+
+              <div class="pos-payment-row" id="posCashPayment">
+                <div class="pos-payment-label">Amount Tendered</div>
+                <div class="pos-payment-input-group">
+                  <span class="pos-currency-sign">₱</span>
+                  <input type="number" id="posTendered" placeholder="0.00" step="0.01" min="0"
+                    oninput="Cashier.calculateChange()" class="pos-tendered-input">
+                </div>
+                <div class="pos-quick-amounts">
+                  <button class="pos-qa-btn" onclick="Cashier.setTendered(20)">₱20</button>
+                  <button class="pos-qa-btn" onclick="Cashier.setTendered(50)">₱50</button>
+                  <button class="pos-qa-btn" onclick="Cashier.setTendered(100)">₱100</button>
+                  <button class="pos-qa-btn" onclick="Cashier.setTendered(200)">₱200</button>
+                  <button class="pos-qa-btn" onclick="Cashier.setTendered(500)">₱500</button>
+                  <button class="pos-qa-btn" onclick="Cashier.setTendered(1000)">₱1K</button>
+                </div>
+              </div>
+
+              <div class="pos-payment-row" id="posNonCashPayment" style="display:none;">
+                <div class="pos-payment-label">Reference # (optional)</div>
+                <div class="pos-payment-input-group">
+                  <input type="text" id="posRefNumber" placeholder="e.g. GCash ref or last 4 digits" class="pos-tendered-input" style="font-size:1rem;text-align:left;">
+                </div>
+              </div>
+
+              <div class="pos-change-row" id="posChangeRow" style="display:none;">
+                <span class="pos-change-label">Change Due</span>
+                <span class="pos-change-amount" id="posChangeAmount">₱0.00</span>
+              </div>
+
+              <button class="pos-checkout-btn" onclick="payCart()" id="posCheckoutBtn">
+                <span id="posChargeLabel">💳 Charge</span>
+                <span id="posCheckoutTotal">₱0.00</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pos-bottombar">
+          <button class="pos-action-btn" onclick="Cashier.suspendSale()" title="Hold this sale for later">
+            <span class="pos-action-icon">⏸️</span> <span class="pos-action-label">Hold</span>
+          </button>
+          <button class="pos-action-btn" onclick="Cashier.resumeSale()" title="Resume a held sale">
+            <span class="pos-action-icon">▶️</span> <span class="pos-action-label">Resume</span>
+          </button>
+          <button class="pos-action-btn" onclick="Cashier.clearCart()" title="Remove all items from cart">
+            <span class="pos-action-icon">🗑️</span> <span class="pos-action-label">Clear</span>
+          </button>
+          <button class="pos-action-btn" onclick="Cashier.voidLastItem()" title="Remove last item from cart">
+            <span class="pos-action-icon">↩️</span> <span class="pos-action-label">Void</span>
+          </button>
+          <button class="pos-action-btn" onclick="Cashier.reprintReceipt()" title="Print the last receipt">
+            <span class="pos-action-icon">🖨️</span> <span class="pos-action-label">Reprint</span>
+          </button>
+          <button class="pos-action-btn pos-action-new" onclick="Cashier.newSale()" title="Start a new sale (clear cart)">
+            <span class="pos-action-icon">🆕</span> <span class="pos-action-label">New Sale</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- === TRANSACTIONS PANEL === -->
+      <section id="cashier-transactions" class="panel" data-module="cashier">
+        <h2>🧾 My Transactions</h2>
+        <div class="inv-toolbar">
+          <div class="inv-search-wrap" style="flex:1;">
+            <input type="text" id="ctSearch" placeholder="Search by receipt # or item..." oninput="CashierModule.filterTransactions(this.value)" class="inv-search-input">
+          </div>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Receipt #</th><th>Date</th><th>Items</th><th>Total</th><th>View</th></tr></thead>
+            <tbody id="cashierTransactionsBody">
+              <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No transactions found.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- === RECEIPTS PANEL === -->
+      <section id="cashier-receipts" class="panel" data-module="cashier">
+        <h2>📄 Receipt History</h2>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Receipt #</th><th>Date</th><th>Items</th><th>Total</th><th>Action</th></tr></thead>
+            <tbody id="cashierReceiptsBody">
+              <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No receipts found.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- === MY PROFILE PANEL === -->
+      <section id="cashier-profile" class="panel" data-module="cashier">
+        <h2>👤 My Profile</h2>
+        <div class="profile-card" style="background:var(--bg-glass);border-radius:var(--radius-md);padding:30px;max-width:480px;">
+          <div class="profile-avatar" style="font-size:3rem;text-align:center;margin-bottom:16px;">👤</div>
+          <div class="profile-field">
+            <label style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;">Name</label>
+            <div id="profileName" style="font-size:1.2rem;font-weight:600;">—</div>
+          </div>
+          <div class="profile-field" style="margin-top:12px;">
+            <label style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;">Username</label>
+            <div id="profileUsername" style="font-size:1rem;">—</div>
+          </div>
+          <div class="profile-field" style="margin-top:12px;">
+            <label style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;">Role</label>
+            <div id="profileRole" style="font-size:1rem;">cashier</div>
+          </div>
+          <div class="profile-field" style="margin-top:12px;">
+            <label style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;">Email</label>
+            <div id="profileEmail" style="font-size:1rem;">—</div>
+          </div>
+          <div class="profile-field" style="margin-top:12px;">
+            <label style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;">Contact</label>
+            <div id="profileContact" style="font-size:1rem;">—</div>
+          </div>
+          <div class="profile-field" style="margin-top:12px;">
+            <label style="font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;">Last Login</label>
+            <div id="profileLastLogin" style="font-size:1rem;">—</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="CashierModule.changePassword()" style="margin-top:20px;">🔑 Change Password</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div id="receiptModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>🧾 Receipt</h2>
+      <button class="modal-close" onclick="closeReceipt()">✕</button>
+    </div>
+    <div class="receipt-body">
+      <div class="receipt-store-info">
+        <strong>Sari-Sari Store</strong><br>
+        <small id="receiptDate"></small>
+      </div>
+      <div class="receipt-meta">
+        <span>Receipt #<b id="receiptId"></b></span>
+        <span>Cashier: <b id="receiptCashier"></b></span>
+      </div>
+      <table class="receipt-table">
+        <thead>
+          <tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+        </thead>
+        <tbody id="receiptItems"></tbody>
+      </table>
+      <div class="receipt-total">
+        <strong>Total: <span id="receiptTotal">₱0.00</span></strong>
+      </div>
+      <div class="receipt-footer">
+        <p>Thank you for your purchase! ❤️</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeReceipt()">Close</button>
+      <button class="btn btn-primary" onclick="printReceipt()">🖨️ Print</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SCRIPTS — ES Modules (Phase 2)
+     ============================================================ -->
+<script type="module" src="js/cashier.js"></script>
+
+</body>
+</html>

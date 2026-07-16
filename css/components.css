@@ -1,0 +1,251 @@
+   PRODUCT MODAL (Add / Edit)
+   ============================================================ */
+
+.inv-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 700px) {
+  .inv-modal-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* Image upload */
+.inv-image-upload {
+  border: 2px dashed var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inv-image-upload:hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-glow);
+}
+
+.inv-image-preview {
+  max-width: 100%;
+  max-height: 120px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.inv-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.inv-image-placeholder .inv-upload-icon {
+  font-size: 2rem;
+}
+
+.inv-image-placeholder small {
+  font-size: 0.7rem;
+}
+
+/* Stock colors for archived */
+.stock-archived td {
+  opacity: 0.6;
+}
+
+/* ============================================================
+   ALERTS
+   MODALS (Receipt, Dialogs)
+   ============================================================ */
+
+.modal-overlay, .dialog-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: var(--modal-overlay-bg);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.active, .dialog-overlay.active {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--modal-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-xl);
+  width: 90%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--modal-shadow);
+  animation: modalIn 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-primary);
+  box-shadow: none;
+  transform: none;
+}
+
+.receipt-body { padding: 24px; }
+
+.receipt-store-info {
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  color: var(--accent-secondary);
+}
+
+.receipt-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--border-glass);
+}
+
+.receipt-table { margin-bottom: 16px; }
+.receipt-table th { font-size: 0.7rem; padding: 8px 12px; }
+.receipt-table td { font-size: 0.85rem; padding: 8px 12px; }
+
+.receipt-total {
+  text-align: right;
+  font-size: 1.15rem;
+  padding: 12px 0;
+  border-top: 1px solid var(--border-glass);
+  color: var(--success);
+}
+
+.receipt-footer {
+  text-align: center;
+  padding: 16px 0 0;
+  color: var(--text-muted);
+}
+
+.receipt-footer p { margin: 0; font-size: 0.85rem; }
+
+.modal-footer {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-glass);
+}
+
+/* Dialog (confirm / prompt) */
+.dialog-box {
+  width: 90%;
+  max-width: 380px;
+  padding: 28px;
+  border-radius: var(--radius-xl);
+  background: var(--dialog-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--dialog-shadow);
+  animation: scaleIn 0.25s ease;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.dialog-icon { font-size: 1.5rem; }
+
+.dialog-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.dialog-message {
+  white-space: pre-line;
+  font-size: 0.93rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.dialog-input {
+  margin-bottom: 16px;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.dialog-actions .btn {
+  min-width: 90px;
+}
+
+/* ============================================================
+   LOADING OVERLAY
