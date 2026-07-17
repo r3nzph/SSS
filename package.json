@@ -5,8 +5,22 @@
   "scripts": {
     "start": "python3 -m http.server 8080",
     "dev": "python3 -m http.server 8080",
-    "serve:php": "php -S localhost:8080"
+    "serve:php": "php -S localhost:8080",
+    "lint:css": "stylelint \"css/*.css\"",
+    "lint:css:fix": "stylelint \"css/*.css\" --fix",
+    "audit": "stylelint \"css/*.css\" --config .stylelintrc.json",
+    "pretest": "npm run lint:css"
   },
-  "keywords": ["pos", "sari-sari-store", "inventory", "static"],
-  "license": "MIT"
+  "keywords": [
+    "pos",
+    "sari-sari-store",
+    "inventory",
+    "static"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "stylelint": "^17.14.0",
+    "stylelint-config-standard": "^40.0.0",
+    "stylelint-declaration-strict-value": "^1.11.1"
+  }
 }

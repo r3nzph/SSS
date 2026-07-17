@@ -467,9 +467,10 @@ const SalesReports = {
       const barH = (day.total / max) * chartH;
       const y = pad.top + chartH - barH;
 
+      const accentHex = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim() || '#6D5DFC';
       const grad = ctx.createLinearGradient(x, y, x, pad.top + chartH);
-      grad.addColorStop(0, '#6c5ce7');
-      grad.addColorStop(1, 'rgba(108,92,231,0.15)');
+      grad.addColorStop(0, accentHex);
+      grad.addColorStop(1, accentHex + '26');
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.roundRect(x, y, barW, barH, [3, 3, 0, 0]);
@@ -535,8 +536,9 @@ const SalesReports = {
       const revX = cx - barW - 1;
       const revY = pad.top + chartH - revH;
       const grad1 = ctx.createLinearGradient(revX, revY, revX, pad.top + chartH);
-      grad1.addColorStop(0, 'rgba(108,92,231,0.8)');
-      grad1.addColorStop(1, 'rgba(108,92,231,0.15)');
+      const accentHex2 = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim() || '#6D5DFC';
+      grad1.addColorStop(0, accentHex2 + 'CC');
+      grad1.addColorStop(1, accentHex2 + '26');
       ctx.fillStyle = grad1;
       ctx.beginPath();
       ctx.roundRect(revX, revY, barW, revH, [3, 3, 0, 0]);
@@ -560,7 +562,8 @@ const SalesReports = {
     });
 
     // Legend
-    ctx.fillStyle = 'rgba(108,92,231,0.8)';
+    const accentRgba = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim() || '#6D5DFC';
+    ctx.fillStyle = accentRgba + 'CC';
     ctx.fillRect(w - 130, 8, 10, 10);
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
     ctx.font = '8px sans-serif';
@@ -1809,11 +1812,11 @@ const SalesReports = {
     printWindow.document.write(`
       <html><head><title>Sales Report</title>
       <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 30px; color: #222; }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; padding: 30px; color: #222; }
         h1 { font-size: 20px; margin-bottom: 4px; }
         .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
-        th { background: #6c5ce7; color: #fff; padding: 8px 10px; text-align: left; }
+        th { background: #6D5DFC; color: #fff; padding: 8px 10px; text-align: left; }
         td { padding: 6px 10px; border-bottom: 1px solid #eee; }
         .total-row td { font-weight: bold; border-top: 2px solid #333; }
         .summary { display: flex; gap: 20px; margin-bottom: 20px; }
@@ -1853,11 +1856,11 @@ const SalesReports = {
     printWindow.document.write(`
       <html><head><title>Inventory Report</title>
       <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 30px; color: #222; }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; padding: 30px; color: #222; }
         h1 { font-size: 20px; }
         .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th { background: #6c5ce7; color: #fff; padding: 8px 10px; text-align: left; }
+        th { background: #6D5DFC; color: #fff; padding: 8px 10px; text-align: left; }
         td { padding: 6px 10px; border-bottom: 1px solid #eee; }
         .summary { display: flex; gap: 20px; margin-bottom: 20px; }
         .summary-item { background: #f5f5f5; padding: 12px 16px; border-radius: 6px; }
@@ -1905,7 +1908,7 @@ const SalesReports = {
     printWindow.document.write(`
       <html><head><title>Profit & Loss</title>
       <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 30px; color: #222; }
+        body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; padding: 30px; color: #222; }
         h1 { font-size: 20px; }
         .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
         .pnl-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #eee; font-size: 13px; }

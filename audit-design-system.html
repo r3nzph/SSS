@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System Audit — Sari-Sari Store POS</title>
+  <style>
+    :root {
+      --bg: #090B1A;
+      --surface: #10162B;
+      --accent: #6D5DFC;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --danger: #EF4444;
+      --text: #FFFFFF;
+      --text-sec: #A8AEC9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      line-height: 1.5;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 4px; }
+    .subtitle { color: var(--text-sec); font-size: 0.85rem; margin-bottom: 24px; }
+    .controls {
+      display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+      margin-bottom: 20px; padding: 16px; background: var(--surface);
+      border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);
+    }
+    .controls select, .controls button {
+      padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04); color: var(--text); font-size: 0.85rem;
+      cursor: pointer; font-family: inherit;
+    }
+    .controls button {
+      background: var(--accent); border-color: var(--accent); font-weight: 600;
+      transition: 0.2s;
+    }
+    .controls button:hover { transform: translateY(-1px); box-shadow: 0 0 20px rgba(109,93,252,0.3); }
+    .controls label { font-size: 0.85rem; color: var(--text-sec); }
+    .stats {
+      display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .stat-card {
+      padding: 12px 18px; background: var(--surface); border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08); min-width: 120px;
+    }
+    .stat-card .num { font-size: 1.3rem; font-weight: 700; }
+    .stat-card .lbl { font-size: 0.7rem; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-card.pass .num { color: var(--success); }
+    .stat-card.warn .num { color: var(--warning); }
+    .stat-card.fail .num { color: var(--danger); }
+    table {
+      width: 100%; border-collapse: collapse; font-size: 0.82rem;
+    }
+    th {
+      text-align: left; padding: 10px 12px; font-size: 0.72rem;
+      text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-sec);
+      background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.08);
+      position: sticky; top: 0;
+    }
+    td { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .file-cell { font-family: monospace; font-size: 0.78rem; color: var(--accent); white-space: nowrap; }
+    .line-cell { text-align: center; color: var(--text-sec); font-family: monospace; }
+    .value-cell { font-family: monospace; font-size: 0.82rem; }
+    .value-cell code { 
+      background: rgba(239,68,68,0.12); color: var(--danger); padding: 1px 6px;
+      border-radius: 4px; font-size: 0.78rem;
+    }
+    .suggestion { color: var(--success); font-size: 0.75rem; }
+    .empty-state {
+      text-align: center; padding: 48px 20px; color: var(--text-sec);
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+    .error-state {
+      text-align: center; padding: 48px 20px;
+    }
+    .error-state .icon { font-size: 3rem; margin-bottom: 12px; }
+    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+    .filter-btn {
+      padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);
+      background: transparent; color: var(--text-sec); font-size: 0.78rem; cursor: pointer;
+      transition: 0.15s;
+    }
+    .filter-btn:hover { background: rgba(255,255,255,0.04); }
+    .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+    .summary-text { font-size: 0.82rem; color: var(--text-sec); margin-bottom: 12px; }
+    #loading {
+      text-align: center; padding: 60px; color: var(--text-sec);
+    }
+    .spinner {
+      width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.08);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <h1>🎨 Design System Audit</h1>
+  <p class="subtitle">Scans all CSS files for hardcoded values that bypass CSS variables from <code>theme.css</code></p>
+
+  <div class="controls">
+    <label>Target:</label>
+    <select id="severityFilter">
+      <option value="all">All Violations</option>
+      <option value="colors">Colors (hex/rgba)</option>
+      <option value="radii">Border-Radius</option>
+      <option value="fonts">Font-Family</option>
+      <option value="shadows">Box-Shadow</option>
+    </select>
+    <button onclick="runAudit()">🔄 Run Audit</button>
+    <label style="margin-left:auto;font-size:0.8rem;">
+      <input type="checkbox" id="showThemeTokens" checked> Include theme.css in audit
+    </label>
+  </div>
+
+  <div class="stats" id="statsBar" class="hidden">
+    <div class="stat-card fail"><div class="num" id="violationCount">0</div><div class="lbl">Violations</div></div>
+    <div class="stat-card"><div class="num" id="filesScanned">0</div><div class="lbl">Files Scanned</div></div>
+  </div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <div>Scanning CSS files...</div>
+  </div>
+
+  <div id="results" class="hidden">
+    <div class="filter-bar" id="filterBar"></div>
+    <div class="summary-text" id="summaryText"></div>
+    <div id="resultsTable"><div class="empty-state"><div class="icon">🎉</div><h3>No violations found!</h3><p>All CSS values properly use design system variables.</p></div></div>
+  </div>
+
+  <div id="error" class="hidden error-state">
+    <div class="icon">⚠️</div>
+    <h3>Failed to load CSS files</h3>
+    <p id="errorMessage" style="color:var(--text-sec);margin-top:8px;"></p>
+    <button onclick="runAudit()" style="margin-top:16px;padding:8px 20px;background:var(--accent);border:none;border-radius:10px;color:white;cursor:pointer;">Retry</button>
+  </div>
+
+  <script>
+    // ============================================================
+    // DESIGN SYSTEM TOKENS (from theme.css)
+    // ============================================================
+    const SYSTEM_TOKENS = {
+      colors: {
+        '--bg-primary': '#090B1A',
+        '--bg-secondary': '#10162B',
+        '--bg-tertiary': '#141B34',
+        '--bg-card': 'rgba(255,255,255,0.03)',
+        '--bg-card-hover': 'rgba(255,255,255,0.06)',
+        '--bg-glass': 'rgba(255,255,255,0.04)',
+        '--bg-glass-hover': 'rgba(255,255,255,0.08)',
+        '--bg-glass-strong': 'rgba(255,255,255,0.10)',
+        '--bg-elevated': '#1e1e3a',
+        '--bg-input': 'rgba(255,255,255,0.04)',
+        '--bg-input-hover': 'rgba(255,255,255,0.07)',
+        '--bg-input-focus': 'rgba(109,93,252,0.08)',
+        '--bg-sidebar': 'rgba(255,255,255,0.03)',
+        '--bg-sidebar-active': 'rgba(109,93,252,0.12)',
+        '--border-glass': 'rgba(255,255,255,0.08)',
+        '--border-glass-hover': 'rgba(255,255,255,0.15)',
+        '--border-glass-strong': 'rgba(255,255,255,0.18)',
+        '--border-input': 'rgba(255,255,255,0.08)',
+        '--border-input-hover': 'rgba(255,255,255,0.15)',
+        '--border-input-focus': '#6D5DFC',
+        '--text-primary': 'rgba(255,255,255,0.92)',
+        '--text-secondary': '#A8AEC9',
+        '--text-muted': 'rgba(255,255,255,0.35)',
+        '--text-dim': 'rgba(255,255,255,0.20)',
+        '--text-inverse': 'rgba(0,0,0,0.85)',
+        '--text-placeholder': 'rgba(255,255,255,0.25)',
+        '--accent-primary': '#6D5DFC',
+        '--accent-primary-hover': '#7D6CFF',
+        '--accent-secondary': '#8B7CFF',
+        '--accent-glow': 'rgba(109,93,252,0.25)',
+        '--accent-glow-strong': 'rgba(109,93,252,0.40)',
+        '--accent-subtle': 'rgba(109,93,252,0.10)',
+        '--accent-border': 'rgba(109,93,252,0.20)',
+        '--success': '#10B981',
+        '--success-bg': 'rgba(16,185,129,0.10)',
+        '--success-border': 'rgba(16,185,129,0.20)',
+        '--warning': '#F59E0B',
+        '--warning-bg': 'rgba(245,158,11,0.10)',
+        '--warning-border': 'rgba(245,158,11,0.20)',
+        '--danger': '#EF4444',
+        '--danger-bg': 'rgba(239,68,68,0.10)',
+        '--danger-border': 'rgba(239,68,68,0.20)',
+        '--info': '#74b9ff',
+        '--info-bg': 'rgba(116,185,255,0.10)',
+        '--info-border': 'rgba(116,185,255,0.20)',
+        '--table-header-bg': 'rgba(255,255,255,0.03)',
+        '--table-row-hover': 'rgba(255,255,255,0.03)',
+        '--table-border': 'rgba(255,255,255,0.04)',
+        '--scrollbar-thumb': 'rgba(255,255,255,0.15)',
+        '--scrollbar-thumb-hover': 'rgba(255,255,255,0.25)',
+        '--overlay-bg': 'rgba(10,10,26,0.75)',
+        '--overlay-bg-strong': 'rgba(10,10,26,0.85)',
+        '--toast-bg': 'rgba(11,11,26,0.90)',
+        '--spinner-border': 'rgba(255,255,255,0.08)',
+        '--toggle-knob-shadow': '0 1px 3px rgba(0,0,0,0.2)'
+      },
+      radii: {
+        '--radius-sm': '10px',
+        '--radius-md': '14px',
+        '--radius-lg': '18px',
+        '--radius-xl': '28px',
+        '--radius-full': '9999px',
+        '--scrollbar-radius': '3px',
+        '--form-radius': 'var(--radius-md)'
+      },
+      fonts: {
+        '--font-family': "'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', sans-serif",
+        '--font-mono': "'SF Mono', 'Cascadia Code', 'Consolas', 'Courier New', monospace"
+      },
+      shadows: {
+        '--shadow-sm': '0 2px 8px rgba(0,0,0,0.3)',
+        '--shadow-md': '0 4px 16px rgba(0,0,0,0.35)',
+        '--shadow-lg': '0 8px 32px rgba(0,0,0,0.4)',
+        '--shadow-xl': '0 16px 48px rgba(0,0,0,0.5)',
+        '--shadow-glow': '0 0 30px var(--accent-glow)',
+        '--shadow-glow-strong': '0 0 50px var(--accent-glow-strong)',
+        '--shadow-card': '0 8px 32px rgba(0,0,0,0.4)',
+        '--shadow-modal': '0 25px 60px rgba(0,0,0,0.5)',
+        '--shadow-dropdown': '0 8px 24px rgba(0,0,0,0.4)',
+        '--toggle-knob-shadow': '0 1px 3px rgba(0,0,0,0.2)'
+      }
+    };
+
+    const ALLOWED_VALUES = {
+      'border-radius': ['50%', '0'],
+      'box-shadow': ['none'],
+      'font-family': ['inherit', 'initial', 'unset'],
+      'background': ['none', 'transparent'],
+      'background-color': ['transparent'],
+      'color': ['inherit', 'transparent', 'currentColor'],
+      'border-color': ['transparent'],
+      'fill': ['none', 'currentColor'],
+      'stroke': ['none', 'currentColor']
+    };
+
+    const ALLOWED_FUNCTIONS = [
+      'linear-gradient', 'radial-gradient', 'conic-gradient',
+      'repeating-linear-gradient', 'repeating-radial-gradient',
+      'color-mix', 'var', 'calc', 'clamp', 'min', 'max'
+    ];
+
+    const CSS_FILES = [
+      'css/theme.css',
+      'css/main.css',
+      'css/components.css',
+      'css/admin.css',
+      'css/cashier.css',
+      'css/login.css',
+      'css/animations.css',
+      'css/utilities.css'
+    ];
+
+    // ============================================================
+    // VIOLATION DETECTION
+    // ============================================================
+
+    function isVariable(value) {
+      return /^\s*var\(--/.test(value);
+    }
+
+    function isFunctionCall(value) {
+      const trimmed = value.trim();
+      return ALLOWED_FUNCTIONS.some(fn => trimmed.startsWith(fn + '('));
+    }
+
+    function isAllowedValue(property, value) {
+      const trimmed = value.trim().toLowerCase();
+      const allowed = ALLOWED_VALUES[property] || [];
+      if (allowed.includes(trimmed)) return true;
+      // Check if value is purely a number (like 0)
+      if (/^\d+(\.\d+)?(px|rem|em)?$/.test(trimmed)) return true;
+      return false;
+    }
+
+    function isHexColor(value) {
+      return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})(\s|$)/.test(value.trim());
+    }
+
+    function isRgbaColor(value) {
+      return /^rgba?\s*\(/.test(value.trim());
+    }
+
+    function isHardcodedColorValue(value, property) {
+      if (isVariable(value)) return false;
+      if (isFunctionCall(value)) return false;
+      if (isAllowedValue(property, value)) return false;
+      if (isHexColor(value) || isRgbaColor(value)) return true;
+      // Named colors (except allowed ones)
+      const namedColors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'gray', 'grey',
+        'white', 'black', 'navy', 'teal', 'aqua', 'fuchsia', 'lime', 'maroon', 'olive', 'silver'];
+      if (namedColors.includes(value.trim().toLowerCase()) && !['white', 'black'].includes(value.trim().toLowerCase())) {
+        return true;
+      }
+      return false;
+    }
+
+    function isHardcodedRadius(value) {
+      if (isVariable(value)) return false;
+      if (isFunctionCall(value)) return false;
+      if (isAllowedValue('border-radius', value)) return false;
+      // Match things like 8px, 12px, 4px, 6px, etc.
+      return /^\d+px(\s+\d+px)*(\s*\/\s*\d+px(\s+\d+px)*)?$/.test(value.trim());
+    }
+
+    function isHardcodedFont(value) {
+      if (isVariable(value)) return false;
+      if (isAllowedValue('font-family', value)) return false;
+      // Has a specific font name (not a generic)
+      return /['"][A-Za-z\s-]+['"]/.test(value);
+    }
+
+    function isHardcodedShadow(value) {
+      if (isVariable(value)) return false;
+      if (isAllowedValue('box-shadow', value)) return false;
+      if (isFunctionCall(value)) return false;
+      // Match shadow patterns: 0 2px 8px rgba(...) etc.
+      return /\d+px\s+\d+px/.test(value.trim()) && !value.trim().startsWith('inset');
+    }
+
+    function classifyViolation(property, value) {
+      const v = value.trim();
+      const p = property.toLowerCase();
+
+      // Check color-related properties
+      if (['color', 'background-color', 'background', 'border-color', 'border-top-color',
+           'border-right-color', 'border-bottom-color', 'border-left-color', 'outline-color',
+           'fill', 'stroke'].includes(p)) {
+        if (isHardcodedColorValue(v, p)) return { type: 'colors', reason: 'Hardcoded color' };
+      }
+
+      // Check border-radius
+      if (p === 'border-radius' && isHardcodedRadius(v)) {
+        return { type: 'radii', reason: 'Hardcoded border-radius' };
+      }
+
+      // Check font-family
+      if (p === 'font-family' && isHardcodedFont(v)) {
+        return { type: 'fonts', reason: 'Hardcoded font-family' };
+      }
+
+      // Check box-shadow
+      if (p === 'box-shadow' && isHardcodedShadow(v)) {
+        return { type: 'shadows', reason: 'Hardcoded box-shadow' };
+      }
+
+      return null;
+    }
+
+    function getSuggestion(property, value) {
+      const p = property.toLowerCase();
+      const suggestions = {
+        'color': 'var(--text-primary), var(--text-secondary), var(--text-muted)',
+        'background-color': 'var(--bg-primary), var(--bg-secondary), var(--bg-card)',
+        'background': 'var(--bg-primary), var(--bg-glass), var(--accent-gradient)',
+        'border-color': 'var(--border-glass), var(--border-input), var(--accent-border)',
+        'border-radius': 'var(--radius-sm), var(--radius-md), var(--radius-lg), var(--radius-xl)',
+        'font-family': 'var(--font-family), var(--font-mono)',
+        'box-shadow': 'var(--shadow-sm), var(--shadow-md), var(--shadow-lg), var(--shadow-card)',
+        'fill': 'var(--accent-primary), var(--text-primary), currentColor',
+        'stroke': 'var(--accent-primary), var(--text-primary), currentColor'
+      };
+      if (suggestions[p]) {
+        return `Use ${suggestions[p]}`;
+      }
+      // For general hex/rgba values
+      return 'Use the corresponding CSS variable from theme.css';
+    }
+
+    // ============================================================
+    // CSS PARSER
+    // ============================================================
+
+    function parseCSS(text, fileName) {
+      const violations = [];
+      const lines = text.split('\n');
+
+      // Track whether we're inside a :root block (theme.css exceptions)
+      let inRoot = false;
+      let inComment = false;
+
+      for (let i = 0; i < lines.length; i++) {
+        const lineNum = i + 1;
+        const raw = lines[i];
+
+        // Track multi-line comments
+        if (inComment) {
+          if (raw.includes('*/')) inComment = false;
+          continue;
+        }
+        if (raw.trim().startsWith('/*')) {
+          if (!raw.includes('*/')) { inComment = true; }
+          continue;
+        }
+
+        const trimmed = raw.trim();
+
+        // Detect :root blocks
+        if (trimmed === ':root' || trimmed.startsWith(':root')) {
+          inRoot = true;
+          // Skip the opening brace
+          continue;
+        }
+        // Check for closing brace of :root
+        if (inRoot && trimmed === '}') {
+          inRoot = false;
+          continue;
+        }
+
+        // Skip comments on same line
+        const code = trimmed.replace(/\/\*.*?\*\//g, '').trim();
+        if (!code) continue;
+
+        // Parse declarations (property: value;)
+        const declMatch = code.match(/^([\w-]+)\s*:\s*(.+?)\s*;?\s*$/);
+        if (!declMatch) continue;
+
+        const property = declMatch[1].trim();
+        let value = declMatch[2].trim();
+
+        // Remove !important
+        value = value.replace(/\s*!important\s*$/, '').trim();
+
+        // Skip if inside :root (these are the variable definitions themselves)
+        if (inRoot && property.startsWith('--')) continue;
+
+        // Skip if using CSS variable
+        if (isVariable(value)) continue;
+
+        // Skip if using calc() or other allowed functions
+        if (isFunctionCall(value)) continue;
+
+        // Skip if allowed value for this property
+        if (isAllowedValue(property, value)) continue;
+
+        // Check for violation
+        const violation = classifyViolation(property, value);
+        if (violation) {
+          violations.push({
+            file: fileName,
+            line: lineNum,
+            property,
+            value,
+            type: violation.type,
+            reason: violation.reason,
+            suggestion: getSuggestion(property, value)
+          });
+        }
+      }
+
+      return violations;
+    }
+
+    // ============================================================
+    // MAIN AUDIT FUNCTION
+    // ============================================================
+
+    async function runAudit() {
+      const loadingEl = document.getElementById('loading');
+      const resultsEl = document.getElementById('results');
+      const statsBar = document.getElementById('statsBar');
+      const errorEl = document.getElementById('error');
+
+      loadingEl.classList.remove('hidden');
+      resultsEl.classList.add('hidden');
+      statsBar.classList.add('hidden');
+      errorEl.classList.add('hidden');
+
+      let allViolations = [];
+      let filesScanned = 0;
+
+      for (const file of CSS_FILES) {
+        try {
+          const response = await fetch(file + '?t=' + Date.now());
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const text = await response.text();
+          const violations = parseCSS(text, file);
+          allViolations = allViolations.concat(violations);
+          filesScanned++;
+        } catch (e) {
+          console.warn(`Could not load ${file}:`, e.message);
+        }
+      }
+
+      loadingEl.classList.add('hidden');
+
+      if (filesScanned === 0) {
+        errorEl.classList.remove('hidden');
+        document.getElementById('errorMessage').textContent =
+          'Could not load any CSS files. Make sure you are running a local server (e.g., python -m http.server 3000) and not opening the file directly.';
+        return;
+      }
+
+      // Filter violations
+      const showThemeTokens = document.getElementById('showThemeTokens').checked;
+      if (!showThemeTokens) {
+        allViolations = allViolations.filter(v => v.file !== 'css/theme.css');
+      }
+
+      const severity = document.getElementById('severityFilter').value;
+      let filtered = allViolations;
+      if (severity !== 'all') {
+        filtered = allViolations.filter(v => v.type === severity);
+      }
+
+      // Update stats
+      const colorViolations = allViolations.filter(v => v.type === 'colors').length;
+      const radiusViolations = allViolations.filter(v => v.type === 'radii').length;
+      const fontViolations = allViolations.filter(v => v.type === 'fonts').length;
+      const shadowViolations = allViolations.filter(v => v.type === 'shadows').length;
+      const total = allViolations.length;
+
+      document.getElementById('violationCount').textContent = total;
+      document.getElementById('filesScanned').textContent = filesScanned;
+      statsBar.classList.remove('hidden');
+
+      // Render filter buttons
+      const filterBar = document.getElementById('filterBar');
+      filterBar.innerHTML = `
+        <button class="filter-btn ${severity === 'all' ? 'active' : ''}" onclick="setFilter('all')">All (${total})</button>
+        <button class="filter-btn ${severity === 'colors' ? 'active' : ''}" onclick="setFilter('colors')">🎨 Colors (${colorViolations})</button>
+        <button class="filter-btn ${severity === 'radii' ? 'active' : ''}" onclick="setFilter('radii')">⬜ Radii (${radiusViolations})</button>
+        <button class="filter-btn ${severity === 'fonts' ? 'active' : ''}" onclick="setFilter('fonts')">🔤 Fonts (${fontViolations})</button>
+        <button class="filter-btn ${severity === 'shadows' ? 'active' : ''}" onclick="setFilter('shadows')">🌓 Shadows (${shadowViolations})</button>
+      `;
+
+      // Render summary
+      document.getElementById('summaryText').textContent =
+        `Found ${filtered.length} violation(s) across ${filesScanned} CSS file(s). ${filtered.length !== allViolations.length ? `(filtered from ${allViolations.length} total)` : ''}`;
+
+      // Render table
+      const tableContainer = document.getElementById('resultsTable');
+      if (filtered.length === 0) {
+        tableContainer.innerHTML = `
+          <div class="empty-state">
+            <div class="icon">🎉</div>
+            <h3>No violations found!</h3>
+            <p>All CSS values properly use design system variables.</p>
+          </div>`;
+      } else {
+        let html = `<table>
+          <thead><tr>
+            <th>File</th><th>Line</th><th>Property</th><th>Value</th><th>Issue</th><th>Suggestion</th>
+          </tr></thead><tbody>`;
+        filtered.forEach(v => {
+          const typeIcon = { colors: '🎨', radii: '⬜', fonts: '🔤', shadows: '🌓' }[v.type] || '⚠️';
+          html += `<tr>
+            <td class="file-cell">${escapeHtml(v.file)}</td>
+            <td class="line-cell">${v.line}</td>
+            <td><code>${escapeHtml(v.property)}</code></td>
+            <td class="value-cell"><code>${escapeHtml(v.value)}</code></td>
+            <td>${typeIcon} ${escapeHtml(v.reason)}</td>
+            <td class="suggestion">${escapeHtml(v.suggestion)}</td>
+          </tr>`;
+        });
+        html += '</tbody></table>';
+        tableContainer.innerHTML = html;
+      }
+
+      resultsEl.classList.remove('hidden');
+    }
+
+    function setFilter(val) {
+      document.getElementById('severityFilter').value = val;
+      runAudit();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // Auto-run on load
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(runAudit, 300);
+    });
+  </script>
+
+</body>
+</html>

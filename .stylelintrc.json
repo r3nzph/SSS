@@ -1,0 +1,101 @@
+{
+  "extends": "stylelint-config-standard",
+  "plugins": ["stylelint-declaration-strict-value"],
+  "rules": {
+    "color-no-hex": [
+      true,
+      {
+        "severity": "warning",
+        "message": "Hex colors are not allowed outside :root. Use a CSS variable instead (e.g., var(--bg-primary))."
+      }
+    ],
+    "color-named": "never",
+    "declaration-property-value-disallowed-list": [
+      {
+        "/^border-radius$/": ["/^(?!var\\(--|0$|50%$)/"],
+        "/^font-family$/": ["/^(?!var\\(--)/"],
+        "/^box-shadow$/": ["/^(?!var\\(--|none$|inset)/"]
+      },
+      {
+        "severity": "error",
+        "message": "Do not use hardcoded border-radius, font-family, or box-shadow values. Use the corresponding CSS variable (e.g., var(--radius-md), var(--font-family), var(--shadow-md))."
+      }
+    ],
+    "scale-unlimited/declaration-strict-value": [
+      [
+        "color",
+        "background-color",
+        "background",
+        "border-color",
+        "border-top-color",
+        "border-right-color",
+        "border-bottom-color",
+        "border-left-color",
+        "outline-color",
+        "fill",
+        "stroke"
+      ],
+      {
+        "ignoreValues": [
+          "inherit",
+          "initial",
+          "unset",
+          "transparent",
+          "currentColor",
+          "white",
+          "black"
+        ],
+        "ignoreFunctions": [
+          "linear-gradient",
+          "radial-gradient",
+          "conic-gradient",
+          "repeating-linear-gradient",
+          "repeating-radial-gradient",
+          "color-mix"
+        ],
+        "message": "Expected \"%s\" to use a CSS variable (e.g., var(--text-primary)). Hardcoded colors bypass the design system."
+      }
+    ],
+    "declaration-property-unit-allowed-list": [
+      {
+        "/^font-size/": ["rem", "em"]
+      },
+      {
+        "severity": "warning",
+        "message": "Use rem or em for font-size, not px."
+      }
+    ],
+    "unit-allowed-list": [
+      ["px", "rem", "em", "%", "vh", "vw", "vmin", "vmax", "deg", "s", "ms", "fr"],
+      {
+        "severity": "error"
+      }
+    ],
+    "property-no-vendor-prefix": null,
+    "at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": ["include", "mixin"]
+      }
+    ],
+    "no-descending-specificity": null,
+    "comment-empty-line-before": null,
+    "rule-empty-line-before": null,
+    "length-zero-no-unit": true,
+    "max-nesting-depth": 3,
+    "selector-max-id": 1,
+    "selector-class-pattern": null,
+    "keyframes-name-pattern": null,
+    "custom-property-pattern": null
+  },
+  "overrides": [
+    {
+      "files": ["css/login.css", "css/theme.css"],
+      "rules": {
+        "color-no-hex": null,
+        "scale-unlimited/declaration-strict-value": null,
+        "declaration-property-value-disallowed-list": null
+      }
+    }
+  ]
+}

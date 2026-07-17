@@ -104,14 +104,20 @@ const UserManager = {
   },
 
   _getAvatarColor(role) {
+    const root = getComputedStyle(document.documentElement);
+    const accent = root.getPropertyValue('--accent-primary').trim() || '#6D5DFC';
+    const success = root.getPropertyValue('--success').trim() || '#10B981';
+    const warning = root.getPropertyValue('--warning').trim() || '#F59E0B';
+    const danger = root.getPropertyValue('--danger').trim() || '#EF4444';
+    const info = root.getPropertyValue('--info').trim() || '#74b9ff';
     const colors = {
-      superadmin: 'linear-gradient(135deg, #f093fb, #f5576c)',
-      admin: 'linear-gradient(135deg, #667eea, #764ba2)',
-      cashier: 'linear-gradient(135deg, #43e97b, #38f9d7)',
-      inventory: 'linear-gradient(135deg, #fa709a, #fee140)',
-      readonly: 'linear-gradient(135deg, #a8edea, #fed6e3)'
+      superadmin: `linear-gradient(135deg, ${danger}, ${accent})`,
+      admin: `linear-gradient(135deg, ${accent}, #764ba2)`,
+      cashier: `linear-gradient(135deg, ${success}, ${info})`,
+      inventory: `linear-gradient(135deg, ${danger}, ${warning})`,
+      readonly: `linear-gradient(135deg, ${info}, ${success})`
     };
-    return colors[role] || 'linear-gradient(135deg, #667eea, #764ba2)';
+    return colors[role] || `linear-gradient(135deg, ${accent}, ${info})`;
   },
 
   // ============================

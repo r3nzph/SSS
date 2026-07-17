@@ -28,6 +28,8 @@ import Skeleton from './skeleton.js';
 const AdminModule = {
   _initialized: false,
   _currentView: 'admin',
+  _clearSkeletonTimer: null,
+  _retryTimer: null,
 
   init() {
     if (!Auth.isAdmin()) {
@@ -56,6 +58,12 @@ const AdminModule = {
 
     // Show skeletons for data-heavy views
     this._showViewSkeletons(view);
+
+    // SAFETY TIMEOUT: Auto-clear skeletons after 5 seconds if data never loads
+    this._clearSkeletonTimer = setTimeout(() => {
+      this._clearSkeletonsForView(view);
+      console.warn('[ADMIN] Safety timeout: cleared skeletons for view:', view);
+    }, 5000);
 
     const sectionMap = {
       'admin-suppliers': { panel: 'admin', sectionId: 'admin-suppliers-section' },
@@ -86,6 +94,26 @@ const AdminModule = {
     document.querySelectorAll('.nav-item').forEach(item => {
       item.classList.remove('active');
       if (item.dataset.view === view) item.classList.add('active');
+    });
+  },
+
+  _clearSkeletonsForView(view) {
+    const skeletonMap = {
+      'admin': ['kpiContainer', 'salesChart', 'topProductsChart'],
+      'inventory': ['lowStockAlerts', 'inventoryTable'],
+      'audit': ['auditLogBody'],
+      'usermanager': ['umCardsContainer'],
+      'admin-suppliers': ['suppliersTable'],
+      'admin-pos': ['poTable'],
+      'salesreports': ['srContent', 'srFilterBar', 'srTabs']
+    };
+    const ids = skeletonMap[view] || [];
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && (el.querySelector('.skeleton') || el.innerHTML === '')) {
+        console.log('[ADMIN] Safety clearing skeleton:', id);
+        el.innerHTML = `<div class="panel-empty">Failed to load data. Try refreshing the page.</div>`;
+      }
     });
   },
 
@@ -162,30 +190,72 @@ const AdminModule = {
   _setupEventListeners() {},
 
   refreshAll() {
-    if (!Auth.isAdmin()) return;
+    if (!Auth.isAdmin()) {
+      console.warn('[ADMIN] refreshAll skipped: not admin.');
+      return;
+    }
     const state = Auth.getState();
-    if (!state.db) return;
+    if (!state.db) {
+      console.warn('[ADMIN] refreshAll skipped: db not loaded yet. Retrying in 500ms...');
+      if (this._retryTimer) clearTimeout(this._retryTimer);
+      this._retryTimer = setTimeout(() => {
+        this._retryTimer = null;
+        const retryState = Auth.getState();
+        if (retryState.db) {
+          console.log('[ADMIN] Retry successful, running refreshAll.');
+          this.refreshAll();
+        } else {
+          console.error('[ADMIN] Retry failed: db still not loaded.');
+          const panel = document.getElementById('admin');
+          if (panel) {
+            panel.innerHTML = `<div class="panel" style="text-align:center;padding:60px 20px;">
+              <h2 style="font-size:1.5rem;margin-bottom:12px;">⚠️ Failed to Load Dashboard</h2>
+              <p style="color:var(--text-secondary);margin-bottom:24px;">The database could not be loaded. This may be due to corrupted data or a storage error.</p>
+              <button class="btn btn-primary" onclick="location.reload()">🔄 Refresh Page</button>
+            </div>`;
+          }
+        }
+      }, 500);
+      return;
+    }
 
-    Dashboard.renderDashboard();
-    Admin.renderAdmin();
-    Suppliers.renderSuppliers();
-    Purchasing.renderPOs();
-    Receiving.renderReceivingHistory();
-    Accounts.renderUsers();
-    History.renderHistory();
-    Audit.renderAuditLog();
-    Inventory.renderInventory();
-    StockAdjustments.renderAdjustmentHistory();
-    SalesReports.renderAll();
-    UserManager.renderAll();
-    ConfigCenter.renderAll();
-    Backup.renderBackupInfo();
-    Settings.loadSettings();
-    Settings.renderSettingsSummary();
-    Pricing.renderPriceAlerts();
-    Pricing.renderPriceHistory();
-    Pricing.checkPriceAlerts();
-    Pricing.attachPricePopovers();
+    // Clear safety timeout if data loaded successfully
+    if (this._clearSkeletonTimer) {
+      clearTimeout(this._clearSkeletonTimer);
+      this._clearSkeletonTimer = null;
+    }
+
+    const modules = [
+      { name: 'Dashboard', fn: () => Dashboard.renderDashboard() },
+      { name: 'Admin', fn: () => Admin.renderAdmin() },
+      { name: 'Suppliers', fn: () => Suppliers.renderSuppliers() },
+      { name: 'Purchasing', fn: () => Purchasing.renderPOs() },
+      { name: 'Receiving', fn: () => Receiving.renderReceivingHistory() },
+      { name: 'Accounts', fn: () => Accounts.renderUsers() },
+      { name: 'History', fn: () => History.renderHistory() },
+      { name: 'Audit', fn: () => Audit.renderAuditLog() },
+      { name: 'Inventory', fn: () => Inventory.renderInventory() },
+      { name: 'StockAdjustments', fn: () => StockAdjustments.renderAdjustmentHistory() },
+      { name: 'SalesReports', fn: () => SalesReports.renderAll() },
+      { name: 'UserManager', fn: () => UserManager.renderAll() },
+      { name: 'ConfigCenter', fn: () => ConfigCenter.renderAll() },
+      { name: 'Backup', fn: () => Backup.renderBackupInfo() },
+      { name: 'Settings', fn: () => { Settings.loadSettings(); Settings.renderSettingsSummary(); } },
+      { name: 'Pricing', fn: () => { Pricing.renderPriceAlerts(); Pricing.renderPriceHistory(); Pricing.checkPriceAlerts(); Pricing.attachPricePopovers(); } }
+    ];
+
+    modules.forEach(mod => {
+      try {
+        mod.fn();
+      } catch (e) {
+        console.error(`[ADMIN] ${mod.name} render failed:`, e);
+      }
+    });
+
+    // Final safety: clear any remaining skeletons after all modules tried to render
+    requestAnimationFrame(() => {
+      this._clearSkeletonsForView('admin');
+    });
   }
 };
 

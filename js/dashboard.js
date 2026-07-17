@@ -8,14 +8,38 @@ import { formatCurrency } from './utils.js';
 const Dashboard = {
   _charts: [],
 
-  renderDashboard() { this.renderKPI(); this.renderCharts(); },
+  renderDashboard() {
+    try {
+      this.renderKPI();
+    } catch (e) {
+      console.error('[DASHBOARD] KPI render failed:', e);
+    }
+    try {
+      this.renderCharts();
+    } catch (e) {
+      console.error('[DASHBOARD] Charts render failed:', e);
+    }
+  },
 
   renderKPI() {
     const el = document.getElementById('kpiContainer');
-    if (!el) return;
+    if (!el) {
+      console.warn('[DASHBOARD] kpiContainer element not found.');
+      return;
+    }
     const data = Auth.state.db;
-    if (!data || !data.stats) return;
-    const s = data.stats;
+    if (!data) {
+      console.warn('[DASHBOARD] Auth.state.db is null — rendering empty state.');
+      el.innerHTML = `<div class="kpi-card" style="--kpi-color: var(--text-muted);">
+        <div class="kpi-icon">📭</div>
+        <div class="kpi-info">
+          <div class="kpi-label">No Data</div>
+          <div class="kpi-value" style="font-size:0.9rem;">Could not load dashboard data.</div>
+        </div>
+      </div>`;
+      return;
+    }
+    const s = data.stats || { totalRevenue: 0, totalProfit: 0, totalItemsSold: 0, totalTransactions: 0 };
     const products = data.products || [];
     const totalValue = products.reduce((sum, p) => sum + p.price * p.stock, 0);
     const lowStock = products.filter(p => p.stock <= (p.minStock || 5)).length;
@@ -103,8 +127,9 @@ const Dashboard = {
       const x = pad.left + i * gap + (gap - barW) / 2;
       const barH = (day.total / max) * chartH;
       const y = pad.top + chartH - barH;
+      const accentPrimary = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim() || '#6D5DFC';
       const grad = ctx.createLinearGradient(x, y, x, pad.top + chartH);
-      grad.addColorStop(0, '#6c5ce7'); grad.addColorStop(1, 'rgba(108,92,231,0.3)');
+      grad.addColorStop(0, accentPrimary); grad.addColorStop(1, accentPrimary + '4D');
       ctx.fillStyle = grad; ctx.beginPath();
       ctx.roundRect(x, y, barW, barH, [4, 4, 0, 0]); ctx.fill();
       ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
