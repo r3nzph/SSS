@@ -33,48 +33,100 @@ window.handleLogout = () => {
 };
 window.toggleTheme = () => Theme.toggle();
 
-document.addEventListener('DOMContentLoaded', async () => {
-  UI.init();
-  await StorageService.init();
-  await Theme.init();
+// ===============================
+// INITIALIZATION LIFECYCLE
+// ===============================
 
-  // Restore session via centralized Session manager
-  const session = Session.restoreSession();
+let _initCompleted = false;
 
-  if (!session) {
-    Session.redirectToIndex();
-    return;
+// Safety timeout: if init doesn't complete in 10 seconds, show error
+const _initTimeout = setTimeout(() => {
+  if (!_initCompleted) {
+    console.error('[CASHIER] FATAL: Initialization timed out after 10 seconds.');
+    _showFatalError('Initialization timed out. The application could not start. Please refresh the page or clear your browser data.');
   }
+}, 10000);
 
-  // Validate role — cashier page is for cashiers and admins
-  if (!Session.canAccessCashierPage(session.role)) {
-    Session.redirectByRole(session.role);
-    return;
-  }
-
-  // Restore Auth state
-  Auth.setUser(session.user, session.role, session.userData);
-  Auth.setDb(StorageService.readRaw());
-  Auth.startActivityListeners();
-  Auth.updateLastLogin();
-
-  // Update sidebar
-  const displayName = (session.userData && session.userData.fullName) || session.user;
-  const displayEl = document.getElementById('currentUserDisplay');
-  if (displayEl) displayEl.innerText = displayName;
-  const roleEl = document.getElementById('currentUserRole');
-  if (roleEl) roleEl.innerText = session.role;
-  const avatarEl = document.getElementById('userAvatar');
-  if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
-
-  // Initialize cashier module
-  CashierModule.init();
-  CashierModule.switchView('cashier');
-  CashierModule.refreshAll();
-
-  // Ripple effect
-  document.addEventListener('click', (e) => {
-    const b = e.target.closest('button');
-    if (b && !b.closest('.toast') && !b.closest('.modal-close')) UI.ripple(e);
+function _showFatalError(message) {
+  // Hide loading overlay if visible
+  try { UI.hideLoading(); } catch (_) {}
+  // Clear any skeleton elements
+  document.querySelectorAll('.skeleton, .skeleton-table-row, .skeleton-card, .skeleton-block').forEach(el => {
+    el.innerHTML = '';
+    el.className = '';
   });
+  // Show error in cashier panel
+  const panel = document.getElementById('cashier');
+  if (panel) {
+    panel.innerHTML = `<div style="text-align:center;padding:80px 20px;">
+      <div style="font-size:3rem;margin-bottom:16px;">⚠️</div>
+      <h2 style="font-size:1.5rem;margin-bottom:12px;">Failed to Load POS Terminal</h2>
+      <p style="color:var(--text-secondary);margin-bottom:24px;max-width:480px;margin-left:auto;margin-right:auto;">${message}</p>
+      <button class="btn btn-primary" onclick="location.reload()">🔄 Refresh Page</button>
+    </div>`;
+    panel.classList.add('active');
+  }
+}
+
+// Global: catch unhandled promise rejections
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('[CASHIER] Unhandled Promise Rejection:', event.reason);
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    UI.init();
+    await StorageService.init();
+    await Theme.init();
+
+    // Restore session via centralized Session manager
+    const session = Session.restoreSession();
+
+    if (!session) {
+      _initCompleted = true;
+      clearTimeout(_initTimeout);
+      Session.redirectToIndex();
+      return;
+    }
+
+    // Validate role — cashier page is for cashiers and admins
+    if (!Session.canAccessCashierPage(session.role)) {
+      _initCompleted = true;
+      clearTimeout(_initTimeout);
+      Session.redirectByRole(session.role);
+      return;
+    }
+
+    // Restore Auth state
+    Auth.setUser(session.user, session.role, session.userData);
+    Auth.setDb(StorageService.readRaw());
+    Auth.startActivityListeners();
+    Auth.updateLastLogin().catch(e => console.error('[CASHIER] updateLastLogin failed:', e));
+
+    // Update sidebar
+    const displayName = (session.userData && session.userData.fullName) || session.user;
+    const displayEl = document.getElementById('currentUserDisplay');
+    if (displayEl) displayEl.innerText = displayName;
+    const roleEl = document.getElementById('currentUserRole');
+    if (roleEl) roleEl.innerText = session.role;
+    const avatarEl = document.getElementById('userAvatar');
+    if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
+
+    // Initialize cashier module
+    CashierModule.init();
+    CashierModule.switchView('cashier');
+    CashierModule.refreshAll();
+
+    // Ripple effect
+    document.addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (b && !b.closest('.toast') && !b.closest('.modal-close')) UI.ripple(e);
+    });
+
+    _initCompleted = true;
+    clearTimeout(_initTimeout);
+  } catch (e) {
+    console.error('[CASHIER] Fatal initialization error:', e);
+    _showFatalError('A critical error occurred during initialization: ' + (e.message || 'Unknown error') + '. Please refresh the page or clear your browser data.');
+  }
 });

@@ -100,12 +100,15 @@ const AdminModule = {
   _clearSkeletonsForView(view) {
     const skeletonMap = {
       'admin': ['kpiContainer', 'salesChart', 'topProductsChart'],
-      'inventory': ['lowStockAlerts', 'inventoryTable'],
+      'inventory': ['lowStockAlerts', 'inventoryTable', 'invSummary', 'invPagination'],
       'audit': ['auditLogBody'],
-      'usermanager': ['umCardsContainer'],
-      'admin-suppliers': ['suppliersTable'],
-      'admin-pos': ['poTable'],
-      'salesreports': ['srContent', 'srFilterBar', 'srTabs']
+      'usermanager': ['umCardsContainer', 'umSummary', 'umPagination'],
+      'admin-suppliers': ['suppliersTable', 'supPagination'],
+      'admin-pos': ['poTable', 'poSummary', 'poPagination'],
+      'salesreports': ['srContent', 'srFilterBar', 'srTabs'],
+      'configcenter': ['cfgContent'],
+      'admin-receiving': ['recHistoryBody'],
+      'admin-adjustments': ['adjHistoryBody', 'adjSummary', 'adjPagination']
     };
     const ids = skeletonMap[view] || [];
     ids.forEach(id => {
@@ -114,6 +117,11 @@ const AdminModule = {
         console.log('[ADMIN] Safety clearing skeleton:', id);
         el.innerHTML = `<div class="panel-empty">Failed to load data. Try refreshing the page.</div>`;
       }
+    });
+    // Also clear any orphaned skeleton elements anywhere in the document
+    document.querySelectorAll('.skeleton, .skeleton-table-row, .skeleton-card, .skeleton-block, .skeleton-toolbar').forEach(el => {
+      console.log('[ADMIN] Safety clearing orphaned skeleton element');
+      el.innerHTML = '';
     });
   },
 

@@ -19,12 +19,25 @@ import { StorageAdapter } from './storage-adapter.js';
 // ===============================
 
 async function _hashPassword(password) {
-  const salt = 'sarisari-pos-salt-';
-  const encoder = new TextEncoder();
-  const data = encoder.encode(salt + password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  try {
+    const salt = 'sarisari-pos-salt-';
+    const encoder = new TextEncoder();
+    const data = encoder.encode(salt + password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch (e) {
+    console.error('[Storage] Password hashing failed, using fallback:', e);
+    // Fallback: simple hash when crypto is unavailable (e.g., non-HTTPS)
+    let hash = 0;
+    const str = 'sarisari-pos-salt-' + (password || '');
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash |= 0;
+    }
+    return Math.abs(hash).toString(16).padStart(8, '0');
+  }
 }
 
 /**
@@ -191,33 +204,51 @@ const StorageService = {
   /**
    * Initialize the data store. Creates defaults if empty, migrates old format.
    * Must be called once at app startup.
+   * NEVER throws — catches errors and logs them.
    */
   async init() {
-    const raw = StorageAdapter.getFullData();
-    if (!raw) {
-      const data = getDefaultData();
-      // Hash default passwords
-      for (const user of data.users) {
-        user.password = await _hashPassword(user.password || 'admin123');
-      }
-      StorageAdapter.setFullData(data);
-    } else {
-      migrateIfNeeded(raw);
-      // Upgrade any plaintext passwords to hashed
-      if (raw.users) {
-        for (const user of raw.users) {
-          if (user.password && user.password.length < 20) {
-            user.password = await _hashPassword(user.password);
+    try {
+      const raw = StorageAdapter.getFullData();
+      if (!raw) {
+        const data = getDefaultData();
+        // Hash default passwords
+        for (const user of data.users) {
+          try { user.password = await _hashPassword(user.password || 'admin123'); } catch (e) {
+            console.error('[Storage] Password hash failed during init:', e);
+            user.password = 'admin123';
           }
         }
-        StorageAdapter.setFullData(raw);
-      }
-      // Recalculate stats
-      const data = StorageAdapter.getFullData();
-      if (data) {
-        data.stats = calculateStats(data.transactions, data.products);
         StorageAdapter.setFullData(data);
+      } else {
+        try { migrateIfNeeded(raw); } catch (e) {
+          console.error('[Storage] Migration failed:', e);
+        }
+        // Upgrade any plaintext passwords to hashed
+        if (raw.users) {
+          for (const user of raw.users) {
+            if (user.password && user.password.length < 20) {
+              try { user.password = await _hashPassword(user.password); } catch (e) {
+                console.error('[Storage] Password upgrade failed for user:', user.username, e);
+              }
+            }
+          }
+          try { StorageAdapter.setFullData(raw); } catch (e) {
+            console.error('[Storage] Failed to save upgraded data:', e);
+          }
+        }
+        // Recalculate stats
+        try {
+          const data = StorageAdapter.getFullData();
+          if (data) {
+            data.stats = calculateStats(data.transactions, data.products);
+            StorageAdapter.setFullData(data);
+          }
+        } catch (e) {
+          console.error('[Storage] Stats calculation failed:', e);
+        }
       }
+    } catch (e) {
+      console.error('[Storage] Fatal init error:', e);
     }
   },
 

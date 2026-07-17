@@ -44,6 +44,12 @@ const CashierModule = {
       item.classList.remove('active');
       if (item.dataset.view === view) item.classList.add('active');
     });
+    // Safety timeout: clear skeletons after 5 seconds if data never loads
+    if (this._safetyTimer) clearTimeout(this._safetyTimer);
+    this._safetyTimer = setTimeout(() => {
+      console.warn('[CASHIER] Safety timeout: clearing skeletons for view:', view);
+      this._clearAllSkeletons();
+    }, 5000);
     if (view === 'cashier-transactions') {
       Skeleton.showTable('cashierTransactionsBody', 5);
       setTimeout(() => this._renderTransactions(), 50);
@@ -180,10 +186,27 @@ const CashierModule = {
     });
   },
 
+  _clearAllSkeletons() {
+    if (this._safetyTimer) {
+      clearTimeout(this._safetyTimer);
+      this._safetyTimer = null;
+    }
+    // Clear skeleton elements
+    document.querySelectorAll('.skeleton, .skeleton-table-row, .skeleton-card, .skeleton-block, .skeleton-toolbar').forEach(el => {
+      console.log('[CASHIER] Safety clearing orphaned skeleton');
+      el.innerHTML = '';
+    });
+  },
+
   refreshAll() {
     if (!Auth.isCashier()) return;
     const state = Auth.getState();
     if (!state.db) return;
+    // If data loaded successfully, clear the safety timeout
+    if (this._safetyTimer) {
+      clearTimeout(this._safetyTimer);
+      this._safetyTimer = null;
+    }
     CashierPOS.renderCashier();
     if (this._currentView === 'cashier-transactions') this._renderTransactions();
     if (this._currentView === 'cashier-receipts') this._renderReceipts();
