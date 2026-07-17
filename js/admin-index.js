@@ -24,6 +24,7 @@ import Backup from './backup.js';
 import History from './history.js';
 import Accounts from './accounts.js';
 import Skeleton from './skeleton.js';
+import StorageService from './storage.js';
 
 const AdminModule = {
   _initialized: false,
@@ -202,29 +203,40 @@ const AdminModule = {
       console.warn('[ADMIN] refreshAll skipped: not admin.');
       return;
     }
-    const state = Auth.getState();
+
+    // FALLBACK: if state.db is null, try reading from StorageService directly
+    let state = Auth.getState();
     if (!state.db) {
-      console.warn('[ADMIN] refreshAll skipped: db not loaded yet. Retrying in 500ms...');
-      if (this._retryTimer) clearTimeout(this._retryTimer);
-      this._retryTimer = setTimeout(() => {
-        this._retryTimer = null;
-        const retryState = Auth.getState();
-        if (retryState.db) {
-          console.log('[ADMIN] Retry successful, running refreshAll.');
-          this.refreshAll();
-        } else {
-          console.error('[ADMIN] Retry failed: db still not loaded.');
-          const panel = document.getElementById('admin');
-          if (panel) {
-            panel.innerHTML = `<div class="panel" style="text-align:center;padding:60px 20px;">
-              <h2 style="font-size:1.5rem;margin-bottom:12px;">⚠️ Failed to Load Dashboard</h2>
-              <p style="color:var(--text-secondary);margin-bottom:24px;">The database could not be loaded. This may be due to corrupted data or a storage error.</p>
-              <button class="btn btn-primary" onclick="location.reload()">🔄 Refresh Page</button>
-            </div>`;
+      const freshDb = StorageService.readRaw();
+      if (freshDb) {
+        console.log('[ADMIN] refreshAll: state.db was null but StorageService has data. Using it.');
+        Auth.setDb(freshDb);
+        state = Auth.getState();
+      } else {
+        console.warn('[ADMIN] refreshAll skipped: db not loaded yet. Retrying in 500ms...');
+        if (this._retryTimer) clearTimeout(this._retryTimer);
+        this._retryTimer = setTimeout(() => {
+          this._retryTimer = null;
+          // Try one more time with a fresh read from StorageService
+          const retryDb = StorageService.readRaw();
+          if (retryDb) {
+            console.log('[ADMIN] Retry successful: read data from StorageService.');
+            Auth.setDb(retryDb);
+            this.refreshAll();
+          } else {
+            console.error('[ADMIN] Retry failed: no data in StorageService.');
+            const panel = document.getElementById('admin');
+            if (panel) {
+              panel.innerHTML = `<div class="panel" style="text-align:center;padding:60px 20px;">
+                <h2 style="font-size:1.5rem;margin-bottom:12px;">Failed to Load Dashboard</h2>
+                <p style="color:var(--text-secondary);margin-bottom:24px;">The database could not be loaded. Please refresh the page or clear your browser data and try again.</p>
+                <button class="btn btn-primary" onclick="location.reload()"> Refresh Page</button>
+              </div>`;
+            }
           }
-        }
-      }, 500);
-      return;
+        }, 500);
+        return;
+      }
     }
 
     // Clear safety timeout if data loaded successfully

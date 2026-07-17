@@ -250,6 +250,29 @@ const StorageService = {
     } catch (e) {
       console.error('[Storage] Fatal init error:', e);
     }
+
+    // ===============================
+    // VERIFICATION: ensure data actually exists in localStorage
+    // If init succeeded but data is missing (e.g. silent write failure),
+    // force-create default data.
+    // ===============================
+    const verify = StorageAdapter.getFullData();
+    if (!verify) {
+      console.warn('[Storage] init() completed but data is missing from localStorage. Re-creating defaults...');
+      try {
+        const fallbackData = getDefaultData();
+        for (const user of fallbackData.users) {
+          try { user.password = await _hashPassword(user.password || 'admin123'); } catch (e) {
+            console.error('[Storage] Fallback password hash failed:', e);
+            user.password = 'admin123';
+          }
+        }
+        StorageAdapter.setFullData(fallbackData);
+        console.log('[Storage] Fallback defaults created successfully.');
+      } catch (e2) {
+        console.error('[Storage] CRITICAL: Could not create fallback data:', e2);
+      }
+    }
   },
 
   /**
@@ -324,6 +347,29 @@ const StorageService = {
       data.stats = calculateStats(data.transactions, data.products);
     }
     return data;
+  },
+
+  /**
+   * Force-initialize the data store with defaults.
+   * Must be awaited. Used as a fallback when normal init fails to write data.
+   * Properly hashes default passwords so login works.
+   */
+  async forceInit() {
+    try {
+      const data = getDefaultData();
+      for (const user of data.users) {
+        try { user.password = await _hashPassword(user.password || 'admin123'); } catch (e) {
+          console.error('[Storage] forceInit password hash failed:', e);
+          user.password = 'admin123';
+        }
+      }
+      StorageAdapter.setFullData(data);
+      console.log('[Storage] forceInit: Defaults written successfully.');
+      return true;
+    } catch (e) {
+      console.error('[Storage] forceInit failed:', e);
+      return false;
+    }
   },
 
   // ---- Password helpers (not storage ops, but commonly needed) ----

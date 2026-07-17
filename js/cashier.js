@@ -77,6 +77,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     UI.init();
     await StorageService.init();
+
+    // VERIFY: ensure data actually exists in localStorage
+    // If init failed silently (e.g. crypto.subtle, localStorage quota),
+    // force-create defaults so the app has data to work with.
+    let rawDb = StorageService.readRaw();
+    if (!rawDb) {
+      console.warn('[CASHIER] Storage has no data after init. Force-initializing...');
+      await StorageService.forceInit();
+      rawDb = StorageService.readRaw();
+      if (!rawDb) {
+        console.error('[CASHIER] CRITICAL: Could not initialize storage data.');
+        _showFatalError('Could not initialize storage. Please clear your browser data and refresh.');
+        return;
+      }
+      console.log('[CASHIER] Storage force-initialized successfully.');
+    }
+
     await Theme.init();
 
     // Restore session via centralized Session manager
@@ -99,7 +116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Restore Auth state
     Auth.setUser(session.user, session.role, session.userData);
-    Auth.setDb(StorageService.readRaw());
+    Auth.setDb(rawDb);
     Auth.startActivityListeners();
     Auth.updateLastLogin().catch(e => console.error('[CASHIER] updateLastLogin failed:', e));
 

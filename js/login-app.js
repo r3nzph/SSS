@@ -71,6 +71,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize storage (creates default user data if needed)
     await StorageService.init();
 
+    // VERIFY: ensure data actually exists in localStorage
+    // If init failed silently, force-create defaults
+    let rawDb = StorageService.readRaw();
+    if (!rawDb) {
+      console.warn('[LOGIN] Storage has no data after init. Force-initializing...');
+      await StorageService.forceInit();
+      rawDb = StorageService.readRaw();
+      if (!rawDb) {
+        console.error('[LOGIN] CRITICAL: Could not initialize storage data.');
+        _showFatalError('Could not initialize storage. Please clear your browser data and refresh.');
+        return;
+      }
+      console.log('[LOGIN] Storage force-initialized successfully.');
+    }
+
     // Load and apply theme
     await Theme.init();
 
@@ -78,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const session = Session.restoreSession();
     if (session) {
       Auth.setUser(session.user, session.role, session.userData);
-      Auth.setDb(StorageService.readRaw());
+      Auth.setDb(rawDb);
       _initCompleted = true;
       clearTimeout(_initTimeout);
       Session.redirectByRole(session.role);
