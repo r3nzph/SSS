@@ -4,112 +4,286 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sari-Sari Store POS — Login</title>
-  <link rel="stylesheet" href="css/theme.css">
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/animations.css">
-  <link rel="stylesheet" href="css/utilities.css">
-  <link rel="stylesheet" href="css/login.css">
-<script>
-  // Forgot Password handler — standalone, doesn't depend on any module
-  window.handleForgotPassword = function() {
-    alert('Please contact your administrator to reset your password.');
-  };
-</script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+  <!-- Design System -->
+  <link rel="stylesheet" href="css/theme.css?v=2">
+  <link rel="stylesheet" href="css/main.css?v=2">
+  <link rel="stylesheet" href="css/animations.css?v=2">
+  <link rel="stylesheet" href="css/login.css?v=2">
+  <script>
+    // Forgot Password handler — standalone, doesn't depend on any module
+    window.handleForgotPassword = function() {
+      alert('Please contact your administrator to reset your password.');
+    };
+  </script>
 </head>
-<body>
+<body class="login-page">
 
-<!-- ============================================================
-     SPLIT SCREEN LAYOUT
-     ============================================================ -->
-<div class="login-split">
+  <!-- ============================================================
+       DECORATIVE ELEMENTS
+       ============================================================ -->
+  <div class="login-ambient" aria-hidden="true">
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+    <div class="ambient-dots"></div>
+  </div>
 
-  <!-- ==================== LEFT PANEL — Branding ==================== -->
-  <div class="login-left">
-    <div class="login-branding">
-      <div class="login-logo">🏪</div>
-      <h1>Sari-Sari POS</h1>
-      <p class="login-sub">Point of Sale System</p>
-      <p class="login-desc">
-        Streamline your store operations with powerful sales tracking,
-        inventory management, and real-time analytics — all in one place.
-      </p>
+  <!-- ============================================================
+       SPLIT SCREEN LAYOUT
+       ============================================================ -->
+  <div class="login-split">
+
+    <!-- ==================== LEFT PANEL — Branding ==================== -->
+    <div class="login-left">
+      <div class="left-bg" aria-hidden="true"></div>
+      <div class="left-overlay" aria-hidden="true"></div>
+      <div class="left-gradient" aria-hidden="true"></div>
+
+      <!-- Top Branding -->
+      <div class="left-top">
+        <div class="left-brand">
+          <div class="left-logo">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+          <div class="left-brand-text">
+            <h1 class="left-title">Sari-Sari Store POS</h1>
+            <p class="left-subtitle">Smart. Simple. Secure.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero -->
+      <div class="left-hero">
+        <h2 class="hero-heading">
+          Manage your store,<br>
+          sales,<br>
+          <span class="hero-accent">inventory</span><br>
+          and more —<br>
+          all in one place.
+        </h2>
+        <p class="hero-desc">
+          Streamline your store operations with powerful sales tracking,
+          inventory management, and real-time analytics.
+        </p>
+        <div class="hero-divider"></div>
+      </div>
+
+      <!-- Feature Cards 2x2 -->
+      <div class="left-features">
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <div class="feature-title">Sales Management</div>
+            <div class="feature-desc">Fast and easy transaction processing.</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+              <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <div class="feature-title">Inventory Tracking</div>
+            <div class="feature-desc">Real-time stock monitoring.</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <div class="feature-title">Reports & Analytics</div>
+            <div class="feature-desc">Business insights at a glance.</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div class="feature-content">
+            <div class="feature-title">User Management</div>
+            <div class="feature-desc">Admins, cashiers and permissions.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Badge -->
+      <div class="left-bottom">
+        <div class="security-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <span>Secure</span>
+          <span class="badge-dot">·</span>
+          <span>Reliable</span>
+          <span class="badge-dot">·</span>
+          <span>Always Accessible</span>
+        </div>
+      </div>
     </div>
 
-    <div class="login-features">
-      <div class="login-feature-card">
-        <span class="login-feature-icon">💰</span>
-        <div class="login-feature-title">Sales Management</div>
-        <div class="login-feature-desc">Process transactions fast with an intuitive POS interface</div>
+    <!-- ==================== RIGHT PANEL — Login Card ==================== -->
+    <div class="login-right">
+      <div class="login-card">
+        <div class="login-card-glow" aria-hidden="true"></div>
+
+        <!-- Header -->
+        <div class="login-card-header">
+          <div class="login-card-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <polyline points="9 12 11 14 15 10"/>
+            </svg>
+          </div>
+          <h2 class="login-welcome">Welcome Back!</h2>
+          <p class="login-subtitle">Please sign in to your account.</p>
+        </div>
+
+        <!-- Form -->
+        <div class="login-form">
+
+          <!-- Username -->
+          <div class="login-field">
+            <div class="input-wrap">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <input type="text" id="username" placeholder="Username" autocomplete="username" autofocus>
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="login-field">
+            <div class="input-wrap">
+              <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+            </div>
+            <button type="button" class="password-toggle" id="passwordToggle" onclick="togglePassword('password','passwordToggle')" title="Show password">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Options -->
+          <div class="login-options">
+            <label class="login-remember">
+              <input type="checkbox" id="rememberMe" checked>
+              <span class="remember-check"></span>
+              <span class="remember-text">Remember me</span>
+            </label>
+            <button type="button" class="login-forgot" onclick="handleForgotPassword()">Forgot Password?</button>
+          </div>
+
+          <!-- Sign In Button -->
+          <button class="btn-login" onclick="handleLogin()">
+            <span class="btn-text">Sign In</span>
+            <svg class="btn-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+
+        </div>
+
+        <!-- OR Divider -->
+        <div class="login-or">
+          <div class="or-line"></div>
+          <span class="or-text">OR</span>
+          <div class="or-line"></div>
+        </div>
+
+        <!-- Cashier Card -->
+        <div class="cashier-card" onclick="location.href='cashier.html'">
+          <div class="cashier-left">
+            <div class="cashier-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <div class="cashier-info">
+              <div class="cashier-title">Login as Cashier</div>
+              <div class="cashier-desc">Quick access for cashier operations</div>
+            </div>
+          </div>
+          <svg class="cashier-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </div>
+
+        <!-- Security Badge -->
+        <div class="login-security">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <polyline points="9 12 11 14 15 10"/>
+          </svg>
+          <span>Protected by Sari-Sari POS Security</span>
+        </div>
       </div>
-      <div class="login-feature-card">
-        <span class="login-feature-icon">📦</span>
-        <div class="login-feature-title">Inventory Tracking</div>
-        <div class="login-feature-desc">Monitor stock levels and get low-stock alerts</div>
-      </div>
-      <div class="login-feature-card">
-        <span class="login-feature-icon">📊</span>
-        <div class="login-feature-title">Reports & Analytics</div>
-        <div class="login-feature-desc">Visualize sales data with charts and export reports</div>
-      </div>
-      <div class="login-feature-card">
-        <span class="login-feature-icon">👥</span>
-        <div class="login-feature-title">User Management</div>
-        <div class="login-feature-desc">Role-based access for admins and cashiers</div>
-      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <div class="login-global-footer">
+    <div class="footer-left">
+      <span>© 2026 Sari-Sari Store POS</span>
+      <span class="footer-sep">·</span>
+      <span class="footer-version">Version 1.0.0</span>
+    </div>
+    <div class="footer-right">
+      <label class="theme-toggle-label" onclick="toggleTheme()" title="Toggle theme">
+        <svg class="theme-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <div class="theme-switch">
+          <div class="theme-knob"></div>
+        </div>
+        <svg class="theme-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </label>
     </div>
   </div>
 
-  <!-- ==================== RIGHT PANEL — Login Card ==================== -->
-  <div class="login-right">
-    <div class="login-card-wrap">
-      <div class="login-card-header">
-        <h2>Welcome Back</h2>
-        <p>Sign in to your account to continue</p>
-      </div>
-
-      <div class="login-form">
-
-        <!-- Username -->
-        <div class="login-field">
-          <label for="username">Username</label>
-          <input type="text" id="username" placeholder="Enter your username" autocomplete="username" autofocus>
-        </div>
-
-        <!-- Password -->
-        <div class="login-field">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
-          <button type="button" class="password-toggle" id="passwordToggle" onclick="togglePassword('password','passwordToggle')" title="Show password">👁️</button>
-        </div>
-
-        <!-- Remember & Forgot -->
-        <div class="login-options">
-          <label class="login-remember">
-            <input type="checkbox" id="rememberMe" checked>
-            <span>Remember me</span>
-          </label>
-          <button type="button" class="login-forgot" onclick="handleForgotPassword()">Forgot Password?</button>
-        </div>
-
-        <!-- Login Button -->
-        <button class="btn-login" onclick="handleLogin()">Sign In</button>
-
-      </div>
-    </div>
-
-    <div class="login-footer">
-      <div class="login-version">v2.0.0</div>
-      <div class="login-copyright">&copy; 2026 Sari-Sari Store POS. All rights reserved.</div>
-    </div>
-  </div>
-
-</div>
-
-<!-- ============================================================
-     SCRIPTS
-     ============================================================ -->
-<script type="module" src="js/login-app.js"></script>
+  <!-- Scripts -->
+  <script type="module" src="js/login-app.js?v=2"></script>
 
 </body>
 </html>

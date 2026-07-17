@@ -302,7 +302,7 @@ body {
   gap: var(--gap-xs);
   border: none;
   padding: var(--space-xs) var(--space-sm);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   font-family: var(--font-family);
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
@@ -323,37 +323,37 @@ body {
 }
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px var(--accent-glow);
+  box-shadow: 0 0 30px var(--accent-glow), 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .btn-success {
-  background: linear-gradient(135deg, var(--success), var(--success));
+  background: linear-gradient(135deg, var(--success), #34D399);
   color: white;
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
 }
 .btn-success:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 24px var(--accent-glow);
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.3), 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, var(--danger), var(--danger));
+  background: linear-gradient(135deg, var(--danger), #F87171);
   color: white;
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
 }
 .btn-danger:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 24px var(--accent-glow);
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.3), 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .btn-warning {
-  background: linear-gradient(135deg, var(--warning), var(--warning));
+  background: linear-gradient(135deg, var(--warning), #FBBF24);
   color: var(--bg-primary);
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
 }
 .btn-warning:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 24px var(--accent-glow);
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.3), 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .btn-ghost {
