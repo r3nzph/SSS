@@ -102,7 +102,7 @@ const CashierModule = {
     const state = Auth.getState();
     const data = state.db;
     if (!data || !data.transactions) {
-      container.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No transactions found.</td></tr>';
+      container.innerHTML = '<tr><td colspan="5" class="text-center text-muted" style="padding:24px;">No transactions found.</td></tr>';
       return;
     }
     let transactions = data.transactions.filter(tx => tx.cashier === state.user);
@@ -115,18 +115,20 @@ const CashierModule = {
     }
     transactions = transactions.reverse();
     if (transactions.length === 0) {
-      container.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No transactions yet. Start selling!</td></tr>';
+      container.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">No transactions yet. Start selling!</td></tr>';
       return;
     }
-    container.innerHTML = transactions.slice(0, 50).map(tx => `
+    container.innerHTML = transactions.slice(0, 50).map(tx => {
+      const itemCount = tx.items ? tx.items.reduce((s, i) => s + (i.qty || 0), 0) : 0;
+      return `
       <tr>
-        <td style="font-family:monospace;font-size:0.8rem;">${escapeHtml((tx.id || '').slice(0, 10))}</td>
-        <td>${escapeHtml(formatDate(tx.date))}</td>
-        <td>${tx.items ? tx.items.map(i => `${escapeHtml(i.name)} x${i.qty}`).join(', ') : '—'}</td>
+        <td><code class="tx-hash">${escapeHtml((tx.id || '').slice(0, 8))}</code></td>
+        <td><span class="tx-date">${escapeHtml(formatDate(tx.date))}</span></td>
+        <td><span class="tx-items">${itemCount} item${itemCount !== 1 ? 's' : ''}</span></td>
         <td class="price-cell">${formatCurrency(tx.total)}</td>
-        <td><button class="btn btn-sm btn-ghost" onclick="window.viewReceipt('${tx.id}')">🧾 View</button></td>
+        <td><button class="btn btn-sm btn-ghost" onclick="window.viewReceipt('${tx.id}')" style="padding:4px 10px;">🧾 View</button></td>
       </tr>
-    `).join('');
+    `}).join('');
   },
 
   _renderReceipts() {
@@ -135,35 +137,39 @@ const CashierModule = {
     const state = Auth.getState();
     const data = state.db;
     if (!data || !data.transactions) {
-      container.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No receipts found.</td></tr>';
+      container.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">No receipts found.</td></tr>';
       return;
     }
     let transactions = data.transactions.filter(tx => tx.cashier === state.user).reverse();
     if (transactions.length === 0) {
-      container.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">No receipts yet.</td></tr>';
+      container.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted);">No receipts yet.</td></tr>';
       return;
     }
-    container.innerHTML = transactions.slice(0, 50).map(tx => `
+    container.innerHTML = transactions.slice(0, 50).map(tx => {
+      const itemCount = tx.items ? tx.items.reduce((s, i) => s + i.qty, 0) : 0;
+      return `
       <tr>
-        <td style="font-family:monospace;font-size:0.8rem;">${escapeHtml((tx.id || '').slice(0, 10))}</td>
-        <td>${escapeHtml(formatDate(tx.date))}</td>
-        <td>${tx.items ? tx.items.reduce((s, i) => s + i.qty, 0) : 0} items</td>
+        <td><code class="tx-hash">${escapeHtml((tx.id || '').slice(0, 8))}</code></td>
+        <td><span class="tx-date">${escapeHtml(formatDate(tx.date))}</span></td>
+        <td><span class="tx-items">${itemCount} item${itemCount !== 1 ? 's' : ''}</span></td>
         <td class="price-cell">${formatCurrency(tx.total)}</td>
-        <td><button class="btn btn-sm btn-ghost" onclick="window.viewReceipt('${tx.id}')">🖨️ View</button></td>
+        <td><button class="btn btn-sm btn-ghost" onclick="window.viewReceipt('${tx.id}')" style="padding:4px 10px;">🖨️ View</button></td>
       </tr>
-    `).join('');
+    `}).join('');
   },
 
   _renderProfile() {
     const state = Auth.getState();
     const user = state.userData || {};
     const displayName = user.fullName || state.user || '—';
+    const avatarEl = document.getElementById('profileAvatarIcon');
+    if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase();
     const nameEl = document.getElementById('profileName');
     if (nameEl) nameEl.textContent = displayName;
     const usernameEl = document.getElementById('profileUsername');
     if (usernameEl) usernameEl.textContent = state.user || '—';
     const roleEl = document.getElementById('profileRole');
-    if (roleEl) roleEl.textContent = state.role || '—';
+    if (roleEl) roleEl.textContent = (state.role || '—').charAt(0).toUpperCase() + (state.role || '—').slice(1);
     const emailEl = document.getElementById('profileEmail');
     if (emailEl) emailEl.textContent = user.email || '—';
     const contactEl = document.getElementById('profileContact');

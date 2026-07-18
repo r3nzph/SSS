@@ -227,65 +227,89 @@
 
       <!-- === TRANSACTIONS PANEL === -->
       <section id="cashier-transactions" class="panel" data-module="cashier">
-        <h2>🧾 My Transactions</h2>
-        <div class="inv-toolbar">
-          <div class="inv-search-wrap" class="flex-1">
-            <input type="text" id="ctSearch" placeholder="Search by receipt # or item..." oninput="CashierModule.filterTransactions(this.value)" class="inv-search-input">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <h2>🧾 My Transactions</h2>
+            <p class="panel-subtitle">Your recent sales and payment history</p>
           </div>
         </div>
-        <div class="table-container">
-          <table>
-            <thead><tr><th>Receipt #</th><th>Date</th><th>Items</th><th>Total</th><th>View</th></tr></thead>
-            <tbody id="cashierTransactionsBody">
-              <tr><td colspan="5" class="text-center text-muted">No transactions found.</td></tr>
-            </tbody>
-          </table>
+        <div class="cp-card">
+          <div class="cp-card-toolbar">
+            <div class="cp-search-wrap">
+              <input type="text" id="ctSearch" placeholder="Search by receipt # or item..." oninput="CashierModule.filterTransactions(this.value)" class="cp-search-input">
+            </div>
+          </div>
+          <div class="cp-table-wrap">
+            <table class="cp-table">
+              <thead><tr><th>Receipt #</th><th>Date</th><th>Items</th><th>Total</th><th>View</th></tr></thead>
+              <tbody id="cashierTransactionsBody">
+                <tr><td colspan="5" class="text-center text-muted">No transactions found.</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
       <!-- === RECEIPTS PANEL === -->
       <section id="cashier-receipts" class="panel" data-module="cashier">
-        <h2>📄 Receipt History</h2>
-        <div class="table-container">
-          <table>
-            <thead><tr><th>Receipt #</th><th>Date</th><th>Items</th><th>Total</th><th>Action</th></tr></thead>
-            <tbody id="cashierReceiptsBody">
-              <tr><td colspan="5" class="text-center text-muted">No receipts found.</td></tr>
-            </tbody>
-          </table>
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <h2>📄 Receipt History</h2>
+            <p class="panel-subtitle">View and reprint past receipts</p>
+          </div>
+        </div>
+        <div class="cp-card">
+          <div class="cp-table-wrap">
+            <table class="cp-table">
+              <thead><tr><th>Receipt #</th><th>Date</th><th>Items</th><th>Total</th><th>Action</th></tr></thead>
+              <tbody id="cashierReceiptsBody">
+                <tr><td colspan="5" class="text-center text-muted">No receipts found.</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </section>
 
       <!-- === MY PROFILE PANEL === -->
       <section id="cashier-profile" class="panel" data-module="cashier">
-        <h2>👤 My Profile</h2>
-        <div class="profile-card" class="p-lg" style="background:var(--bg-glass);border-radius:var(--radius-md);max-width:480px;">
-          <div class="profile-avatar" class="text-center mb-sm" style="font-size:3rem;">👤</div>
-          <div class="profile-field">
-            <label class="text-sm text-muted uppercase">Name</label>
-            <div id="profileName" class="text-xl font-semibold">—</div>
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <h2>👤 My Profile</h2>
+            <p class="panel-subtitle">Your account information and settings</p>
           </div>
-          <div class="profile-field" class="mt-sm">
-            <label class="text-sm text-muted uppercase">Username</label>
-            <div id="profileUsername" class="text-base">—</div>
+        </div>
+        <div class="cp-card cp-profile-card">
+          <div class="cp-profile-avatar">
+            <span class="cp-profile-avatar-icon" id="profileAvatarIcon">👤</span>
+            <div class="cp-profile-avatar-ring"></div>
           </div>
-          <div class="profile-field" class="mt-sm">
-            <label class="text-sm text-muted uppercase">Role</label>
-            <div id="profileRole" class="text-base">cashier</div>
+          <div class="cp-profile-fields">
+            <div class="cp-profile-field">
+              <span class="cp-profile-label">Full Name</span>
+              <span class="cp-profile-value" id="profileName">—</span>
+            </div>
+            <div class="cp-profile-field">
+              <span class="cp-profile-label">Username</span>
+              <span class="cp-profile-value" id="profileUsername">—</span>
+            </div>
+            <div class="cp-profile-field">
+              <span class="cp-profile-label">Role</span>
+              <span class="cp-profile-value" id="profileRole">cashier</span>
+            </div>
+            <div class="cp-profile-field">
+              <span class="cp-profile-label">Email</span>
+              <span class="cp-profile-value" id="profileEmail">—</span>
+            </div>
+            <div class="cp-profile-field">
+              <span class="cp-profile-label">Contact</span>
+              <span class="cp-profile-value" id="profileContact">—</span>
+            </div>
+            <div class="cp-profile-field">
+              <span class="cp-profile-label">Last Login</span>
+              <span class="cp-profile-value" id="profileLastLogin">—</span>
+            </div>
           </div>
-          <div class="profile-field" class="mt-sm">
-            <label class="text-sm text-muted uppercase">Email</label>
-            <div id="profileEmail" class="text-base">—</div>
-          </div>
-          <div class="profile-field" class="mt-sm">
-            <label class="text-sm text-muted uppercase">Contact</label>
-            <div id="profileContact" class="text-base">—</div>
-          </div>
-          <div class="profile-field" class="mt-sm">
-            <label class="text-sm text-muted uppercase">Last Login</label>
-            <div id="profileLastLogin" class="text-base">—</div>
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="CashierModule.changePassword()" class="mt-md">🔑 Change Password</button>
+          <button class="btn btn-primary" onclick="CashierModule.changePassword()">🔑 Change Password</button>
         </div>
       </section>
 

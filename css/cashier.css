@@ -4,6 +4,198 @@
    ============================================================ */
 
 /* ===============================
+   CASHIER PANEL HEADERS (shared with admin)
+   =============================== */
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--gap-sm);
+  border-bottom: 1px solid var(--border-glass);
+  flex-wrap: wrap;
+  gap: var(--gap-xs);
+}
+
+.panel-header-left h2 {
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  margin: 0;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===============================
+   CASHIER PANEL CARDS (Transactions, Receipts, Profile)
+   =============================== */
+
+.cp-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-glass);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  transition: all 0.3s ease;
+}
+
+.cp-card:hover {
+  box-shadow: 0 12px 40px -8px rgba(0,0,0,0.18);
+}
+
+.cp-card-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-xs);
+  margin-bottom: 16px;
+}
+
+.cp-search-wrap {
+  flex: 1;
+  max-width: 400px;
+}
+
+.cp-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-input);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: var(--font-family);
+  outline: none;
+  transition: all 0.2s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 14px center;
+  background-size: 16px;
+}
+
+.cp-search-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 15%, transparent);
+}
+
+.cp-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+}
+
+.cp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.cp-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+  font-weight: var(--weight-semibold);
+  background: var(--bg-glass);
+  border-bottom: 1px solid var(--border-glass);
+  white-space: nowrap;
+}
+
+.cp-table td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border-glass);
+  color: var(--text-primary);
+}
+
+.cp-table tr:last-child td {
+  border-bottom: none;
+}
+
+.cp-table tr:hover td {
+  background: var(--bg-glass-hover);
+}
+
+/* ===============================
+   PROFILE CARD
+   =============================== */
+
+.cp-profile-card {
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 32px 28px;
+  text-align: center;
+}
+
+.cp-profile-avatar {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cp-profile-avatar-icon {
+  font-size: 2.8rem;
+  z-index: 1;
+}
+
+.cp-profile-avatar-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  opacity: 0.3;
+  animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.cp-profile-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.cp-profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  border-radius: 10px;
+  text-align: left;
+}
+
+.cp-profile-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+  font-weight: var(--weight-semibold);
+}
+
+.cp-profile-value {
+  font-size: 0.9rem;
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+}
+
+/* ===============================
    POS LAYOUT
    =============================== */
 
