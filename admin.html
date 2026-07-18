@@ -36,7 +36,7 @@
             <span class="nav-icon">📦</span>
             <span class="nav-label">Inventory</span>
           </a>
-          <a class="nav-item" data-view="admin" onclick="AdminModule.switchView('admin');setTimeout(()=>{let el=document.getElementById('supplyChainSection');if(el){el.classList.remove('collapsed');el.scrollIntoView({behavior:'smooth',block:'start'})}},200)">
+          <a class="nav-item" data-view="supplychain" onclick="AdminModule.switchView('supplychain')">
             <span class="nav-icon">🏭</span>
             <span class="nav-label">Supply Chain</span>
           </a>
@@ -77,226 +77,168 @@
 
       <!-- === DASHBOARD PANEL === -->
       <section id="admin" class="panel active" data-module="admin">
-        <h2>⚙️ Admin Dashboard</h2>
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <h2>Dashboard</h2>
+            <p class="panel-subtitle">Store overview & performance at a glance</p>
+          </div>
+          <div class="panel-header-right">
+            <div class="dashboard-badge">
+              <span class="dashboard-badge-icon">🕐</span>
+              <span id="dashboardDate" class="dashboard-badge-text"></span>
+            </div>
+          </div>
+        </div>
 
         <div id="kpiContainer" class="kpi-grid"></div>
 
         <div class="charts-row">
           <div class="chart-card">
+            <div class="chart-card-header">
+              <span class="chart-title">📈 Sales Trend</span>
+              <span class="chart-period">Last 7 days</span>
+            </div>
             <div class="chart-card-body"><canvas id="salesChart"></canvas></div>
           </div>
           <div class="chart-card">
+            <div class="chart-card-header">
+              <span class="chart-title">🏆 Top Products</span>
+              <span class="chart-period">By quantity sold</span>
+            </div>
             <div class="chart-card-body"><canvas id="topProductsChart"></canvas></div>
           </div>
         </div>
 
-        <!-- PRODUCT MANAGEMENT -->
-        <div class="section-collapsible">
-          <h3 onclick="this.parentElement.classList.toggle('collapsed')">📦 Product Management ▾</h3>
-          <div class="section-content">
-            <div class="add-product">
-              <input id="pName" placeholder="Product Name">
-              <input id="pPrice" type="number" step="0.01" placeholder="Price (₱)">
-              <input id="pCost" type="number" step="0.01" placeholder="Cost (₱)">
-              <input id="pStock" type="number" placeholder="Stock">
-              <button class="btn btn-success" onclick="addNewProduct()">Add Product</button>
-              <button class="btn btn-ghost hidden" id="cancelEditBtn" onclick="cancelEdit()">Cancel</button>
+        <!-- LOW STOCK ALERTS WIDGET -->
+        <div class="dashboard-widget">
+          <div class="widget-header">
+            <div class="widget-header-left">
+              <span class="widget-title">⚠️ Low Stock Alerts</span>
+              <span class="widget-subtitle">Items needing restock</span>
             </div>
-            <div class="search-bar">
-              <input type="text" id="adminProductSearch" placeholder="Search products..." oninput="filterAdminProducts(this.value)">
-            </div>
-            <div class="table-container"><table><thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Cost</th><th>Stock</th><th>Actions</th></tr></thead><tbody id="adminTable"></tbody></table></div>
+            <a href="#" onclick="AdminModule.switchView('inventory');return false;" class="widget-action">View All Inventory →</a>
+          </div>
+          <div id="dashboardLowStock" class="widget-body"></div>
+        </div>
+      </section>
+
+      <!-- === SUPPLY CHAIN PANEL === -->
+      <section id="supplychain" class="panel" data-module="admin">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <h2>🏭 Supply Chain</h2>
+            <p class="panel-subtitle">Manage suppliers, purchase orders, stock receiving & adjustments</p>
           </div>
         </div>
 
-        <!-- SUPPLY CHAIN MANAGEMENT (Suppliers + POs + Receiving + Adjustments) -->
-        <div class="section-collapsible" id="supplyChainSection">
-          <h3 onclick="this.parentElement.classList.toggle('collapsed');if(!this.parentElement.classList.contains('collapsed'))window.switchSupplyTab(document.querySelector('.sc-tab.active')?.dataset?.tab||'suppliers')">🏭 Supply Chain ▾</h3>
-          <div class="section-content">
-          
-            <!-- Tab Bar -->
-            <div class="sc-tabs">
-              <button class="sc-tab active" data-tab="suppliers" onclick="window.switchSupplyTab('suppliers')">🏭 Suppliers</button>
-              <button class="sc-tab" data-tab="pos" onclick="window.switchSupplyTab('pos')">📥 Purchase Orders</button>
-              <button class="sc-tab" data-tab="receiving" onclick="window.switchSupplyTab('receiving')">📤 Receiving</button>
-              <button class="sc-tab" data-tab="adjustments" onclick="window.switchSupplyTab('adjustments')">🔧 Adjustments</button>
-            </div>
+        <div class="sc-tabs">
+          <button class="sc-tab active" data-tab="suppliers" onclick="window.switchSupplyTab('suppliers')">🏭 Suppliers</button>
+          <button class="sc-tab" data-tab="pos" onclick="window.switchSupplyTab('pos')">📥 Purchase Orders</button>
+          <button class="sc-tab" data-tab="receiving" onclick="window.switchSupplyTab('receiving')">📤 Receiving</button>
+          <button class="sc-tab" data-tab="adjustments" onclick="window.switchSupplyTab('adjustments')">🔧 Adjustments</button>
+        </div>
 
-            <!-- SUPPLIERS TAB -->
-            <div class="sc-panel active" id="sc-tab-suppliers">
-              <div class="inv-toolbar sc-toolbar">
-                <div class="inv-search-wrap">
-                  <input type="text" id="supSearch" placeholder="Search suppliers..." oninput="Suppliers.setFilter('search', this.value)" class="inv-search-input">
-                </div>
-                <div class="inv-stock-filters">
-                  <button class="btn btn-sm btn-ghost sup-filter-btn active" data-filter="active" onclick="Suppliers.setFilter('status','active')">✅ Active</button>
-                  <button class="btn btn-sm btn-ghost sup-filter-btn" data-filter="inactive" onclick="Suppliers.setFilter('status','inactive')">⏸️ Inactive</button>
-                  <button class="btn btn-sm btn-ghost sup-filter-btn" data-filter="archived" onclick="Suppliers.setFilter('status','archived')">📁 Archived</button>
-                </div>
-                <button class="btn btn-primary btn-sm" onclick="Suppliers.showAddModal()">+ Add</button>
-              </div>
-              <div class="table-container sc-table-wrap">
-                <table class="sc-table">
-                  <thead><tr><th>Company</th><th>Contact</th><th>Phone</th><th>Email</th><th>Status</th><th style="width:90px;">Actions</th></tr></thead>
-                  <tbody id="suppliersTable"></tbody>
-                </table>
-              </div>
-              <div class="inv-footer sc-footer">
-                <span class="inv-summary"></span>
-                <div id="supPagination" class="inv-pagination"></div>
-              </div>
+        <!-- SUPPLIERS TAB -->
+        <div class="sc-panel active" id="sc-tab-suppliers">
+          <div class="inv-toolbar sc-toolbar">
+            <div class="inv-search-wrap">
+              <input type="text" id="supSearch" placeholder="Search suppliers..." oninput="Suppliers.setFilter('search', this.value)" class="inv-search-input">
             </div>
-
-            <!-- PURCHASE ORDERS TAB -->
-            <div class="sc-panel" id="sc-tab-pos">
-              <div class="inv-toolbar sc-toolbar">
-                <div class="inv-search-wrap">
-                  <input type="text" id="poSearch" placeholder="Search POs..." oninput="Purchasing.setFilter('search', this.value)" class="inv-search-input">
-                </div>
-                <select onchange="Purchasing.setFilter('status', this.value)" class="inv-filter-select" style="min-width:110px;">
-                  <option value="">All</option>
-                  <option value="draft">Draft</option>
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="partial">Partial</option>
-                  <option value="received">Received</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-                <button class="btn btn-primary btn-sm" onclick="Purchasing.showCreatePOModal()">+ New PO</button>
-                <button class="btn btn-ghost btn-sm" onclick="Purchasing.exportPOsCSV()">📤 CSV</button>
-              </div>
-              <div class="table-container sc-table-wrap">
-                <table class="sc-table">
-                  <thead><tr><th onclick="Purchasing.setSort('poNumber')" class="sortable">PO # ↕</th><th onclick="Purchasing.setSort('supplierName')" class="sortable">Supplier ↕</th><th>Items</th><th onclick="Purchasing.setSort('total')" class="sortable">Total ↕</th><th onclick="Purchasing.setSort('status')" class="sortable">Status ↕</th><th style="width:90px;">Actions</th></tr></thead>
-                  <tbody id="poTable"></tbody>
-                </table>
-              </div>
-              <div class="inv-footer sc-footer">
-                <span id="poSummary" class="inv-summary">Loading...</span>
-                <div id="poPagination" class="inv-pagination"></div>
-              </div>
+            <div class="inv-stock-filters">
+              <button class="btn btn-sm btn-ghost sup-filter-btn active" data-filter="active" onclick="Suppliers.setFilter('status','active')">✅ Active</button>
+              <button class="btn btn-sm btn-ghost sup-filter-btn" data-filter="inactive" onclick="Suppliers.setFilter('status','inactive')">⏸️ Inactive</button>
+              <button class="btn btn-sm btn-ghost sup-filter-btn" data-filter="archived" onclick="Suppliers.setFilter('status','archived')">📁 Archived</button>
             </div>
-
-            <!-- RECEIVING TAB -->
-            <div class="sc-panel" id="sc-tab-receiving">
-              <div class="table-container sc-table-wrap" style="max-height:280px;overflow-y:auto;">
-                <table class="sc-table">
-                  <thead><tr><th>Receipt #</th><th>PO #</th><th>Supplier</th><th>Items</th><th>Total</th><th>Date</th></tr></thead>
-                  <tbody id="recHistoryBody"></tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- ADJUSTMENTS TAB -->
-            <div class="sc-panel" id="sc-tab-adjustments">
-              <div class="inv-toolbar sc-toolbar">
-                <div class="inv-search-wrap">
-                  <input type="text" id="adjSearch" placeholder="Search..." oninput="StockAdjustments.setFilter('search', this.value)" class="inv-search-input">
-                </div>
-                <select id="adjTypeFilter" onchange="StockAdjustments.setFilter('type', this.value)" class="inv-filter-select" style="min-width:120px;">
-                  <option value="">All Types</option>
-                  <option value="damaged">💔 Damaged</option>
-                  <option value="expired">⏰ Expired</option>
-                  <option value="lost">🔍 Lost</option>
-                  <option value="customer_return">🔄 Return</option>
-                  <option value="supplier_return">📤 S. Return</option>
-                  <option value="count_correction">📊 Count</option>
-                  <option value="manual">✏️ Manual</option>
-                  <option value="other">📝 Other</option>
-                </select>
-                <button class="btn btn-warning btn-sm" onclick="StockAdjustments.showAdjustModal()">🔧 New Adj</button>
-                <button class="btn btn-ghost btn-sm" onclick="StockAdjustments.exportCSV()">📤 CSV</button>
-              </div>
-              <div class="table-container sc-table-wrap" style="max-height:320px;overflow-y:auto;">
-                <table class="sc-table">
-                  <thead><tr>
-                    <th onclick="StockAdjustments.setSort('adjNumber')" class="sortable">Adj # ↕</th>
-                    <th>Product</th><th>Old</th><th>New</th><th>Diff</th><th>Type</th><th>Reason</th><th>User</th>
-                    <th onclick="StockAdjustments.setSort('createdAt')" class="sortable" style="width:90px;">Date ↕</th>
-                  </tr></thead>
-                  <tbody id="adjHistoryBody"></tbody>
-                </table>
-              </div>
-              <div class="inv-footer sc-footer">
-                <span id="adjSummary" class="inv-summary"></span>
-                <div id="adjPagination" class="inv-pagination"></div>
-              </div>
-            </div>
-
+            <button class="btn btn-primary btn-sm" onclick="Suppliers.showAddModal()">+ Add</button>
+          </div>
+          <div class="table-container sc-table-wrap">
+            <table class="sc-table">
+              <thead><tr><th>Company</th><th>Contact</th><th>Phone</th><th>Email</th><th>Status</th><th style="width:90px;">Actions</th></tr></thead>
+              <tbody id="suppliersTable"></tbody>
+            </table>
+          </div>
+          <div class="inv-footer sc-footer">
+            <span class="inv-summary"></span>
+            <div id="supPagination" class="inv-pagination"></div>
           </div>
         </div>
 
-        <!-- SALES HISTORY -->
-        <div class="section-collapsible">
-          <h3 onclick="this.parentElement.classList.toggle('collapsed')">📜 Sales History ▾</h3>
-          <div class="section-content">
-            <div class="table-container"><table><thead><tr><th>Date</th><th>Items</th><th>Qty</th><th>Total</th><th>Cashier</th></tr></thead><tbody id="salesTable"></tbody></table></div>
+        <!-- PURCHASE ORDERS TAB -->
+        <div class="sc-panel" id="sc-tab-pos">
+          <div class="inv-toolbar sc-toolbar">
+            <div class="inv-search-wrap">
+              <input type="text" id="poSearch" placeholder="Search POs..." oninput="Purchasing.setFilter('search', this.value)" class="inv-search-input">
+            </div>
+            <select onchange="Purchasing.setFilter('status', this.value)" class="inv-filter-select" style="min-width:110px;">
+              <option value="">All</option>
+              <option value="draft">Draft</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="partial">Partial</option>
+              <option value="received">Received</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="Purchasing.showCreatePOModal()">+ New PO</button>
+            <button class="btn btn-ghost btn-sm" onclick="Purchasing.exportPOsCSV()">📤 CSV</button>
+          </div>
+          <div class="table-container sc-table-wrap">
+            <table class="sc-table">
+              <thead><tr><th onclick="Purchasing.setSort('poNumber')" class="sortable">PO # ↕</th><th onclick="Purchasing.setSort('supplierName')" class="sortable">Supplier ↕</th><th>Items</th><th onclick="Purchasing.setSort('total')" class="sortable">Total ↕</th><th onclick="Purchasing.setSort('status')" class="sortable">Status ↕</th><th style="width:90px;">Actions</th></tr></thead>
+              <tbody id="poTable"></tbody>
+            </table>
+          </div>
+          <div class="inv-footer sc-footer">
+            <span id="poSummary" class="inv-summary">Loading...</span>
+            <div id="poPagination" class="inv-pagination"></div>
           </div>
         </div>
 
-        <!-- USER ACCOUNTS -->
-        <div class="section-collapsible">
-          <h3 onclick="this.parentElement.classList.toggle('collapsed')">👥 User Accounts ▾</h3>
-          <div class="section-content">
-            <div class="add-user">
-              <input id="uName" placeholder="Username">
-              <input id="uPassword" type="password" placeholder="Password">
-              <small id="userPasswordHint" class="hidden user-pw-hint">Leave blank to keep password</small>
-              <select id="uRole"><option value="cashier">Cashier</option><option value="admin">Admin</option></select>
-              <button class="btn btn-success btn-save-user" onclick="saveUser()">Add User</button>
-              <button class="btn btn-ghost hidden" id="cancelUserEditBtn" onclick="cancelUserEdit()">Cancel</button>
-            </div>
-            <div class="table-container"><table><thead><tr><th>ID</th><th>Username</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table></div>
+        <!-- RECEIVING TAB -->
+        <div class="sc-panel" id="sc-tab-receiving">
+          <div class="sc-toolbar" style="padding:8px 12px;margin-bottom:10px;">
+            <span style="font-size:0.85rem;color:var(--text-secondary);">📥 Stock Receiving History</span>
+          </div>
+          <div class="table-container sc-table-wrap" style="max-height:400px;overflow-y:auto;">
+            <table class="sc-table">
+              <thead><tr><th>Receipt #</th><th>PO #</th><th>Supplier</th><th>Items</th><th>Total</th><th>Date</th></tr></thead>
+              <tbody id="recHistoryBody"></tbody>
+            </table>
           </div>
         </div>
 
-        <!-- STORE SETTINGS -->
-        <div class="section-collapsible">
-          <h3 onclick="this.parentElement.classList.toggle('collapsed')">⚙️ Store Settings ▾</h3>
-          <div class="section-content">
-            <div id="settingsSummary"></div>
-            <div class="settings-form">
-              <input id="setStoreName" placeholder="Store Name">
-              <input id="setStoreAddress" placeholder="Store Address">
-              <input id="setReceiptFooter" placeholder="Receipt Footer">
-              <input id="setTaxRate" type="number" step="0.1" placeholder="Tax Rate (%)">
-              <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+        <!-- ADJUSTMENTS TAB -->
+        <div class="sc-panel" id="sc-tab-adjustments">
+          <div class="inv-toolbar sc-toolbar">
+            <div class="inv-search-wrap">
+              <input type="text" id="adjSearch" placeholder="Search..." oninput="StockAdjustments.setFilter('search', this.value)" class="inv-search-input">
             </div>
+            <select id="adjTypeFilter" onchange="StockAdjustments.setFilter('type', this.value)" class="inv-filter-select" style="min-width:120px;">
+              <option value="">All Types</option>
+              <option value="damaged">💔 Damaged</option>
+              <option value="expired">⏰ Expired</option>
+              <option value="lost">🔍 Lost</option>
+              <option value="customer_return">🔄 Return</option>
+              <option value="supplier_return">📤 S. Return</option>
+              <option value="count_correction">📊 Count</option>
+              <option value="manual">✏️ Manual</option>
+              <option value="other">📝 Other</option>
+            </select>
+            <button class="btn btn-warning btn-sm" onclick="StockAdjustments.showAdjustModal()">🔧 New Adj</button>
+            <button class="btn btn-ghost btn-sm" onclick="StockAdjustments.exportCSV()">📤 CSV</button>
           </div>
-        </div>
-
-        <!-- BACKUP / RESTORE -->
-        <div class="section-collapsible">
-          <h3 onclick="this.parentElement.classList.toggle('collapsed')">💾 Backup & Restore ▾</h3>
-          <div class="section-content">
-            <div id="backupInfo"></div>
-            <div class="action-bar">
-              <button class="btn btn-primary" onclick="exportData()">📤 Export Backup</button>
-              <button class="btn btn-warning" onclick="importData()">📥 Import Backup</button>
-            </div>
+          <div class="table-container sc-table-wrap" style="max-height:400px;overflow-y:auto;">
+            <table class="sc-table">
+              <thead><tr>
+                <th onclick="StockAdjustments.setSort('adjNumber')" class="sortable">Adj # ↕</th>
+                <th>Product</th><th>Old</th><th>New</th><th>Diff</th><th>Type</th><th>Reason</th><th>User</th>
+                <th onclick="StockAdjustments.setSort('createdAt')" class="sortable" style="width:90px;">Date ↕</th>
+              </tr></thead>
+              <tbody id="adjHistoryBody"></tbody>
+            </table>
           </div>
-        </div>
-
-        <!-- PRICING -->
-        <div class="section-collapsible">
-          <h3 onclick="this.parentElement.classList.toggle('collapsed')">💰 Pricing Management ▾</h3>
-          <div class="section-content">
-            <div id="priceAlerts"></div>
-            <div class="action-bar">
-              <button class="btn btn-primary" onclick="Pricing.bulkPriceUpdate()">📊 Bulk Price Update</button>
-            </div>
-            <h4>Price Change History</h4>
-            <div class="table-container" style="max-height:320px;overflow-y:auto;">
-              <table><thead><tr><th>Date</th><th>Product</th><th>Old Price</th><th>New Price</th><th>Change</th><th>By</th></tr></thead><tbody id="priceHistoryBody"></tbody></table>
-            </div>
-          </div>
-        </div>
-
-        <!-- REPORTS LINK -->
-        <div class="section-collapsible">
-          <h3 onclick="AdminModule.switchView('salesreports')" class="cursor-pointer">📊 Reports & Analytics ▸</h3>
-          <div class="section-content">
-            <p style="color:var(--text-muted);font-size:0.85rem;padding:8px 0;">Reports have been moved to the unified <strong>Sales & Reports</strong> panel. <br><a href="#" onclick="AdminModule.switchView('salesreports');return false;" class="text-accent">Click here to open →</a></p>
+          <div class="inv-footer sc-footer">
+            <span id="adjSummary" class="inv-summary"></span>
+            <div id="adjPagination" class="inv-pagination"></div>
           </div>
         </div>
       </section>

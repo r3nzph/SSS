@@ -45,8 +45,7 @@ const AdminModule = {
   },
 
   switchView(view) {
-    const adminViews = ['admin', 'inventory', 'audit', 'configcenter', 'usermanager', 'salesreports',
-      'admin-suppliers', 'admin-pos', 'admin-receiving', 'admin-adjustments'];
+    const adminViews = ['admin', 'inventory', 'supplychain', 'audit', 'configcenter', 'usermanager', 'salesreports'];
 
     if (!adminViews.includes(view)) {
       UI.toast('Access Denied: This view is not available in Admin mode.', 'error');
@@ -71,28 +70,8 @@ const AdminModule = {
       }, 5000);
     }
 
-    const sectionMap = {
-      'admin': { panel: 'admin', sectionId: 'supplyChainSection' }
-    };
-
-    const mapped = sectionMap[view];
-    if (mapped) {
-      const panel = document.getElementById(mapped.panel);
-      if (panel) {
-        panel.classList.add('active');
-        const section = document.getElementById(mapped.sectionId);
-        if (section) {
-          setTimeout(() => {
-            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            const h3 = section.querySelector('h3');
-            if (h3) section.classList.remove('collapsed');
-          }, 100);
-        }
-      }
-    } else {
-      const panel = document.getElementById(view);
-      if (panel) panel.classList.add('active');
-    }
+    const panel = document.getElementById(view);
+    if (panel) panel.classList.add('active');
 
     document.querySelectorAll('.nav-item').forEach(item => {
       item.classList.remove('active');
@@ -102,16 +81,13 @@ const AdminModule = {
 
   _clearSkeletonsForView(view) {
     const skeletonMap = {
-      'admin': ['kpiContainer', 'salesChart', 'topProductsChart'],
+      'admin': ['kpiContainer', 'dashboardLowStock'],
       'inventory': ['lowStockAlerts', 'inventoryTable', 'invSummary', 'invPagination'],
+      'supplychain': ['suppliersTable', 'supPagination', 'poTable', 'poSummary', 'poPagination', 'recHistoryBody', 'adjHistoryBody', 'adjSummary', 'adjPagination'],
       'audit': ['auditLogBody'],
       'usermanager': ['umCardsContainer', 'umSummary', 'umPagination'],
-      'admin-suppliers': ['suppliersTable', 'supPagination'],
-      'admin-pos': ['poTable', 'poSummary', 'poPagination'],
       'salesreports': ['srContent', 'srFilterBar', 'srTabs'],
-      'configcenter': ['cfgContent'],
-      'admin-receiving': ['recHistoryBody'],
-      'admin-adjustments': ['adjHistoryBody', 'adjSummary', 'adjPagination']
+      'configcenter': ['cfgContent']
     };
     const ids = skeletonMap[view] || [];
     ids.forEach(id => {
@@ -133,14 +109,11 @@ const AdminModule = {
     const skeletonMap = {
       'admin': ['kpiContainer'],
       'inventory': ['inventoryTable'],
+      'supplychain': ['suppliersTable'],
       'audit': ['auditLogBody'],
       'usermanager': ['umCardsContainer'],
-      'admin-suppliers': ['suppliersTable'],
-      'admin-pos': ['poTable'],
       'salesreports': ['srContent'],
-      'configcenter': ['cfgContent'],
-      'admin-receiving': ['recHistoryBody'],
-      'admin-adjustments': ['adjHistoryBody']
+      'configcenter': ['cfgContent']
     };
     const ids = skeletonMap[view] || [];
     // If any main container has real content (non-empty, no skeletons), view has data
@@ -166,17 +139,14 @@ const AdminModule = {
         Skeleton.showAlerts('lowStockAlerts', 2);
         Skeleton.showTable('inventoryTable', 8);
         break;
+      case 'supplychain':
+        Skeleton.showTable('suppliersTable', 5);
+        break;
       case 'audit':
         Skeleton.showTable('auditLogBody', 10);
         break;
       case 'usermanager':
         Skeleton.showCards('umCardsContainer', 6);
-        break;
-      case 'admin-suppliers':
-        Skeleton.showTable('suppliersTable', 5);
-        break;
-      case 'admin-pos':
-        Skeleton.showTable('poTable', 5);
         break;
       case 'salesreports': {
         const srContent = document.getElementById('srContent');

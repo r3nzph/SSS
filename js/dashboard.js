@@ -19,6 +19,39 @@ const Dashboard = {
     } catch (e) {
       console.error('[DASHBOARD] Charts render failed:', e);
     }
+    try {
+      this.renderDashboardLowStock();
+    } catch (e) {
+      console.error('[DASHBOARD] Low stock render failed:', e);
+    }
+  },
+
+  renderDashboardLowStock() {
+    const container = document.getElementById('dashboardLowStock');
+    if (!container) return;
+    const data = Auth.state.db;
+    if (!data || !data.products) {
+      container.innerHTML = '<p class="no-alerts">✅ No data available.</p>';
+      return;
+    }
+    const low = data.products.filter(p => !p.archived && p.stock <= (p.minStock || 5));
+    if (low.length === 0) {
+      container.innerHTML = '<p class="no-alerts">✅ All items are well-stocked.</p>';
+      return;
+    }
+    container.innerHTML = low.slice(0, 8).map(p => `
+      <div class="alert-item ${p.stock <= 0 ? 'alert-danger' : 'alert-warning'}">
+        <span class="alert-icon">${p.stock <= 0 ? '🚫' : '⚠️'}</span>
+        <span class="alert-text"><strong>${this._escapeHtml(p.name)}</strong> ${p.stock <= 0 ? 'is out of stock!' : `only ${p.stock} left (min: ${p.minStock || 5})`}</span>
+      </div>
+    `).join('');
+  },
+
+  _escapeHtml(str) {
+    if (typeof str !== 'string') return str || '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
   },
 
   renderKPI() {
@@ -45,7 +78,7 @@ const Dashboard = {
     const lowStock = products.filter(p => p.stock <= (p.minStock || 5)).length;
 
     el.innerHTML = `
-      <div class="kpi-card" style="--kpi-color: var(--accent-primary); animation-delay: 0.05s;">
+      <div class="kpi-card" style="--kpi-color: var(--accent-primary);">
         <div class="kpi-icon">💰</div>
         <div class="kpi-info">
           <div class="kpi-label">Total Revenue</div>
@@ -53,7 +86,7 @@ const Dashboard = {
           <div class="kpi-trend up">▲ Since inception</div>
         </div>
       </div>
-      <div class="kpi-card" style="--kpi-color: var(--success); animation-delay: 0.10s;">
+      <div class="kpi-card" style="--kpi-color: var(--success);">
         <div class="kpi-icon">📈</div>
         <div class="kpi-info">
           <div class="kpi-label">Total Profit</div>
@@ -61,7 +94,7 @@ const Dashboard = {
           <div class="kpi-trend up">▲ ${s.totalRevenue ? Math.round(s.totalProfit / s.totalRevenue * 100) : 0}% margin</div>
         </div>
       </div>
-      <div class="kpi-card" style="--kpi-color: var(--info); animation-delay: 0.15s;">
+      <div class="kpi-card" style="--kpi-color: var(--info);">
         <div class="kpi-icon">📦</div>
         <div class="kpi-info">
           <div class="kpi-label">Items Sold</div>
@@ -69,7 +102,7 @@ const Dashboard = {
           <div class="kpi-trend up">▲ ${(s.totalTransactions || 0).toLocaleString()} transactions</div>
         </div>
       </div>
-      <div class="kpi-card" style="--kpi-color: var(--warning); animation-delay: 0.20s;">
+      <div class="kpi-card" style="--kpi-color: var(--warning);">
         <div class="kpi-icon">⚠️</div>
         <div class="kpi-info">
           <div class="kpi-label">Low Stock Items</div>
@@ -77,7 +110,7 @@ const Dashboard = {
           <div class="kpi-trend ${lowStock > 0 ? 'down' : 'up'}">${lowStock > 0 ? '▼ Needs attention' : '▲ All stocked'}</div>
         </div>
       </div>
-      <div class="kpi-card" style="--kpi-color: var(--accent-secondary); animation-delay: 0.25s;">
+      <div class="kpi-card" style="--kpi-color: var(--accent-secondary);">
         <div class="kpi-icon">🏷️</div>
         <div class="kpi-info">
           <div class="kpi-label">Products</div>
@@ -85,7 +118,7 @@ const Dashboard = {
           <div class="kpi-trend up">▲ ${formatCurrency(totalValue)} total value</div>
         </div>
       </div>
-      <div class="kpi-card" style="--kpi-color: var(--success); animation-delay: 0.30s;">
+      <div class="kpi-card" style="--kpi-color: var(--success);">
         <div class="kpi-icon">🧾</div>
         <div class="kpi-info">
           <div class="kpi-label">Avg. Sale</div>
