@@ -57,14 +57,20 @@ const AdminModule = {
     this._currentView = view;
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
 
-    // Show skeletons for data-heavy views
-    this._showViewSkeletons(view);
+    // Check if this view's main data container already has content (rendered by refreshAll()).
+    // If so, skip skeletons and safety timer to avoid overwriting real data.
+    const viewHasData = this._viewHasData(view);
 
-    // SAFETY TIMEOUT: Auto-clear skeletons after 5 seconds if data never loads
-    this._clearSkeletonTimer = setTimeout(() => {
-      this._clearSkeletonsForView(view);
-      console.warn('[ADMIN] Safety timeout: cleared skeletons for view:', view);
-    }, 5000);
+    if (!viewHasData) {
+      // Show skeletons for data-heavy views
+      this._showViewSkeletons(view);
+
+      // SAFETY TIMEOUT: Auto-clear skeletons after 5 seconds if data never loads
+      this._clearSkeletonTimer = setTimeout(() => {
+        this._clearSkeletonsForView(view);
+        console.warn('[ADMIN] Safety timeout: cleared skeletons for view:', view);
+      }, 5000);
+    }
 
     const sectionMap = {
       'admin-suppliers': { panel: 'admin', sectionId: 'admin-suppliers-section' },
@@ -126,43 +132,66 @@ const AdminModule = {
     });
   },
 
-  _showViewSkeletons(view) {
-    // Use requestAnimationFrame to ensure browser paints skeletons before data loads
-    requestAnimationFrame(() => {
-      switch (view) {
-        case 'admin':
-          Skeleton.showKpiGrid('kpiContainer', 6);
-          Skeleton.showChart('salesChart');
-          Skeleton.showChart('topProductsChart');
-          break;
-        case 'inventory':
-          Skeleton.showAlerts('lowStockAlerts', 2);
-          Skeleton.showTable('inventoryTable', 8);
-          break;
-        case 'audit':
-          Skeleton.showTable('auditLogBody', 10);
-          break;
-        case 'usermanager':
-          Skeleton.showCards('umCardsContainer', 6);
-          break;
-        case 'admin-suppliers':
-          Skeleton.showTable('suppliersTable', 5);
-          break;
-        case 'admin-pos':
-          Skeleton.showTable('poTable', 5);
-          break;
-        case 'salesreports': {
-          const srContent = document.getElementById('srContent');
-          if (srContent) srContent.innerHTML = '<div class="skeleton skeleton-block"></div>';
-          // Add skeletons for filter bar and tab bar too
-          const srFilterBar = document.getElementById('srFilterBar');
-          if (srFilterBar) Skeleton.showToolbar('srFilterBar');
-          const srTabs = document.getElementById('srTabs');
-          if (srTabs) srTabs.innerHTML = '<div class="skeleton skeleton-toolbar" style="height:36px"></div>';
-          break;
-        }
-      }
+  /** Check if a view's main data containers already have real content rendered */
+  _viewHasData(view) {
+    const skeletonMap = {
+      'admin': ['kpiContainer'],
+      'inventory': ['inventoryTable'],
+      'audit': ['auditLogBody'],
+      'usermanager': ['umCardsContainer'],
+      'admin-suppliers': ['suppliersTable'],
+      'admin-pos': ['poTable'],
+      'salesreports': ['srContent'],
+      'configcenter': ['cfgContent'],
+      'admin-receiving': ['recHistoryBody'],
+      'admin-adjustments': ['adjHistoryBody']
+    };
+    const ids = skeletonMap[view] || [];
+    // If any main container has real content (non-empty, no skeletons), view has data
+    return ids.some(id => {
+      const el = document.getElementById(id);
+      if (!el) return false;
+      return el.innerHTML !== '' && !el.querySelector('.skeleton');
     });
+  },
+
+  _showViewSkeletons(view) {
+    // Insert skeletons synchronously BEFORE data rendering.
+    // refreshAll() runs immediately after this and replaces them with real data.
+    // Do NOT use requestAnimationFrame here — it would delay skeleton insertion
+    // until AFTER synchronous data rendering, causing skeletons to overwrite real data.
+    switch (view) {
+      case 'admin':
+        Skeleton.showKpiGrid('kpiContainer', 6);
+        Skeleton.showChart('salesChart');
+        Skeleton.showChart('topProductsChart');
+        break;
+      case 'inventory':
+        Skeleton.showAlerts('lowStockAlerts', 2);
+        Skeleton.showTable('inventoryTable', 8);
+        break;
+      case 'audit':
+        Skeleton.showTable('auditLogBody', 10);
+        break;
+      case 'usermanager':
+        Skeleton.showCards('umCardsContainer', 6);
+        break;
+      case 'admin-suppliers':
+        Skeleton.showTable('suppliersTable', 5);
+        break;
+      case 'admin-pos':
+        Skeleton.showTable('poTable', 5);
+        break;
+      case 'salesreports': {
+        const srContent = document.getElementById('srContent');
+        if (srContent) srContent.innerHTML = '<div class="skeleton skeleton-block"></div>';
+        const srFilterBar = document.getElementById('srFilterBar');
+        if (srFilterBar) Skeleton.showToolbar('srFilterBar');
+        const srTabs = document.getElementById('srTabs');
+        if (srTabs) srTabs.innerHTML = '<div class="skeleton skeleton-toolbar" style="height:36px"></div>';
+        break;
+      }
+    }
   },
 
   _exposeGlobals() {
@@ -199,12 +228,20 @@ const AdminModule = {
   _setupEventListeners() {},
 
   refreshAll() {
+    // CRITICAL: Always clear the safety timer FIRST, before any conditionals.
+    // switchView() sets a 5-second timer; if we exit early (e.g. db not ready),
+    // the timer would replace skeletons with "Failed to load" messages.
+    if (this._clearSkeletonTimer) {
+      clearTimeout(this._clearSkeletonTimer);
+      this._clearSkeletonTimer = null;
+    }
+
     if (!Auth.isAdmin()) {
       console.warn('[ADMIN] refreshAll skipped: not admin.');
       return;
     }
 
-    // FALLBACK: if state.db is null, try reading from StorageService directly
+    // Ensure db is available — fallback to StorageService if needed
     let state = Auth.getState();
     if (!state.db) {
       const freshDb = StorageService.readRaw();
@@ -213,38 +250,11 @@ const AdminModule = {
         Auth.setDb(freshDb);
         state = Auth.getState();
       } else {
-        console.warn('[ADMIN] refreshAll skipped: db not loaded yet. Retrying in 500ms...');
-        if (this._retryTimer) clearTimeout(this._retryTimer);
-        this._retryTimer = setTimeout(() => {
-          this._retryTimer = null;
-          // Try one more time with a fresh read from StorageService
-          const retryDb = StorageService.readRaw();
-          if (retryDb) {
-            console.log('[ADMIN] Retry successful: read data from StorageService.');
-            Auth.setDb(retryDb);
-            this.refreshAll();
-          } else {
-            console.error('[ADMIN] Retry failed: no data in StorageService.');
-            const panel = document.getElementById('admin');
-            if (panel) {
-              panel.innerHTML = `<div class="panel" style="text-align:center;padding:60px 20px;">
-                <h2 style="font-size:1.5rem;margin-bottom:12px;">Failed to Load Dashboard</h2>
-                <p style="color:var(--text-secondary);margin-bottom:24px;">The database could not be loaded. Please refresh the page or clear your browser data and try again.</p>
-                <button class="btn btn-primary" onclick="location.reload()"> Refresh Page</button>
-              </div>`;
-            }
-          }
-        }, 500);
-        return;
+        console.warn('[ADMIN] refreshAll: no db data available. Modules will render empty states.');
       }
     }
 
-    // Clear safety timeout if data loaded successfully
-    if (this._clearSkeletonTimer) {
-      clearTimeout(this._clearSkeletonTimer);
-      this._clearSkeletonTimer = null;
-    }
-
+    // Render all modules — each handles null/missing data gracefully
     const modules = [
       { name: 'Dashboard', fn: () => Dashboard.renderDashboard() },
       { name: 'Admin', fn: () => Admin.renderAdmin() },
