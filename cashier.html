@@ -55,8 +55,12 @@
             <div class="sidebar-user-role" id="currentUserRole">cashier</div>
           </div>
         </div>
-        <button class="btn btn-ghost btn-sm btn-logout mb-xs" onclick="handleLogout()">🚪 Logout</button>
-        <button class="btn btn-ghost btn-sm w-full" onclick="toggleTheme()" id="themeToggleBtn">🌙 Dark</button>
+        <div class="sidebar-footer-actions">
+          <button class="btn btn-ghost btn-sm btn-logout" onclick="handleLogout()" title="Logout">🚪 Logout</button>
+          <div class="theme-toggle-mini" onclick="toggleTheme()" id="themeToggleBtn" title="Toggle theme">
+            <span class="theme-toggle-icon" id="themeToggleIcon">🌙</span>
+          </div>
+        </div>
       </div>
     </aside>
 
@@ -72,11 +76,10 @@
           </div>
           <div class="pos-topbar-center">
             <span class="pos-datetime" id="posDateTime"></span>
-            <span class="pos-shift-badge" id="posShiftBadge">🟢 Active</span>
           </div>
           <div class="pos-topbar-right">
+            <span class="pos-shift-badge" id="posShiftBadge">🟢 Active</span>
             <span class="pos-cashier-name" id="posCashierName">👤 Cashier</span>
-            <button class="btn btn-ghost btn-sm" onclick="handleLogout()" title="Logout">🚪</button>
           </div>
         </div>
 
@@ -135,7 +138,7 @@
                   <span id="posTaxLabel">Tax</span>
                   <span id="posTax">₱0.00</span>
                 </div>
-                <div class="pos-summary-row pos-summary-discount" id="posDiscountRow" class="hidden">
+                <div class="pos-summary-row pos-summary-discount hidden" id="posDiscountRow">
                   <span>Discount</span>
                   <span id="posDiscount" class="text-success">−₱0.00</span>
                 </div>
@@ -183,14 +186,14 @@
                 </div>
               </div>
 
-              <div class="pos-payment-row" id="posNonCashPayment" class="hidden">
+              <div class="pos-payment-row hidden" id="posNonCashPayment">
                 <div class="pos-payment-label">Reference # (optional)</div>
                 <div class="pos-payment-input-group">
-                  <input type="text" id="posRefNumber" placeholder="e.g. GCash ref or last 4 digits" class="pos-tendered-input" class="text-base text-left">
+                  <input type="text" id="posRefNumber" placeholder="e.g. GCash ref or last 4 digits" class="pos-tendered-input">
                 </div>
               </div>
 
-              <div class="pos-change-row" id="posChangeRow" class="hidden">
+              <div class="pos-change-row hidden" id="posChangeRow">
                 <span class="pos-change-label">Change Due</span>
                 <span class="pos-change-amount" id="posChangeAmount">₱0.00</span>
               </div>
