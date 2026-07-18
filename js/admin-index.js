@@ -30,7 +30,6 @@ const AdminModule = {
   _initialized: false,
   _currentView: 'admin',
   _clearSkeletonTimer: null,
-  _retryTimer: null,
 
   init() {
     if (!Auth.isAdmin()) {
