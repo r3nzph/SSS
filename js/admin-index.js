@@ -172,6 +172,7 @@ const AdminModule = {
     window.UserManager = UserManager;
     window.ConfigCenter = ConfigCenter;
     window.Pricing = Pricing;
+    window.Audit = Audit;
 
     window.addNewProduct = (...args) => Admin.addNewProduct(...args);
     window.editProduct = (...args) => Admin.editProduct(...args);

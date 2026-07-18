@@ -245,14 +245,25 @@
 
       <!-- === INVENTORY PANEL === -->
       <section id="inventory" class="panel" data-module="admin">
-        <h2>📦 Inventory Management</h2>
-
-        <div class="alerts-section">
-          <h3>⚠️ Alerts</h3>
-          <div id="lowStockAlerts"></div>
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <h2>📦 Inventory</h2>
+            <p class="panel-subtitle">Manage products, stock levels & categories</p>
+          </div>
         </div>
 
-        <div class="inv-toolbar">
+        <div class="dashboard-widget" style="margin-bottom:16px;">
+          <div class="widget-header">
+            <div class="widget-header-left">
+              <span class="widget-title">⚠️ Low Stock Alerts</span>
+              <span class="widget-subtitle">Items needing restock attention</span>
+            </div>
+          </div>
+          <div id="lowStockAlerts" class="widget-body"></div>
+        </div>
+
+        <div class="section-card">
+          <div class="inv-toolbar" style="margin-bottom:0;border-radius:12px 12px 0 0;">
           <div class="inv-search-wrap">
             <input type="text" id="invSearch" placeholder="Search by name, barcode, category, brand..." oninput="Inventory.setFilter('search', this.value)" class="inv-search-input">
           </div>
@@ -300,18 +311,29 @@
           <span id="invSummary" class="inv-summary">Loading...</span>
           <div id="invPagination" class="inv-pagination"></div>
         </div>
+        </div>
       </section>
 
       <!-- === AUDIT LOG PANEL === -->
       <section id="audit" class="panel" data-module="admin">
-        <h2>📋 Activity Log</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr><th>Timestamp</th><th>Role</th><th>User</th><th>Action</th><th>Details</th></tr>
-            </thead>
-            <tbody id="auditLogBody"></tbody>
-          </table>
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <h2>📋 Activity Log</h2>
+            <p class="panel-subtitle">Track all system actions and changes</p>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="sr-search-wrap" style="margin-bottom:16px;">
+            <input type="text" id="auditSearchInput" placeholder="Search by user, action, or details..." oninput="Audit.filterAuditLog(this.value)" class="inv-search-input">
+          </div>
+          <div class="table-container" style="border:1px solid var(--border-glass);border-radius:12px;overflow:hidden;">
+            <table class="audit-table">
+              <thead>
+                <tr><th>Timestamp</th><th>Role</th><th>User</th><th>Action</th><th>Details</th></tr>
+              </thead>
+              <tbody id="auditLogBody"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
