@@ -315,20 +315,25 @@
         </div>
       </section>
 
-      <!-- === CONFIG CENTER PANEL === -->
+      <!-- === SETTINGS PANEL === -->
       <section id="configcenter" class="panel" data-module="admin">
-        <h2>⚙️ Settings & System Configuration</h2>
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <h2>⚙️ Settings</h2>
+            <p class="panel-subtitle">Configure your store, receipts, inventory & preferences</p>
+          </div>
+        </div>
 
-        <div class="cfg-tabs">
-          <button class="btn btn-sm btn-ghost cfg-tab-btn active" data-tab="store" onclick="ConfigCenter.switchTab('store')">🏪 Store</button>
-          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="receipt" onclick="ConfigCenter.switchTab('receipt')">🧾 Receipt</button>
-          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="inventory" onclick="ConfigCenter.switchTab('inventory')">📦 Inventory</button>
-          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="sales" onclick="ConfigCenter.switchTab('sales')">💰 Sales</button>
-          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="notifications" onclick="ConfigCenter.switchTab('notifications')">🔔 Notifications</button>
-          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="security" onclick="ConfigCenter.switchTab('security')">🔒 Security</button>
-          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="appearance" onclick="ConfigCenter.switchTab('appearance')">🎨 Appearance</button>
-          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="maintenance" onclick="ConfigCenter.switchTab('maintenance')">🛠️ Maintenance</button>
-          <button class="btn btn-sm btn-ghost cfg-tab-btn" data-tab="backup" onclick="ConfigCenter.switchTab('backup')">🛡️ Backup</button>
+        <div class="cfg-tab-bar">
+          <button class="cfg-tab-btn active" data-tab="store" onclick="ConfigCenter.switchTab('store')">🏪 Store</button>
+          <button class="cfg-tab-btn" data-tab="receipt" onclick="ConfigCenter.switchTab('receipt')">🧾 Receipt</button>
+          <button class="cfg-tab-btn" data-tab="inventory" onclick="ConfigCenter.switchTab('inventory')">📦 Inventory</button>
+          <button class="cfg-tab-btn" data-tab="sales" onclick="ConfigCenter.switchTab('sales')">💰 Sales</button>
+          <button class="cfg-tab-btn" data-tab="notifications" onclick="ConfigCenter.switchTab('notifications')">🔔 Notifications</button>
+          <button class="cfg-tab-btn" data-tab="security" onclick="ConfigCenter.switchTab('security')">🔒 Security</button>
+          <button class="cfg-tab-btn" data-tab="appearance" onclick="ConfigCenter.switchTab('appearance')">🎨 Appearance</button>
+          <button class="cfg-tab-btn" data-tab="maintenance" onclick="ConfigCenter.switchTab('maintenance')">🛠️ Maintenance</button>
+          <button class="cfg-tab-btn" data-tab="backup" onclick="ConfigCenter.switchTab('backup')">🛡️ Backup</button>
         </div>
 
         <div id="cfgContent" class="cfg-content">
@@ -367,7 +372,12 @@
 
       <!-- === SALES & REPORTS PANEL === -->
       <section id="salesreports" class="panel" data-module="admin">
-        <h2>📊 Sales & Reports</h2>
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <h2>📊 Sales & Reports</h2>
+            <p class="panel-subtitle">Analyze revenue, transactions, profits & more</p>
+          </div>
+        </div>
 
         <div id="srFilterBar" class="sr-filter-bar"></div>
         <div id="srTabs" class="sr-tab-bar"></div>
