@@ -8,7 +8,7 @@ import UI from './ui.js';
 import { escapeHtml, formatCurrency, formatDate } from './utils.js';
 import ReceiptViewer from './receipts.js';
 import CashierPOS from './pos.js';
-import Sales from './sales.js';
+import Sales from './transactions.js';
 import StorageService from './storage.js';
 import Audit from './audit.js';
 import Skeleton from './skeleton.js';
