@@ -62,8 +62,16 @@ class ThemeManager {
   /** Update all theme toggle buttons */
   _updateButtons() {
     const isLight = this.isLight;
+    // Support both plain toggle buttons AND nested icon elements
     document.querySelectorAll('#themeToggleBtn').forEach(btn => {
-      btn.innerHTML = isLight ? '🌙 Dark' : '☀️ Light';
+      const iconEl = btn.querySelector('#themeToggleIcon');
+      if (iconEl) {
+        // New premium mini toggle: update only the nested icon span
+        iconEl.textContent = isLight ? '\u{1F31B}' : '\u{1F319}';
+      } else {
+        // Old plain button: update entire content
+        btn.innerHTML = isLight ? '\u{1F319} Dark' : '\u{2600}\u{FE0F} Light';
+      }
     });
   }
 
