@@ -67,10 +67,14 @@ class ThemeManager {
       const iconEl = btn.querySelector('#themeToggleIcon');
       if (iconEl) {
         // New premium mini toggle: update only the nested icon span
-        iconEl.textContent = isLight ? '\u{1F31B}' : '\u{1F319}';
+        // In dark mode (isLight=false): show sun ☀️  → clicking goes to light
+        // In light mode (isLight=true) : show moon 🌙 → clicking goes to dark
+        iconEl.textContent = isLight ? '\u{1F319}' : '\u2600\uFE0F';
       } else {
         // Old plain button: update entire content
-        btn.innerHTML = isLight ? '\u{1F319} Dark' : '\u{2600}\u{FE0F} Light';
+        // In dark mode: show "☀️ Light" → clicking goes to light
+        // In light mode: show "🌙 Dark" → clicking goes to dark
+        btn.innerHTML = isLight ? '\u{1F319} Dark' : '\u2600\uFE0F Light';
       }
     });
   }
