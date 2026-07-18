@@ -72,10 +72,7 @@ const AdminModule = {
     }
 
     const sectionMap = {
-      'admin-suppliers': { panel: 'admin', sectionId: 'admin-suppliers-section' },
-      'admin-pos': { panel: 'admin', sectionId: 'admin-pos-section' },
-      'admin-receiving': { panel: 'admin', sectionId: 'admin-receiving-section' },
-      'admin-adjustments': { panel: 'admin', sectionId: 'admin-adjustments-section' }
+      'admin': { panel: 'admin', sectionId: 'supplyChainSection' }
     };
 
     const mapped = sectionMap[view];
@@ -222,6 +219,17 @@ const AdminModule = {
     window.exportData = (...args) => Backup.exportData(...args);
     window.importData = (...args) => Backup.importData(...args);
     window.filterAdminProducts = (...args) => Admin.filterAdminProducts(...args);
+    window.switchSupplyTab = (tab) => this._switchSupplyTab(tab);
+  },
+
+  /** Switch between Supply Chain tabs without navigating away */
+  _switchSupplyTab(tab) {
+    document.querySelectorAll('.sc-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sc-panel').forEach(p => p.classList.remove('active'));
+    const tabBtn = document.querySelector(`.sc-tab[data-tab="${tab}"]`);
+    const panel = document.getElementById(`sc-tab-${tab}`);
+    if (tabBtn) tabBtn.classList.add('active');
+    if (panel) panel.classList.add('active');
   },
 
   _setupEventListeners() {},

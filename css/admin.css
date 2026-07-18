@@ -411,6 +411,94 @@
 }
 
 /* ===============================
+   SUPPLY CHAIN — Compact Tabbed Layout
+   =============================== */
+
+.sc-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-glass);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+}
+
+.sc-tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  font-family: var(--font-family);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  text-align: center;
+}
+
+.sc-tab:hover {
+  color: var(--text-primary);
+  background: var(--bg-glass-hover);
+}
+
+.sc-tab.active {
+  color: var(--accent-primary);
+  background: var(--bg-sidebar-active);
+  font-weight: var(--weight-semibold);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.sc-panel {
+  display: none;
+}
+
+.sc-panel.active {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+
+.sc-toolbar {
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  gap: 6px;
+}
+
+.sc-table-wrap {
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.sc-table {
+  margin: 0;
+}
+
+.sc-table th {
+  font-size: 0.72rem;
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+
+.sc-table td {
+  font-size: 0.8rem;
+  padding: 7px 10px;
+}
+
+.sc-footer {
+  padding: 6px 2px;
+  margin-top: 4px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===============================
    RESPONSIVE
    =============================== */
 
