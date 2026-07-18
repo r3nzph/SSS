@@ -199,10 +199,11 @@
    POS LAYOUT
    =============================== */
 
-.pos-panel {
+.panel.active.pos-panel {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 70px);
+  height: calc(100vh - var(--space-lg, 24px) * 2 - 70px);
+  overflow: hidden;
 }
 
 .pos-topbar {
@@ -483,10 +484,9 @@
 
 /* --- Cart Item --- */
 .pos-cart-item {
-  display: grid;
-  grid-template-columns: 1fr auto auto auto;
-  gap: 8px;
+  display: flex;
   align-items: center;
+  gap: 6px;
   padding: 8px 10px;
   border-radius: var(--radius-sm);
   margin-bottom: 4px;
@@ -495,6 +495,11 @@
 
 .pos-cart-item:hover {
   background: var(--bg-glass-hover);
+}
+
+.pos-cart-item-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .pos-cart-item-name {
@@ -506,13 +511,19 @@
   text-overflow: ellipsis;
 }
 
-.pos-cart-item-qty {
+.pos-cart-item-price {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.pos-cart-item-controls {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 
-.pos-cart-item-qty button {
+.pos-qty-btn {
   width: 24px;
   height: 24px;
   border-radius: var(--radius-sm);
@@ -527,27 +538,28 @@
   transition: all var(--transition-fast);
 }
 
-.pos-cart-item-qty button:hover {
+.pos-qty-btn:hover {
   background: var(--bg-glass-strong);
   border-color: var(--accent-primary);
 }
 
-.pos-cart-item-qty span {
-  min-width: 24px;
+.pos-cart-qty {
+  min-width: 22px;
   text-align: center;
   font-weight: var(--weight-semibold);
   font-size: var(--text-sm);
 }
 
-.pos-cart-item-price {
+.pos-cart-item-total {
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
   color: var(--success);
   min-width: 60px;
   text-align: right;
+  flex-shrink: 0;
 }
 
-.pos-cart-item-remove {
+.pos-cart-remove {
   background: none;
   border: none;
   color: var(--text-muted);
@@ -556,9 +568,10 @@
   padding: 4px;
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
+  flex-shrink: 0;
 }
 
-.pos-cart-item-remove:hover {
+.pos-cart-remove:hover {
   color: var(--danger);
   background: var(--danger-bg);
 }
