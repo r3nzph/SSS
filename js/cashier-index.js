@@ -44,6 +44,14 @@ const CashierModule = {
       item.classList.remove('active');
       if (item.dataset.view === view) item.classList.add('active');
     });
+    // Skip skeletons if this view already has data rendered
+    if (this._viewHasData(view)) {
+      if (this._safetyTimer) {
+        clearTimeout(this._safetyTimer);
+        this._safetyTimer = null;
+      }
+      return;
+    }
     // Safety timeout: clear skeletons after 5 seconds if data never loads
     if (this._safetyTimer) clearTimeout(this._safetyTimer);
     this._safetyTimer = setTimeout(() => {
@@ -198,14 +206,31 @@ const CashierModule = {
     });
   },
 
+  _viewHasData(view) {
+    const containerIds = {
+      'cashier-transactions': 'cashierTransactionsBody',
+      'cashier-receipts': 'cashierReceiptsBody',
+      'cashier-profile': 'profileName'
+    };
+    const id = containerIds[view];
+    if (!id) return true; // main POS view: always skip skeletons
+    const el = document.getElementById(id);
+    if (!el) return false;
+    // Has real content if innerHTML isn't empty and doesn't contain skeleton elements
+    return el.innerHTML !== '' && !el.querySelector('.skeleton');
+  },
+
   refreshAll() {
     if (!Auth.isCashier()) return;
     const state = Auth.getState();
-    if (!state.db) return;
-    // If data loaded successfully, clear the safety timeout
+    // Always clear safety timer first, regardless of data availability
     if (this._safetyTimer) {
       clearTimeout(this._safetyTimer);
       this._safetyTimer = null;
+    }
+    if (!state.db) {
+      // Data not ready yet, will retry via the auth state listener
+      return;
     }
     CashierPOS.renderCashier();
     if (this._currentView === 'cashier-transactions') this._renderTransactions();
