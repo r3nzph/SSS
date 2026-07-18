@@ -21,7 +21,6 @@ import Settings from './store-settings.js';
 import ConfigCenter from './settings.js';
 import Pricing from './pricing.js';
 import Backup from './backup.js';
-import History from './history.js';
 import Accounts from './accounts.js';
 import Skeleton from './skeleton.js';
 import StorageService from './storage.js';
@@ -235,20 +234,16 @@ const AdminModule = {
     // Render all modules — each handles null/missing data gracefully
     const modules = [
       { name: 'Dashboard', fn: () => Dashboard.renderDashboard() },
-      { name: 'Admin', fn: () => Admin.renderAdmin() },
       { name: 'Suppliers', fn: () => Suppliers.renderSuppliers() },
       { name: 'Purchasing', fn: () => Purchasing.renderPOs() },
       { name: 'Receiving', fn: () => Receiving.renderReceivingHistory() },
-      { name: 'Accounts', fn: () => Accounts.renderUsers() },
-      { name: 'History', fn: () => History.renderHistory() },
+      { name: 'StockAdjustments', fn: () => StockAdjustments.renderAdjustmentHistory() },
       { name: 'Audit', fn: () => Audit.renderAuditLog() },
       { name: 'Inventory', fn: () => Inventory.renderInventory() },
-      { name: 'StockAdjustments', fn: () => StockAdjustments.renderAdjustmentHistory() },
       { name: 'SalesReports', fn: () => SalesReports.renderAll() },
       { name: 'UserManager', fn: () => UserManager.renderAll() },
       { name: 'ConfigCenter', fn: () => ConfigCenter.renderAll() },
       { name: 'Backup', fn: () => Backup.renderBackupInfo() },
-      { name: 'Settings', fn: () => { Settings.loadSettings(); Settings.renderSettingsSummary(); } },
       { name: 'Pricing', fn: () => { Pricing.renderPriceAlerts(); Pricing.renderPriceHistory(); Pricing.checkPriceAlerts(); Pricing.attachPricePopovers(); } }
     ];
 
