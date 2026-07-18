@@ -2,6 +2,19 @@
 // UTILITY FUNCTIONS
 // ===============================
 
+/** Read store settings from localStorage (shared helper) */
+function getStoreSettings() {
+  try {
+    const raw = localStorage.getItem('sarisari_pos_data');
+    if (!raw) return {};
+    const data = JSON.parse(raw);
+    if (data.settings && Array.isArray(data.settings)) {
+      return data.settings.find(s => s.id === 'main') || {};
+    }
+    return data.settings?.main || data.settings || {};
+  } catch { return {}; }
+}
+
 /** Format a number as currency (₱) */
 function formatCurrency(amount) {
   const data = (() => {
@@ -181,12 +194,14 @@ export default {
   formatCurrency, formatDate, formatShortDate, escapeHtml, generateId,
   getISOTimestamp, getInputValue, showModal, hideModal, handleError,
   clamp, debounce, truncate, todayISO, todayStart, todayEnd, formatPercent, pluralize,
-  getStockLevel, clearInput, setInputValue, getExistingIds, getSelectValue, setSelectValue
+  getStockLevel, clearInput, setInputValue, getExistingIds, getSelectValue, setSelectValue,
+  getStoreSettings
 };
 
 export {
   formatCurrency, formatDate, formatShortDate, escapeHtml, generateId,
   getISOTimestamp, getInputValue, showModal, hideModal, handleError,
   clamp, debounce, truncate, todayISO, todayStart, todayEnd, formatPercent, pluralize,
-  getStockLevel, clearInput, setInputValue, getExistingIds, getSelectValue, setSelectValue
+  getStockLevel, clearInput, setInputValue, getExistingIds, getSelectValue, setSelectValue,
+  getStoreSettings
 };

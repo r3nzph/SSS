@@ -6,7 +6,7 @@
 
 import Auth from './auth.js';
 import Audit from './audit.js';
-import { formatCurrency, formatDate, showModal, hideModal, handleError, generateId } from './utils.js';
+import { formatCurrency, formatDate, showModal, hideModal, handleError, generateId, getStoreSettings } from './utils.js';
 import UI from './ui.js';
 import StorageService from './storage.js';
 
@@ -122,6 +122,12 @@ const Sales = {
     const receiptDate = document.getElementById('receiptDate');
     const receiptId = document.getElementById('receiptId');
     const receiptCashier = document.getElementById('receiptCashier');
+    const storeName = document.getElementById('receiptStoreName');
+    const storeAddr = document.getElementById('receiptStoreAddress');
+    const receiptMsg = document.getElementById('receiptMessage');
+    const headerText = document.getElementById('receiptHeaderText');
+    const taxInfo = document.getElementById('receiptTaxInfo');
+    const s = getStoreSettings();
 
     if (receiptItems) {
       receiptItems.innerHTML = (transaction.items || []).map(item => `
@@ -138,6 +144,25 @@ const Sales = {
     if (receiptDate) receiptDate.textContent = formatDate(transaction.date);
     if (receiptId) receiptId.textContent = transaction.id;
     if (receiptCashier) receiptCashier.textContent = transaction.cashier;
+
+    // Wire settings into receipt
+    if (storeName) storeName.textContent = s.storeName || 'Sari-Sari Store';
+    if (storeAddr) {
+      const parts = [s.storeAddress, s.storePhone, s.storeEmail].filter(Boolean);
+      storeAddr.textContent = parts.join(' \u00b7 ') || '';
+    }
+    if (receiptMsg) receiptMsg.textContent = s.receiptMessage || 'Thank you for your purchase! \u2764\ufe0f';
+    if (headerText) headerText.textContent = s.receiptHeader || '';
+    if (taxInfo) {
+      const taxRate = s.taxRate || 0;
+      if (taxRate > 0 && s.showTaxOnReceipt !== false) {
+        const taxAmt = (transaction.total || 0) * (taxRate / (100 + taxRate));
+        taxInfo.textContent = `VAT (${taxRate}%): ${formatCurrency(taxAmt)}`;
+        taxInfo.classList.remove('hidden');
+      } else {
+        taxInfo.classList.add('hidden');
+      }
+    }
 
     showModal('receiptModal');
   },

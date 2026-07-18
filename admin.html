@@ -403,13 +403,15 @@
     </div>
     <div class="receipt-body">
       <div class="receipt-store-info">
-        <strong>Sari-Sari Store</strong><br>
+        <strong id="receiptStoreName">Sari-Sari Store</strong><br>
+        <small id="receiptStoreAddress"></small><br>
         <small id="receiptDate"></small>
       </div>
       <div class="receipt-meta">
         <span>Receipt #<b id="receiptId"></b></span>
         <span>Cashier: <b id="receiptCashier"></b></span>
       </div>
+      <div id="receiptTaxInfo" class="receipt-tax-info hidden" style="font-size:0.75rem;color:var(--text-muted);padding:4px 16px;"></div>
       <table class="receipt-table">
         <thead>
           <tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr>
@@ -419,8 +421,9 @@
       <div class="receipt-total">
         <strong>Total: <span id="receiptTotal">₱0.00</span></strong>
       </div>
+      <div class="receipt-header-text" id="receiptHeaderText" style="text-align:center;font-size:0.75rem;color:var(--text-muted);padding:4px 16px;"></div>
       <div class="receipt-footer">
-        <p>Thank you for your purchase! ❤️</p>
+        <p id="receiptMessage">Thank you for your purchase! ❤️</p>
       </div>
     </div>
     <div class="modal-footer">

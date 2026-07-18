@@ -9,7 +9,7 @@
 import Auth from './auth.js';
 import Audit from './audit.js';
 import UI from './ui.js';
-import { escapeHtml, formatCurrency } from './utils.js';
+import { escapeHtml, formatCurrency, getStoreSettings } from './utils.js';
 
 // Held sales storage (in-memory map)
 let _heldSales = [];
@@ -248,15 +248,23 @@ const CashierPOS = {
   renderCart() {
     const container = document.getElementById('posCartItems');
     const countEl = document.getElementById('posCartCount');
+    const taxLabel = document.getElementById('posTaxLabel');
     if (!container) return;
 
+    const s = getStoreSettings();
+    const zero = (s.currency || '₱') + '0.00';
     const cart = Auth.getCart();
     const subtotal = cart.reduce((s, i) => s + i.total, 0);
     const discountAmt = subtotal * (_discountPercent / 100);
     const taxable = subtotal - discountAmt;
-    const taxRate = Auth.state.db?.settings?.taxRate || 12;
+    const taxRate = parseFloat(s.taxRate) || 0;
     const taxAmt = taxable * (taxRate / 100);
     const total = taxable + taxAmt;
+
+    // Update tax label with dynamic rate
+    if (taxLabel) {
+      taxLabel.textContent = taxRate > 0 ? `Tax (${taxRate}%)` : 'Tax';
+    }
 
     if (cart.length === 0) {
       container.innerHTML = `
@@ -267,10 +275,10 @@ const CashierPOS = {
         </div>
       `;
       if (countEl) countEl.textContent = '0 items';
-      document.getElementById('posSubtotal').textContent = '₱0.00';
-      document.getElementById('posTax').textContent = '₱0.00';
-      document.getElementById('posTotal').textContent = '₱0.00';
-      document.getElementById('posCheckoutTotal').textContent = '₱0.00';
+      document.getElementById('posSubtotal').textContent = zero;
+      document.getElementById('posTax').textContent = zero;
+      document.getElementById('posTotal').textContent = zero;
+      document.getElementById('posCheckoutTotal').textContent = zero;
       document.getElementById('posChangeRow').style.display = 'none';
       document.getElementById('posTendered').value = '';
       return;
@@ -460,13 +468,14 @@ const CashierPOS = {
   // ============================
 
   newSale() {
+    const s = getStoreSettings();
     Auth.clearCart();
-    _discountPercent = 0;
-    _paymentMethod = 'cash';
-    document.getElementById('posDiscountInput').value = '';
+    _discountPercent = parseFloat(s.defaultDiscount) || 0;
+    _paymentMethod = s.defaultPayment || 'cash';
+    document.getElementById('posDiscountInput').value = _discountPercent > 0 ? _discountPercent : '';
     document.getElementById('posTendered').value = '';
     document.getElementById('posRefNumber').value = '';
-    this.selectPaymentMethod('cash');
+    this.selectPaymentMethod(_paymentMethod);
     this.renderCart();
     document.getElementById('posSearch')?.focus();
   },
