@@ -192,6 +192,24 @@ function migrateIfNeeded(data) {
     });
   }
 
+  // ---- Demo password version migration ----
+  // Ensures existing localStorage users get the updated default passwords
+  // (admin123 for admin, cashier123 for cashier) instead of the old hash.
+  if (data.users && Array.isArray(data.settings) && data.settings[0]) {
+    const mainSettings = data.settings[0];
+    if (!mainSettings._demoPasswordVersion || mainSettings._demoPasswordVersion < 1) {
+      const defaultPasswords = { admin: 'admin123', cashier: 'cashier123' };
+      for (const user of data.users) {
+        if (user.createdBy === 'system' && defaultPasswords[user.username]) {
+          user.password = defaultPasswords[user.username];
+          changed = true;
+        }
+      }
+      mainSettings._demoPasswordVersion = 1;
+      changed = true;
+    }
+  }
+
   if (changed) StorageAdapter.setFullData(data);
 }
 
