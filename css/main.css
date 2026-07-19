@@ -727,6 +727,10 @@ td {
 
 tr:last-child td { border-bottom: none; }
 
+tr:nth-child(even) td {
+  background: var(--table-row-even);
+}
+
 tr:hover td {
   background: var(--table-row-hover);
 }
