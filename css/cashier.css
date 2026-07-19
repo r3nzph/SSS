@@ -236,14 +236,33 @@
 }
 
 /* ===============================
-   POS LAYOUT
+   POS LAYOUT — Full-height flex chain
+   The cashier POS panel fills main-content using flex:1,
+   relying on .cashier-page .main-content to constrain the viewport.
    =============================== */
+
+/* Make main-content a flex container so pos-panel can fill it */
+.cashier-page .main-content {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
 
 .panel.active.pos-panel {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - var(--space-lg, 24px) * 2 - 70px);
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
+}
+
+/* Non-POS panels (transactions, receipts, profile) — scroll within constrained main-content */
+.cashier-page .main-content .panel:not(.pos-panel).active {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 /* ===============================
@@ -453,7 +472,7 @@
   flex: 1;
   overflow-y: auto;
   padding: var(--space-2xs);
-  content-visibility: auto;
+  /* content-visibility auto removed — it conflicts with flex height in scrollable containers */
 }
 
 .pos-product-card {
@@ -1175,6 +1194,9 @@
 
 /* Tablet portrait (768px and below) — Single column */
 @media (max-width: 900px) {
+  .cashier-page .main-content {
+    height: 100dvh;
+  }
   .pos-body {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr auto;
