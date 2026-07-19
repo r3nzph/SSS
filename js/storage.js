@@ -62,7 +62,7 @@ async function hashPassword(password) {
 function getDefaultData() {
   return {
     users: [
-      { id: 'u1', username: 'admin', role: 'admin', createdAt: new Date().toISOString(),
+      { id: 'u1', username: 'admin', password: 'admin123', role: 'admin', createdAt: new Date().toISOString(),
         fullName: 'Administrator', email: '', contactNumber: '', status: 'active',
         lastLogin: null, createdBy: 'system', loginAttempts: 0, lockedUntil: null,
         forcePasswordChange: false, profilePicture: '',
@@ -70,7 +70,7 @@ function getDefaultData() {
           stockReceiving: true, stockAdjustment: true, salesAudit: true, reports: true,
           userManagement: true, settings: true, cashierPOS: true, backup: true,
           restore: true, deleteRecords: true, exportReports: true } },
-      { id: 'u2', username: 'cashier', role: 'cashier', createdAt: new Date().toISOString(),
+      { id: 'u2', username: 'cashier', password: 'cashier123', role: 'cashier', createdAt: new Date().toISOString(),
         fullName: 'Cashier', email: '', contactNumber: '', status: 'active',
         lastLogin: null, createdBy: 'system', loginAttempts: 0, lockedUntil: null,
         forcePasswordChange: false, profilePicture: '',

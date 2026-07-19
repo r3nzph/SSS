@@ -682,70 +682,116 @@
   text-transform: uppercase;
 }
 
-/* ---- Cashier Card ---- */
-.cashier-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 18px;
+/* ---- Demo Accounts ---- */
+.demo-accounts {
+  margin-bottom: 18px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
-  cursor: pointer;
+  overflow: hidden;
   transition: all var(--login-transition);
-  margin-bottom: 18px;
 }
 
-.cashier-card:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateY(-1px);
+.demo-accounts:hover {
+  border-color: rgba(255, 255, 255, 0.10);
 }
 
-.cashier-left {
+.demo-accounts-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.cashier-icon {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-}
-
-.cashier-card:hover .cashier-icon {
-  background: rgba(109, 93, 252, 0.12);
-  color: var(--accent);
-}
-
-.cashier-title {
-  font-size: 0.85rem;
+  gap: 8px;
+  padding: 12px 16px 8px;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text-white);
-  margin-bottom: 1px;
-}
-
-.cashier-desc {
-  font-size: 0.75rem;
   color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
-.cashier-arrow {
-  color: rgba(255, 255, 255, 0.15);
-  transition: all var(--login-transition);
+.demo-accounts-icon {
+  color: var(--accent);
+  opacity: 0.7;
   flex-shrink: 0;
 }
 
-.cashier-card:hover .cashier-arrow {
+.demo-accounts-label {
+  opacity: 0.8;
+}
+
+.demo-accounts-body {
+  padding: 0 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.demo-account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  transition: background var(--login-transition);
+}
+
+.demo-account-row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.demo-account-role {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-white);
+  white-space: nowrap;
+}
+
+.demo-account-role svg {
   color: var(--accent);
-  transform: translateX(2px);
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.demo-account-creds {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  letter-spacing: -0.2px;
+}
+
+.demo-account-sep {
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.10);
+  flex-shrink: 0;
+}
+
+.demo-label {
+  color: rgba(255, 255, 255, 0.25);
+  font-weight: 400;
+}
+
+.demo-accounts-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 16px 10px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.25);
+  line-height: 1.3;
+}
+
+.demo-accounts-footer svg {
+  opacity: 0.5;
+  flex-shrink: 0;
 }
 
 /* ---- Security Badge ---- */
@@ -902,14 +948,38 @@ html.light-mode .login-card-icon {
   border-color: rgba(109, 93, 252, 0.10);
 }
 
-html.light-mode .cashier-card {
+html.light-mode .demo-accounts {
   background: rgba(255, 255, 255, 0.5);
   border-color: rgba(0, 0, 0, 0.06);
 }
 
-html.light-mode .cashier-card:hover {
-  background: rgba(255, 255, 255, 0.7);
+html.light-mode .demo-accounts:hover {
   border-color: rgba(0, 0, 0, 0.10);
+}
+
+html.light-mode .demo-account-row {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(0, 0, 0, 0.04);
+}
+
+html.light-mode .demo-account-row:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+html.light-mode .demo-accounts-header {
+  color: #4b5563;
+}
+
+html.light-mode .demo-account-role {
+  color: #1a1a2e;
+}
+
+html.light-mode .demo-account-creds {
+  color: #6b7280;
+}
+
+html.light-mode .demo-label {
+  color: rgba(0, 0, 0, 0.25);
 }
 
 html.light-mode .or-line {
@@ -1040,6 +1110,9 @@ html:not(.light-mode) .theme-toggle-label:hover .theme-sun {
   .login-field input[type="text"],
   .login-field input[type="password"] { height: 46px; font-size: 0.85rem; }
   .btn-login { height: 46px; font-size: 0.9rem; }
-  .cashier-card { padding: 12px 14px; }
+  .demo-accounts-header { padding: 10px 14px 6px; }
+  .demo-accounts-body { padding: 0 14px 8px; gap: 6px; }
+  .demo-account-row { padding: 6px 10px; flex-direction: column; align-items: flex-start; gap: 4px; }
+  .demo-account-creds { font-size: 0.72rem; }
   .login-global-footer { padding: 10px 16px; flex-direction: column; gap: 6px; text-align: center; }
 }
