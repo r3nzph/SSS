@@ -143,6 +143,26 @@ function pluralize(count, singular, plural) {
   return count === 1 ? singular : (plural || singular + 's');
 }
 
+/**
+ * Centralized chart theme colors.
+ * Returns semantic color names that adapt to the current theme.
+ * All canvas-based charts should use these colors instead of hardcoded rgba().
+ */
+function getChartTheme() {
+  const isLight = document.documentElement.classList.contains('light-mode');
+  return {
+    chartTitle:    isLight ? '#111827' : 'rgba(255,255,255,0.6)',
+    axisLabel:     isLight ? '#374151' : 'rgba(255,255,255,0.5)',
+    axisLabelDim:  isLight ? '#4B5563' : 'rgba(255,255,255,0.4)',
+    dataValue:     isLight ? '#111827' : 'rgba(255,255,255,0.7)',
+    dataValueBold: isLight ? '#111827' : 'rgba(255,255,255,0.8)',
+    emptyText:     isLight ? '#6B7280' : 'rgba(255,255,255,0.3)',
+    mutedText:     isLight ? '#6B7280' : 'rgba(255,255,255,0.4)',
+    legendText:    isLight ? '#111827' : 'rgba(255,255,255,0.65)',
+    gridLine:      isLight ? '#E5E7EB' : 'rgba(255,255,255,0.08)',
+  };
+}
+
 /** Get stock level CSS class */
 function getStockLevel(stock, product) {
   if (product && product.archived) return 'stock-archived';
@@ -195,7 +215,7 @@ export default {
   getISOTimestamp, getInputValue, showModal, hideModal, handleError,
   clamp, debounce, truncate, todayISO, todayStart, todayEnd, formatPercent, pluralize,
   getStockLevel, clearInput, setInputValue, getExistingIds, getSelectValue, setSelectValue,
-  getStoreSettings
+  getStoreSettings, getChartTheme
 };
 
 export {
@@ -203,5 +223,5 @@ export {
   getISOTimestamp, getInputValue, showModal, hideModal, handleError,
   clamp, debounce, truncate, todayISO, todayStart, todayEnd, formatPercent, pluralize,
   getStockLevel, clearInput, setInputValue, getExistingIds, getSelectValue, setSelectValue,
-  getStoreSettings
+  getStoreSettings, getChartTheme
 };

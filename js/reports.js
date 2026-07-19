@@ -28,7 +28,7 @@ if (typeof CanvasRenderingContext2D !== 'undefined' && !CanvasRenderingContext2D
 import Auth from './auth.js';
 import Audit from './audit.js';
 import UI from './ui.js';
-import { escapeHtml, formatCurrency, formatDate } from './utils.js';
+import { escapeHtml, formatCurrency, formatDate, getChartTheme } from './utils.js';
 // Import Sales for receipt viewing (used in viewReceipt)
 import Sales from './transactions.js';
 
@@ -112,11 +112,28 @@ const SalesReports = {
   // ============================
 
   renderAll() {
+    this._initChartThemeListener();
     this._renderTabs();
     this._highlightActiveTab();
     this._highlightActiveRange();
     this._renderTabContent();
     this._renderDateFilterBar();
+  },
+
+  /** Re-render overview charts when theme changes (fires once) */
+  _initChartThemeListener() {
+    if (this._chartListenerInit) return;
+    this._chartListenerInit = true;
+    window.addEventListener('theme-changed', () => {
+      const overviewCharts = ['srRevenueChart','srProfitChart','srBestSellingChart','srCategoryChart','srCashierChart'];
+      if (overviewCharts.some(id => document.getElementById(id))) {
+        this._drawRevenueChart();
+        this._drawProfitChart();
+        this._drawBestSellingChart();
+        this._drawCategoryChart();
+        this._drawCashierChart();
+      }
+    });
   },
 
   _renderTabs() {
@@ -435,6 +452,7 @@ const SalesReports = {
     if (!ctx) return;
 
     const transactions = this._getFilteredTransactions();
+    const ct = getChartTheme();
     const w = ctx.canvas.width, h = ctx.canvas.height;
     const pad = { top: 22, bottom: 26, left: 8, right: 8 };
     const chartW = w - pad.left - pad.right;
@@ -457,7 +475,7 @@ const SalesReports = {
     const barW = chartW / days.length * 0.55;
     const gap = chartW / days.length;
 
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillStyle = ct.chartTitle;
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('Daily Revenue Trend', pad.left, 14);
@@ -476,12 +494,12 @@ const SalesReports = {
       ctx.roundRect(x, y, barW, barH, [3, 3, 0, 0]);
       ctx.fill();
 
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillStyle = ct.axisLabelDim;
       ctx.font = '8px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(day.label, x + barW / 2, h - 4);
       if (day.total > 0) {
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillStyle = ct.dataValue;
         ctx.font = '7px sans-serif';
         ctx.fillText('₱' + day.total.toFixed(0), x + barW / 2, y - 3);
       }
@@ -494,6 +512,7 @@ const SalesReports = {
 
     const transactions = this._getFilteredTransactions();
     const products = (Auth.state.db.products || []);
+    const ct = getChartTheme();
     const w = ctx.canvas.width, h = ctx.canvas.height;
     const pad = { top: 22, bottom: 26, left: 8, right: 8 };
     const chartW = w - pad.left - pad.right;
@@ -524,7 +543,7 @@ const SalesReports = {
     const barW = chartW / days.length * 0.35;
     const gap = chartW / days.length;
 
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillStyle = ct.chartTitle;
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('Revenue vs Profit', pad.left, 14);
@@ -555,7 +574,7 @@ const SalesReports = {
       ctx.roundRect(profitX, profitY, barW, profitH, [3, 3, 0, 0]);
       ctx.fill();
 
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillStyle = ct.axisLabelDim;
       ctx.font = '8px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(day.label, cx, h - 4);
@@ -565,7 +584,7 @@ const SalesReports = {
     const accentRgba = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim() || '#6D5DFC';
     ctx.fillStyle = accentRgba + 'CC';
     ctx.fillRect(w - 130, 8, 10, 10);
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillStyle = ct.legendText;
     ctx.font = '8px sans-serif';
     ctx.fillText('Revenue', w - 116, 16);
     ctx.fillStyle = 'rgba(0,184,148,0.8)';
@@ -578,6 +597,7 @@ const SalesReports = {
     if (!ctx) return;
 
     const transactions = this._getFilteredTransactions();
+    const ct = getChartTheme();
     const w = ctx.canvas.width, h = ctx.canvas.height;
     const pad = { top: 22, bottom: 16, left: 90, right: 36 };
     const chartW = w - pad.left - pad.right;
@@ -597,13 +617,13 @@ const SalesReports = {
 
     const sorted = Object.entries(productSales).sort((a, b) => b[1].qty - a[1].qty).slice(0, 8);
 
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillStyle = ct.chartTitle;
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('Best Selling Products', pad.left, 14);
 
     if (sorted.length === 0) {
-      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fillStyle = ct.emptyText;
       ctx.textAlign = 'center';
       ctx.font = '11px sans-serif';
       ctx.fillText('No sales data', w / 2, h / 2);
@@ -617,7 +637,7 @@ const SalesReports = {
       const y = pad.top + i * (barH + 5);
       const barW = (info.qty / maxQty) * chartW;
 
-      ctx.fillStyle = 'rgba(255,255,255,0.65)';
+      ctx.fillStyle = ct.legendText;
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'right';
       const label = name.length > 12 ? name.slice(0, 11) + '\u2026' : name;
@@ -632,7 +652,7 @@ const SalesReports = {
       ctx.roundRect(pad.left, y, barW, barH, [0, 3, 3, 0]);
       ctx.fill();
 
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillStyle = ct.dataValueBold;
       ctx.font = 'bold 9px sans-serif';
       ctx.textAlign = 'left';
       ctx.fillText(info.qty + ' sold', pad.left + barW + 5, y + barH / 2 + 3.5);
@@ -646,6 +666,7 @@ const SalesReports = {
     const data = Auth.state.db;
     const products = data.products || [];
     const transactions = this._getFilteredTransactions();
+    const ct = getChartTheme();
     const w = ctx.canvas.width, h = ctx.canvas.height;
     const pad = { top: 22, bottom: 16, left: 90, right: 36 };
     const chartW = w - pad.left - pad.right;
@@ -666,13 +687,13 @@ const SalesReports = {
 
     const sorted = Object.entries(categorySales).sort((a, b) => b[1].revenue - a[1].revenue).slice(0, 6);
 
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillStyle = ct.chartTitle;
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('Categories by Revenue', pad.left, 14);
 
     if (sorted.length === 0) {
-      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fillStyle = ct.emptyText;
       ctx.textAlign = 'center';
       ctx.font = '11px sans-serif';
       ctx.fillText('No category data', w / 2, h / 2);
@@ -685,7 +706,7 @@ const SalesReports = {
     sorted.forEach(([cat, info], i) => {
       const y = pad.top + i * (barH + 5);
       const barW = (info.revenue / maxRev) * chartW;
-      ctx.fillStyle = 'rgba(255,255,255,0.65)';
+      ctx.fillStyle = ct.legendText;
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'right';
       const label = cat.length > 12 ? cat.slice(0, 11) + '\u2026' : cat;
@@ -700,7 +721,7 @@ const SalesReports = {
       ctx.roundRect(pad.left, y, barW, barH, [0, 3, 3, 0]);
       ctx.fill();
 
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillStyle = ct.dataValueBold;
       ctx.font = 'bold 9px sans-serif';
       ctx.textAlign = 'left';
       ctx.fillText(formatCurrency(info.revenue), pad.left + barW + 5, y + barH / 2 + 3.5);
@@ -712,6 +733,7 @@ const SalesReports = {
     if (!ctx) return;
 
     const transactions = this._getFilteredTransactions();
+    const ct = getChartTheme();
     const w = ctx.canvas.width, h = ctx.canvas.height;
     const pad = { top: 22, bottom: 16, left: 90, right: 36 };
     const chartW = w - pad.left - pad.right;
@@ -727,13 +749,13 @@ const SalesReports = {
 
     const sorted = Object.entries(cashierMap).sort((a, b) => b[1].revenue - a[1].revenue).slice(0, 6);
 
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillStyle = ct.chartTitle;
     ctx.font = '10px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('Sales by Cashier', pad.left, 14);
 
     if (sorted.length === 0) {
-      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.fillStyle = ct.emptyText;
       ctx.textAlign = 'center';
       ctx.font = '11px sans-serif';
       ctx.fillText('No cashier data', w / 2, h / 2);
@@ -746,7 +768,7 @@ const SalesReports = {
     sorted.forEach(([name, info], i) => {
       const y = pad.top + i * (barH + 6);
       const barW = (info.revenue / maxRev) * chartW;
-      ctx.fillStyle = 'rgba(255,255,255,0.65)';
+      ctx.fillStyle = ct.legendText;
       ctx.font = '10px sans-serif';
       ctx.textAlign = 'right';
       const label = name.length > 12 ? name.slice(0, 11) + '\u2026' : name;
@@ -761,7 +783,7 @@ const SalesReports = {
       ctx.roundRect(pad.left, y, barW, barH, [0, 3, 3, 0]);
       ctx.fill();
 
-      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillStyle = ct.dataValueBold;
       ctx.font = 'bold 9px sans-serif';
       ctx.textAlign = 'left';
       ctx.fillText(formatCurrency(info.revenue) + ` (${info.count} tx)`, pad.left + barW + 5, y + barH / 2 + 3.5);

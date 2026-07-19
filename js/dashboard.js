@@ -3,12 +3,13 @@
 // ===============================
 
 import Auth from './auth.js';
-import { formatCurrency } from './utils.js';
+import { formatCurrency, getChartTheme } from './utils.js';
 
 const Dashboard = {
   _charts: [],
 
   renderDashboard() {
+    this._initThemeListener();
     try {
       this.renderKPI();
     } catch (e) {
@@ -24,6 +25,17 @@ const Dashboard = {
     } catch (e) {
       console.error('[DASHBOARD] Low stock render failed:', e);
     }
+  },
+
+  /** Re-render charts on theme change (runs once) */
+  _initThemeListener() {
+    if (this._listenerInitialized) return;
+    this._listenerInitialized = true;
+    window.addEventListener('theme-changed', () => {
+      if (document.getElementById('salesChart') || document.getElementById('topProductsChart')) {
+        this.renderCharts();
+      }
+    });
   },
 
   renderDashboardLowStock() {
@@ -148,11 +160,12 @@ const Dashboard = {
       days.push({ label, total: dayTotal });
     }
     const max = Math.max(...days.map(d => d.total), 1);
+    const ct = getChartTheme();
     const w = canvas.width, h = canvas.height, pad = { top: 20, bottom: 30, left: 10, right: 10 };
     const chartW = w - pad.left - pad.right, chartH = h - pad.top - pad.bottom;
     const barW = chartW / days.length * 0.6, gap = chartW / days.length;
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    ctx.fillStyle = ct.chartTitle;
     ctx.font = '11px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('Sales (7 days)', pad.left, 14);
@@ -165,10 +178,10 @@ const Dashboard = {
       grad.addColorStop(0, accentPrimary); grad.addColorStop(1, accentPrimary + '4D');
       ctx.fillStyle = grad; ctx.beginPath();
       ctx.roundRect(x, y, barW, barH, [4, 4, 0, 0]); ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+      ctx.fillStyle = ct.axisLabel; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
       ctx.fillText(day.label, x + barW / 2, h - 6);
       if (day.total > 0) {
-        ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '9px sans-serif';
+        ctx.fillStyle = ct.dataValue; ctx.font = '9px sans-serif';
         ctx.fillText('₱' + day.total.toFixed(0), x + barW / 2, y - 4);
       }
     });
@@ -190,21 +203,22 @@ const Dashboard = {
       productSales[item.name].total += item.total || 0;
     });});
     const sorted = Object.entries(productSales).sort((a, b) => b[1].qty - a[1].qty).slice(0, 5);
+    const ct = getChartTheme();
     const w = canvas.width, h = canvas.height, pad = { top: 20, bottom: 20, left: 100, right: 40 };
     const chartW = w - pad.left - pad.right, chartH = h - pad.top - pad.bottom;
     const barH = Math.min(28, chartH / Math.max(sorted.length, 1) - 6);
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillStyle = ct.chartTitle; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
     ctx.fillText('Top Products', pad.left, 14);
     if (sorted.length === 0) {
-      ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.textAlign = 'center';
+      ctx.fillStyle = ct.emptyText; ctx.textAlign = 'center';
       ctx.fillText('No sales data yet', w / 2, h / 2); return;
     }
     const maxQty = Math.max(...sorted.map(s => s[1].qty), 1);
     sorted.forEach(([name, info], i) => {
       const y = pad.top + i * (barH + 8);
       const barW = (info.qty / maxQty) * chartW;
-      ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+      ctx.fillStyle = ct.legendText; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
       const label = name.length > 12 ? name.slice(0, 12) + '...' : name;
       ctx.fillText(label, pad.left - 8, y + barH / 2 + 4);
       const grad = ctx.createLinearGradient(pad.left, 0, pad.left + chartW, 0);
@@ -212,7 +226,7 @@ const Dashboard = {
       grad.addColorStop(0, `hsla(${hue}, 70%, 60%, 0.9)`); grad.addColorStop(1, `hsla(${hue}, 70%, 60%, 0.3)`);
       ctx.fillStyle = grad; ctx.beginPath();
       ctx.roundRect(pad.left, y, barW, barH, [0, 4, 4, 0]); ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,0.8)'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillStyle = ct.dataValueBold; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left';
       ctx.fillText(info.qty + ' sold', pad.left + barW + 6, y + barH / 2 + 4);
     });
   }
