@@ -8,7 +8,7 @@ import Auth from './auth.js';
 import StorageService from './storage.js';
 import UI from './ui.js';
 import Audit from './audit.js';
-import { escapeHtml, formatCurrency, getInputValue, setInputValue, clearInput, generateId, showModal, hideModal, handleError } from './utils.js';
+import { escapeHtml, formatCurrency, getInputValue, setInputValue, clearInput, generateId, showModal, hideModal, handleError, getExistingIds } from './utils.js';
 
 const Inventory = {
   _currentSort: { field: 'name', dir: 'asc' },
@@ -392,9 +392,13 @@ const Inventory = {
         await Audit.logAction('PRODUCT_UPDATE', `Updated "${name}" (ID: ${this._editingProductId})`);
         UI.toast(`"${name}" updated.`, 'success');
       } else {
-        // ADD new product
+        // ADD new product — ensure unique ID
         const existingIds = getExistingIds('products');
-        productData.id = generateId('p');
+        let productId;
+        do {
+          productId = generateId('p');
+        } while (existingIds.includes(productId));
+        productData.id = productId;
         productData.dateAdded = new Date().toISOString();
         const r = StorageService.save('products', productData);
         if (!r.success) { UI.toast(r.error || 'Add failed.', 'error'); return; }
