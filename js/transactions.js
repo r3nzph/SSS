@@ -32,11 +32,22 @@ const Sales = {
       }
     }
 
-    const total = cart.reduce((sum, item) => sum + item.total, 0);
+    // Calculate real total with discount and tax (mirrors CashierPOS.renderCart logic)
+    const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
+    const discountInput = document.getElementById('posDiscountInput');
+    const discountPercent = parseFloat(discountInput?.value) || 0;
+    const discountAmount = subtotal * (discountPercent / 100);
+    const taxable = subtotal - discountAmount;
+    const s = getStoreSettings();
+    const taxRate = parseFloat(s.taxRate) || 0;
+    const taxAmount = taxable * (taxRate / 100);
+    const total = taxable + taxAmount;
 
-    // Get payment details from CashierPOS module
+    // Get payment details from CashierPOS module and DOM
     let paymentMethod = 'cash';
     let paymentRef = '';
+    let amountTendered = 0;
+    let change = 0;
     try {
       if (window.Cashier) {
         paymentMethod = window.Cashier.getPaymentMethod ? window.Cashier.getPaymentMethod() : 'cash';
@@ -44,8 +55,13 @@ const Sales = {
       }
     } catch(e) {}
 
+    // Get tendered amount from the DOM
+    const tenderedInput = document.getElementById('posTendered');
+    amountTendered = parseFloat(tenderedInput?.value) || 0;
+    change = Math.max(0, amountTendered - total);
+
     try {
-      // Build the transaction (moved from old StorageService.checkout())
+      // Build the transaction with all payment fields
       const transaction = {
         id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5).toUpperCase(),
         items: cart.map(item => {
@@ -62,7 +78,16 @@ const Sales = {
             price: item.price, qty: item.qty, total: item.total
           };
         }),
+        subtotal,
+        discountPercent,
+        discountAmount,
+        taxRate,
+        taxAmount,
         total,
+        paymentMethod,
+        paymentRef,
+        amountTendered,
+        change,
         cashier: Auth.state.user || 'unknown',
         date: new Date().toISOString()
       };
@@ -119,9 +144,17 @@ const Sales = {
   showReceipt(transaction) {
     const receiptItems = document.getElementById('receiptItems');
     const receiptTotal = document.getElementById('receiptTotal');
+    const receiptSubtotal = document.getElementById('receiptSubtotal');
+    const receiptDiscount = document.getElementById('receiptDiscount');
+    const receiptDiscountRow = document.getElementById('receiptDiscountRow');
     const receiptDate = document.getElementById('receiptDate');
     const receiptId = document.getElementById('receiptId');
     const receiptCashier = document.getElementById('receiptCashier');
+    const receiptPaymentMethod = document.getElementById('receiptPaymentMethod');
+    const receiptTendered = document.getElementById('receiptTendered');
+    const receiptTenderedRow = document.getElementById('receiptTenderedRow');
+    const receiptChange = document.getElementById('receiptChange');
+    const receiptChangeRow = document.getElementById('receiptChangeRow');
     const storeName = document.getElementById('receiptStoreName');
     const storeAddr = document.getElementById('receiptStoreAddress');
     const receiptMsg = document.getElementById('receiptMessage');
@@ -140,10 +173,55 @@ const Sales = {
       `).join('');
     }
 
-    if (receiptTotal) receiptTotal.textContent = formatCurrency(transaction.total);
+    // Core receipt data
     if (receiptDate) receiptDate.textContent = formatDate(transaction.date);
     if (receiptId) receiptId.textContent = transaction.id;
     if (receiptCashier) receiptCashier.textContent = transaction.cashier;
+
+    // Payment summary
+    const txSubtotal = transaction.subtotal || transaction.total || 0;
+    const txDiscount = transaction.discountAmount || 0;
+    if (receiptSubtotal) receiptSubtotal.textContent = formatCurrency(txSubtotal);
+    if (receiptTotal) receiptTotal.textContent = formatCurrency(transaction.total || 0);
+
+    // Discount row (show only if discount > 0)
+    if (receiptDiscountRow && receiptDiscount) {
+      if (txDiscount > 0) {
+        receiptDiscountRow.classList.remove('hidden');
+        receiptDiscount.textContent = '−' + formatCurrency(txDiscount);
+      } else {
+        receiptDiscountRow.classList.add('hidden');
+      }
+    }
+
+    // Payment method
+    if (receiptPaymentMethod) {
+      const icons = { cash: '💵 Cash', gcash: '📱 GCash', card: '💳 Card' };
+      receiptPaymentMethod.textContent = icons[transaction.paymentMethod] || transaction.paymentMethod || 'Cash';
+    }
+
+    // Tendered and change (show only for cash payments)
+    const isCash = !transaction.paymentMethod || transaction.paymentMethod === 'cash';
+    const txTendered = transaction.amountTendered || 0;
+    const txChange = transaction.change || 0;
+
+    if (receiptTenderedRow) {
+      if (isCash && txTendered > 0) {
+        receiptTenderedRow.classList.remove('hidden');
+        if (receiptTendered) receiptTendered.textContent = formatCurrency(txTendered);
+      } else {
+        receiptTenderedRow.classList.add('hidden');
+      }
+    }
+
+    if (receiptChangeRow) {
+      if (isCash && txChange > 0) {
+        receiptChangeRow.classList.remove('hidden');
+        if (receiptChange) receiptChange.textContent = formatCurrency(txChange);
+      } else {
+        receiptChangeRow.classList.add('hidden');
+      }
+    }
 
     // Wire settings into receipt
     if (storeName) storeName.textContent = s.storeName || 'Sari-Sari Store';
@@ -153,11 +231,13 @@ const Sales = {
     }
     if (receiptMsg) receiptMsg.textContent = s.receiptMessage || 'Thank you for your purchase! \u2764\ufe0f';
     if (headerText) headerText.textContent = s.receiptHeader || '';
+
+    // Tax info on receipt
     if (taxInfo) {
-      const taxRate = s.taxRate || 0;
-      if (taxRate > 0 && s.showTaxOnReceipt !== false) {
-        const taxAmt = (transaction.total || 0) * (taxRate / (100 + taxRate));
-        taxInfo.textContent = `VAT (${taxRate}%): ${formatCurrency(taxAmt)}`;
+      const txTaxRate = transaction.taxRate || s.taxRate || 0;
+      const txTaxAmount = transaction.taxAmount || 0;
+      if (txTaxRate > 0 && txTaxAmount > 0) {
+        taxInfo.textContent = `VAT (${txTaxRate}%): ${formatCurrency(txTaxAmount)}`;
         taxInfo.classList.remove('hidden');
       } else {
         taxInfo.classList.add('hidden');

@@ -345,8 +345,31 @@
         </thead>
         <tbody id="receiptItems"></tbody>
       </table>
-      <div class="receipt-total">
-        <strong>Total: <span id="receiptTotal">₱0.00</span></strong>
+      <div class="receipt-summary" style="padding:8px 16px;border-top:1px dashed var(--border-glass);font-size:0.8rem;">
+        <div class="receipt-summary-row" style="display:flex;justify-content:space-between;padding:2px 0;">
+          <span>Subtotal</span>
+          <span id="receiptSubtotal">₱0.00</span>
+        </div>
+        <div class="receipt-summary-row hidden" id="receiptDiscountRow" style="display:flex;justify-content:space-between;padding:2px 0;">
+          <span>Discount</span>
+          <span id="receiptDiscount" class="text-success">−₱0.00</span>
+        </div>
+        <div class="receipt-summary-row" style="display:flex;justify-content:space-between;padding:2px 0;font-weight:600;border-top:1px solid var(--border-glass);margin-top:4px;padding-top:6px;">
+          <span>TOTAL</span>
+          <span id="receiptTotal">₱0.00</span>
+        </div>
+        <div class="receipt-payment-row" style="display:flex;justify-content:space-between;padding:2px 0;margin-top:4px;border-top:1px dashed var(--border-glass);padding-top:6px;">
+          <span>Payment</span>
+          <span id="receiptPaymentMethod">—</span>
+        </div>
+        <div class="receipt-summary-row hidden" id="receiptTenderedRow" style="display:flex;justify-content:space-between;padding:2px 0;">
+          <span>Amount Tendered</span>
+          <span id="receiptTendered">₱0.00</span>
+        </div>
+        <div class="receipt-summary-row hidden" id="receiptChangeRow" style="display:flex;justify-content:space-between;padding:2px 0;">
+          <span>Change</span>
+          <span id="receiptChange" class="text-success">₱0.00</span>
+        </div>
       </div>
       <div class="receipt-header-text" id="receiptHeaderText" style="text-align:center;font-size:0.75rem;color:var(--text-muted);padding:4px 16px;"></div>
       <div class="receipt-footer">

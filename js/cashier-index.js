@@ -239,8 +239,12 @@ const CashierModule = {
       return;
     }
     CashierPOS.renderCashier();
-    if (this._currentView === 'cashier-transactions') this._renderTransactions();
-    if (this._currentView === 'cashier-receipts') this._renderReceipts();
+    // Always refresh transactions and receipts so they reflect the latest
+    // saved data. The _viewHasData() check in switchView() would otherwise
+    // skip re-rendering when the placeholder text is already in the DOM,
+    // causing newly saved transactions to never appear.
+    this._renderTransactions();
+    this._renderReceipts();
     if (this._currentView === 'cashier-profile') this._renderProfile();
   }
 };
