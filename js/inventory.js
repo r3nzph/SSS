@@ -56,7 +56,7 @@ const Inventory = {
     if (!tbody) return;
     const products = StorageService.load('products');
     if (!products || products.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7">No products in inventory.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8">No products in inventory.</td></tr>';
       return;
     }
 
@@ -71,7 +71,7 @@ const Inventory = {
     this._renderSummary(total);
 
     if (page.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7">No products match your criteria.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8">No products match your criteria.</td></tr>';
       return;
     }
 
@@ -83,7 +83,9 @@ const Inventory = {
       const isSelected = this._selectedIds.has(p.id);
       return `<tr class="${stockClass}${isSelected ? ' row-selected' : ''}${p.archived ? ' row-archived' : ''}">
         <td><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="Inventory.toggleSelect('${p.id}')"></td>
-        <td>${p.image ? `<img src="${escapeHtml(p.image)}" class="inv-thumb" alt="${escapeHtml(p.name)}" onclick="Inventory.showImagePreview('${escapeHtml(p.image)}')" loading="lazy">` : '<span class="inv-thumb-placeholder">📦</span>'}</td>
+        <td>${p.image 
+          ? `<div class="product-thumbnail"><img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onclick="Inventory.showImagePreview('${escapeHtml(p.image)}')" loading="lazy"></div>`
+          : `<div class="product-thumbnail"><span>📦</span></div>`}</td>
         <td>
           <strong>${escapeHtml(p.name)}</strong>
           <div class="inv-meta">
