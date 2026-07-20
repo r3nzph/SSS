@@ -83,7 +83,7 @@ const Inventory = {
       const isSelected = this._selectedIds.has(p.id);
       return `<tr class="${stockClass}${isSelected ? ' row-selected' : ''}${p.archived ? ' row-archived' : ''}">
         <td><input type="checkbox" ${isSelected ? 'checked' : ''} onchange="Inventory.toggleSelect('${p.id}')"></td>
-        <td>${p.image ? `<img src="${escapeHtml(p.image)}" class="inv-thumb" alt="">` : '<span class="inv-thumb-placeholder">📦</span>'}</td>
+        <td>${p.image ? `<img src="${escapeHtml(p.image)}" class="inv-thumb" alt="${escapeHtml(p.name)}" onclick="Inventory.showImagePreview('${escapeHtml(p.image)}')" loading="lazy">` : '<span class="inv-thumb-placeholder">📦</span>'}</td>
         <td>
           <strong>${escapeHtml(p.name)}</strong>
           <div class="inv-meta">
@@ -507,6 +507,38 @@ const Inventory = {
     } else {
       preview.classList.add('hidden');
       placeholder.classList.remove('hidden');
+    }
+  },
+
+  // ============================
+  // IMAGE PREVIEW LIGHTBOX
+  // ============================
+
+  showImagePreview(src) {
+    let overlay = document.getElementById('imagePreviewOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'imagePreviewOverlay';
+      overlay.className = 'image-preview-overlay';
+      overlay.onclick = () => this.closeImagePreview();
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML = `<img src="${escapeHtml(src)}" alt="Product image">`;
+    overlay.classList.add('active');
+
+    // Close on Escape key — store handler reference so closeImagePreview can clean it up
+    this._previewKeyHandler = (e) => {
+      if (e.key === 'Escape') this.closeImagePreview();
+    };
+    document.addEventListener('keydown', this._previewKeyHandler);
+  },
+
+  closeImagePreview() {
+    const overlay = document.getElementById('imagePreviewOverlay');
+    if (overlay) overlay.classList.remove('active');
+    if (this._previewKeyHandler) {
+      document.removeEventListener('keydown', this._previewKeyHandler);
+      this._previewKeyHandler = null;
     }
   },
 
