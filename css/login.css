@@ -871,7 +871,7 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-html.light-mode .theme-switch {
+[data-theme="light"] .theme-switch {
   background: var(--accent);
 }
 
@@ -887,7 +887,7 @@ html.light-mode .theme-switch {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-html.light-mode .theme-knob {
+[data-theme="light"] .theme-knob {
   transform: translateX(16px);
 }
 
@@ -904,119 +904,253 @@ html.light-mode .theme-knob {
 
 /* ===============================
    LIGHT MODE OVERRIDES — Login Page
+   Professional soft-light palette with WCAG AA contrast.
    =============================== */
 
-html.light-mode body.login-page {
-  --bg-login: #f0f2f5;
-  --bg-login-surface: #ffffff;
-  --border-subtle: rgba(0, 0, 0, 0.08);
-  --glow: rgba(109, 93, 252, 0.10);
-  --input-glass: #ffffff;
+/* ---- CSS Variable Overrides ---- */
+[data-theme="light"] body.login-page {
+  --bg-login: #F3F4F6;
+  --bg-login-surface: #FFFFFF;
+  --accent: #6366F1;
+  --accent-hover: #4F46E5;
+  --text-white: #111827;
+  --text-secondary: #4B5563;
+  --border-subtle: #CBD5E1;
+  --card-bg: #FFFFFF;
+  --glow: rgba(99, 102, 241, 0.18);
+  --input-glass: #FFFFFF;
 }
 
-/* Right panel text colors for light mode */
-html.light-mode body.login-page .login-right {
-  --text-white: #1a1a2e;
-  --text-secondary: #6b7280;
+/* Right panel */
+[data-theme="light"] body.login-page .login-right {
+  --text-white: #111827;
+  --text-secondary: #4B5563;
 }
 
-/* Left panel text MUST stay white (dark overlay background) */
-html.light-mode body.login-page .login-left {
-  --text-white: #ffffff;
-  --text-secondary: #a8aec9;
+/* Left panel — stays dark overlay over background image */
+[data-theme="light"] body.login-page .login-left {
+  --text-white: #FFFFFF;
+  --text-secondary: #A8AEC9;
 }
 
-html.light-mode .login-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(109, 93, 252, 0.12);
+/* ---- Login Card ---- */
+[data-theme="light"] .login-card {
+  background: #FFFFFF;
+  border: 1px solid #D1D5DB;
   box-shadow:
-    0 0 0 1px rgba(109, 93, 252, 0.06),
-    0 20px 60px rgba(0, 0, 0, 0.06),
-    0 0 80px rgba(109, 93, 252, 0.06);
+    0 4px 6px rgba(15, 23, 42, 0.06),
+    0 10px 20px rgba(15, 23, 42, 0.08);
 }
 
-html.light-mode .login-card-glow {
+[data-theme="light"] .login-card-glow {
   background: radial-gradient(
     ellipse at 50% 0%,
-    rgba(109, 93, 252, 0.04) 0%,
+    rgba(99, 102, 241, 0.06) 0%,
     transparent 60%
   );
 }
 
-html.light-mode .login-card-icon {
-  background: linear-gradient(135deg, rgba(109, 93, 252, 0.12), rgba(109, 93, 252, 0.06));
-  border-color: rgba(109, 93, 252, 0.10);
+[data-theme="light"] .login-card-icon {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.08));
+  border-color: rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.12);
 }
 
-html.light-mode .demo-accounts {
-  background: rgba(255, 255, 255, 0.5);
-  border-color: rgba(0, 0, 0, 0.06);
+/* ---- Input Fields ---- */
+[data-theme="light"] .input-wrap .input-icon {
+  color: #9CA3AF;
 }
 
-html.light-mode .demo-accounts:hover {
-  border-color: rgba(0, 0, 0, 0.10);
+[data-theme="light"] .input-wrap:focus-within .input-icon {
+  color: var(--accent);
 }
 
-html.light-mode .demo-account-row {
-  background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(0, 0, 0, 0.04);
+[data-theme="light"] .login-field input[type="text"],
+[data-theme="light"] .login-field input[type="password"] {
+  background: #FFFFFF;
+  border-color: #CBD5E1;
+  color: #111827;
 }
 
-html.light-mode .demo-account-row:hover {
-  background: rgba(255, 255, 255, 0.8);
+[data-theme="light"] .login-field input::placeholder {
+  color: #9CA3AF;
 }
 
-html.light-mode .demo-accounts-header {
-  color: #4b5563;
+[data-theme="light"] .login-field input:hover {
+  border-color: #9CA3AF;
+  background: #F8FAFC;
 }
 
-html.light-mode .demo-account-role {
-  color: #1a1a2e;
+[data-theme="light"] .login-field input:focus {
+  background: #FFFFFF;
+  border-color: #6366F1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15), 0 0 20px rgba(99, 102, 241, 0.08);
 }
 
-html.light-mode .demo-account-creds {
-  color: #6b7280;
+/* ---- Password Toggle ---- */
+[data-theme="light"] .password-toggle {
+  color: #9CA3AF;
 }
 
-html.light-mode .demo-label {
-  color: rgba(0, 0, 0, 0.25);
+[data-theme="light"] .password-toggle:hover {
+  color: #6366F1;
+  background: rgba(99, 102, 241, 0.08);
 }
 
-html.light-mode .or-line {
-  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.08), transparent);
+/* ---- Remember Me Checkbox ---- */
+[data-theme="light"] .remember-check {
+  border-color: #CBD5E1;
+  background: #FFFFFF;
 }
 
-html.light-mode .theme-moon {
+[data-theme="light"] .login-remember:hover .remember-check {
+  border-color: #9CA3AF;
+}
+
+[data-theme="light"] .remember-text {
+  color: #4B5563;
+}
+
+/* ---- Forgot Password ---- */
+[data-theme="light"] .login-forgot {
+  color: #6366F1;
+}
+
+[data-theme="light"] .login-forgot:hover {
+  color: #4F46E5;
+}
+
+/* ---- OR Divider ---- */
+[data-theme="light"] .or-line {
+  background: linear-gradient(to right, transparent, #D1D5DB, transparent);
+}
+
+[data-theme="light"] .or-text {
+  color: #9CA3AF;
+}
+
+/* ---- Demo Accounts ---- */
+[data-theme="light"] .demo-accounts {
+  background: #F8FAFC;
+  border-color: #D1D5DB;
+}
+
+[data-theme="light"] .demo-accounts:hover {
+  border-color: #9CA3AF;
+}
+
+[data-theme="light"] .demo-accounts-header {
+  color: #4B5563;
+}
+
+[data-theme="light"] .demo-accounts-icon {
+  color: #6366F1;
   opacity: 0.8;
 }
 
-html.light-mode .theme-sun {
-  opacity: 0.4;
-}
-
-/* Override hover on theme icons in light mode so icon stays visible */
-html.light-mode .theme-toggle-label:hover .theme-moon {
+[data-theme="light"] .demo-accounts-label {
   opacity: 1;
 }
 
-html.light-mode .theme-toggle-label:hover .theme-sun {
-  opacity: 0.5;
+[data-theme="light"] .demo-account-row {
+  background: #FFFFFF;
+  border-color: #E2E8F0;
 }
 
-/* Dark mode icon states (default) */
-html:not(.light-mode) .theme-moon {
-  opacity: 0.4;
+[data-theme="light"] .demo-account-row:hover {
+  background: #F1F5F9;
 }
 
-html:not(.light-mode) .theme-sun {
-  opacity: 0.8;
+[data-theme="light"] .demo-account-role {
+  color: #111827;
 }
 
-html:not(.light-mode) .theme-toggle-label:hover .theme-moon {
+[data-theme="light"] .demo-account-role svg {
+  color: #6366F1;
+  opacity: 0.9;
+}
+
+[data-theme="light"] .demo-account-creds {
+  color: #4B5563;
+}
+
+[data-theme="light"] .demo-account-sep {
+  background: #D1D5DB;
+}
+
+[data-theme="light"] .demo-label {
+  color: #9CA3AF;
+}
+
+[data-theme="light"] .demo-accounts-footer {
+  color: #6B7280;
+}
+
+[data-theme="light"] .demo-accounts-footer svg {
+  opacity: 0.6;
+  color: #6366F1;
+}
+
+/* ---- Security Badge ---- */
+[data-theme="light"] .login-security {
+  color: #6B7280;
+}
+
+/* ---- Global Footer ---- */
+[data-theme="light"] .login-global-footer {
+  color: #9CA3AF;
+}
+
+/* ---- Theme Toggle ---- */
+[data-theme="light"] .theme-toggle-label {
   opacity: 0.6;
 }
 
-html:not(.light-mode) .theme-toggle-label:hover .theme-sun {
+[data-theme="light"] .theme-toggle-label:hover {
+  opacity: 1;
+}
+
+[data-theme="light"] .theme-switch {
+  background: #6366F1;
+  border-color: transparent;
+}
+
+[data-theme="light"] .theme-knob {
+  transform: translateX(16px);
+}
+
+[data-theme="light"] .theme-sun {
+  opacity: 0.9;
+  color: #F59E0B;
+}
+
+[data-theme="light"] .theme-moon {
+  opacity: 0.4;
+  color: #6366F1;
+}
+
+[data-theme="light"] .theme-toggle-label:hover .theme-sun {
+  opacity: 1;
+}
+
+[data-theme="light"] .theme-toggle-label:hover .theme-moon {
+  opacity: 0.6;
+}
+
+/* Dark mode icon states (default) */
+html:not([data-theme="light"]) .theme-moon {
+  opacity: 0.4;
+}
+
+html:not([data-theme="light"]) .theme-sun {
+  opacity: 0.8;
+}
+
+html:not([data-theme="light"]) .theme-toggle-label:hover .theme-moon {
+  opacity: 0.6;
+}
+
+html:not([data-theme="light"]) .theme-toggle-label:hover .theme-sun {
   opacity: 1;
 }
 

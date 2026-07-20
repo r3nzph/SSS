@@ -184,7 +184,7 @@
    proper contrast and readability.
    =============================== */
 
-:root.light-mode {
+[data-theme="light"] {
   /* ---- Background Colors ---- */
   --bg-primary: #F5F7FA;
   --bg-secondary: #FFFFFF;

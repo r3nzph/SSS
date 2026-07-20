@@ -50,13 +50,9 @@ class ThemeManager {
 
   // ---- Internal ----
 
-  /** Apply theme by toggling `.light-mode` class on <html> */
+  /** Apply theme by setting data-theme attribute on <html> */
   _apply(theme) {
-    if (theme === THEMES.LIGHT) {
-      document.documentElement.classList.add('light-mode');
-    } else {
-      document.documentElement.classList.remove('light-mode');
-    }
+    document.documentElement.setAttribute('data-theme', theme);
   }
 
   /** Update all theme toggle buttons */

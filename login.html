@@ -10,7 +10,7 @@
       try {
         var theme = localStorage.getItem('pos-theme');
         if (theme === 'light') {
-          document.documentElement.classList.add('light-mode');
+          document.documentElement.setAttribute('data-theme', 'light');
         }
       } catch(e) {}
     })();

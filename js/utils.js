@@ -149,7 +149,7 @@ function pluralize(count, singular, plural) {
  * All canvas-based charts should use these colors instead of hardcoded rgba().
  */
 function getChartTheme() {
-  const isLight = document.documentElement.classList.contains('light-mode');
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
   return {
     chartTitle:    isLight ? '#111827' : 'rgba(255,255,255,0.6)',
     axisLabel:     isLight ? '#374151' : 'rgba(255,255,255,0.5)',
