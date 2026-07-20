@@ -98,9 +98,24 @@ const Skeleton = {
 
   /* ---- Generate chart skeleton ---- */
   showChart(containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    container.innerHTML = `<div class="skeleton skeleton-chart"></div>`;
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    // For canvas elements, insert skeleton alongside rather than replacing the canvas
+    // (canvas.innerHTML fallback content doesn't show the skeleton properly)
+    if (el.tagName === 'CANVAS') {
+      el.style.opacity = '0';
+      const parent = el.parentElement;
+      if (parent && !parent.querySelector('.skeleton-chart')) {
+        const skel = document.createElement('div');
+        skel.className = 'skeleton skeleton-chart';
+        const cs = getComputedStyle(el);
+        skel.style.height = cs.height || '220px';
+        skel.style.borderRadius = '8px';
+        parent.appendChild(skel);
+      }
+      return;
+    }
+    el.innerHTML = `<div class="skeleton skeleton-chart"></div>`;
   },
 
   /* ---- Generate alert section skeleton ---- */

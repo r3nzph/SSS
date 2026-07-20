@@ -120,6 +120,10 @@ const Sales = {
         if (typeof window.CashierModule !== 'undefined' && typeof window.CashierModule.refreshAll === 'function') {
           window.CashierModule.refreshAll();
         }
+        // If admin dashboard is open, refresh that too
+        if (typeof window.AdminModule !== 'undefined' && typeof window.AdminModule.refreshAll === 'function') {
+          window.AdminModule.refreshAll();
+        }
 
         // Auto start new sale
         setTimeout(() => {

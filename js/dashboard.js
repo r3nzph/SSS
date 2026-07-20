@@ -32,7 +32,7 @@ const Dashboard = {
     if (this._listenerInitialized) return;
     this._listenerInitialized = true;
     window.addEventListener('theme-changed', () => {
-      if (document.getElementById('salesChart') || document.getElementById('topProductsChart')) {
+      if (document.getElementById('salesChart') || document.getElementById('profitChart')) {
         this.renderCharts();
       }
     });
@@ -140,94 +140,204 @@ const Dashboard = {
       </div>`;
   },
 
-  renderCharts() { this.renderSalesChart(); this.renderTopProductsChart(); },
+  renderCharts() { this.renderRevenueChart(); this.renderProfitChart(); },
 
-  renderSalesChart() {
-    const canvas = document.getElementById('salesChart');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width || 400;
-    canvas.height = 220;
+  /** Helper: get 7-day aggregated data from transactions */
+  _getLast7Days() {
     const data = Auth.state.db;
     const transactions = data.transactions || [];
     const days = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date(); d.setDate(d.getDate() - i);
+      const d = new Date();
+      d.setDate(d.getDate() - i);
       const key = d.toISOString().slice(0, 10);
       const label = d.toLocaleDateString('en', { weekday: 'short' });
-      const dayTotal = transactions.filter(tx => tx.date && tx.date.slice(0, 10) === key).reduce((sum, tx) => sum + (tx.total || 0), 0);
-      days.push({ label, total: dayTotal });
+      const dayTxns = transactions.filter(tx => tx.date && tx.date.slice(0, 10) === key);
+      days.push({ label, key, txns: dayTxns });
     }
-    const max = Math.max(...days.map(d => d.total), 1);
+    return days;
+  },
+
+  /** Render the Revenue Chart (daily sales total) */
+  renderRevenueChart() {
+    const canvas = document.getElementById('salesChart');
+    if (!canvas) return;
+    // Restore visibility (skeleton may have hidden the canvas)
+    canvas.style.opacity = '1';
+    const parentEl = canvas.parentElement;
+    if (parentEl) {
+      const skel = parentEl.querySelector('.skeleton-chart');
+      if (skel) skel.remove();
+    }
+
+    const data = Auth.state.db;
+    const allTxns = data.transactions || [];
+
+    // Resize canvas
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = Math.max(rect.width || 400, 100);
+    canvas.height = 220;
+    const w = canvas.width, h = canvas.height;
     const ct = getChartTheme();
-    const w = canvas.width, h = canvas.height, pad = { top: 20, bottom: 30, left: 10, right: 10 };
-    const chartW = w - pad.left - pad.right, chartH = h - pad.top - pad.bottom;
-    const barW = chartW / days.length * 0.6, gap = chartW / days.length;
     ctx.clearRect(0, 0, w, h);
+
+    // Title
     ctx.fillStyle = ct.chartTitle;
     ctx.font = '11px sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText('Sales (7 days)', pad.left, 14);
-    days.forEach((day, i) => {
+    ctx.fillText('Revenue (7 days)', 10, 14);
+
+    // No-data state
+    if (allTxns.length === 0) {
+      ctx.fillStyle = ct.emptyText;
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('No transactions yet', w / 2, h / 2);
+      return;
+    }
+
+    const days = this._getLast7Days();
+    const dayData = days.map(d => ({
+      label: d.label,
+      total: d.txns.reduce((s, tx) => s + (tx.total || 0), 0)
+    }));
+
+    const max = Math.max(...dayData.map(d => d.total), 1);
+    const pad = { top: 20, bottom: 30, left: 10, right: 10 };
+    const chartW = w - pad.left - pad.right;
+    const chartH = h - pad.top - pad.bottom;
+    const barW = chartW / dayData.length * 0.6;
+    const gap = chartW / dayData.length;
+
+    dayData.forEach((day, i) => {
       const x = pad.left + i * gap + (gap - barW) / 2;
       const barH = (day.total / max) * chartH;
       const y = pad.top + chartH - barH;
+
       const accentPrimary = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim() || '#6D5DFC';
       const grad = ctx.createLinearGradient(x, y, x, pad.top + chartH);
-      grad.addColorStop(0, accentPrimary); grad.addColorStop(1, accentPrimary + '4D');
-      ctx.fillStyle = grad; ctx.beginPath();
-      ctx.roundRect(x, y, barW, barH, [4, 4, 0, 0]); ctx.fill();
-      ctx.fillStyle = ct.axisLabel; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+      grad.addColorStop(0, accentPrimary);
+      grad.addColorStop(1, accentPrimary + '4D');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(x, y, barW, barH, [4, 4, 0, 0]);
+      ctx.fill();
+
+      ctx.fillStyle = ct.axisLabel;
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
       ctx.fillText(day.label, x + barW / 2, h - 6);
+
       if (day.total > 0) {
-        ctx.fillStyle = ct.dataValue; ctx.font = '9px sans-serif';
+        ctx.fillStyle = ct.dataValue;
+        ctx.font = '9px sans-serif';
         ctx.fillText('₱' + day.total.toFixed(0), x + barW / 2, y - 4);
       }
     });
   },
 
-  renderTopProductsChart() {
-    const canvas = document.getElementById('topProductsChart');
+  /** Render the Profit Chart (daily profit = revenue − cost of goods) */
+  renderProfitChart() {
+    const canvas = document.getElementById('profitChart');
     if (!canvas) return;
+    // Restore visibility (skeleton may have hidden the canvas)
+    canvas.style.opacity = '1';
+    const parentEl = canvas.parentElement;
+    if (parentEl) {
+      const skel = parentEl.querySelector('.skeleton-chart');
+      if (skel) skel.remove();
+    }
+
+    const data = Auth.state.db;
+    const products = data.products || [];
+    const allTxns = data.transactions || [];
+
+    // Resize canvas
     const ctx = canvas.getContext('2d');
     const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width || 400;
+    canvas.width = Math.max(rect.width || 400, 100);
     canvas.height = 220;
-    const data = Auth.state.db;
-    const transactions = data.transactions || [];
-    const productSales = {};
-    transactions.forEach(tx => { if (tx.items) tx.items.forEach(item => {
-      if (!productSales[item.name]) productSales[item.name] = { qty: 0, total: 0 };
-      productSales[item.name].qty += item.qty || 0;
-      productSales[item.name].total += item.total || 0;
-    });});
-    const sorted = Object.entries(productSales).sort((a, b) => b[1].qty - a[1].qty).slice(0, 5);
+    const w = canvas.width, h = canvas.height;
     const ct = getChartTheme();
-    const w = canvas.width, h = canvas.height, pad = { top: 20, bottom: 20, left: 100, right: 40 };
-    const chartW = w - pad.left - pad.right, chartH = h - pad.top - pad.bottom;
-    const barH = Math.min(28, chartH / Math.max(sorted.length, 1) - 6);
     ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = ct.chartTitle; ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
-    ctx.fillText('Top Products', pad.left, 14);
-    if (sorted.length === 0) {
-      ctx.fillStyle = ct.emptyText; ctx.textAlign = 'center';
-      ctx.fillText('No sales data yet', w / 2, h / 2); return;
+
+    // Title
+    ctx.fillStyle = ct.chartTitle;
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Profit (7 days)', 10, 14);
+
+    // No-data state
+    if (allTxns.length === 0) {
+      ctx.fillStyle = ct.emptyText;
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('No transactions yet', w / 2, h / 2);
+      return;
     }
-    const maxQty = Math.max(...sorted.map(s => s[1].qty), 1);
-    sorted.forEach(([name, info], i) => {
-      const y = pad.top + i * (barH + 8);
-      const barW = (info.qty / maxQty) * chartW;
-      ctx.fillStyle = ct.legendText; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
-      const label = name.length > 12 ? name.slice(0, 12) + '...' : name;
-      ctx.fillText(label, pad.left - 8, y + barH / 2 + 4);
-      const grad = ctx.createLinearGradient(pad.left, 0, pad.left + chartW, 0);
-      const hue = 260 - i * 30;
-      grad.addColorStop(0, `hsla(${hue}, 70%, 60%, 0.9)`); grad.addColorStop(1, `hsla(${hue}, 70%, 60%, 0.3)`);
-      ctx.fillStyle = grad; ctx.beginPath();
-      ctx.roundRect(pad.left, y, barW, barH, [0, 4, 4, 0]); ctx.fill();
-      ctx.fillStyle = ct.dataValueBold; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'left';
-      ctx.fillText(info.qty + ' sold', pad.left + barW + 6, y + barH / 2 + 4);
+
+    const days = this._getLast7Days();
+    const dayProfit = days.map(d => {
+      let profit = 0;
+      d.txns.forEach(tx => {
+        if (tx.items) {
+          tx.items.forEach(item => {
+            const product = products.find(p => p.id === item.productId);
+            const cost = product ? (parseFloat(product.cost) || 0) : 0;
+            profit += ((item.price || 0) - cost) * (item.qty || 0);
+          });
+        }
+      });
+      return { label: d.label, profit: Math.round(profit * 100) / 100 };
+    });
+
+    const maxProfit = Math.max(...dayProfit.map(d => d.profit), 1);
+    // If all days have zero profit, show a flat chart
+    const hasProfit = dayProfit.some(d => d.profit !== 0);
+
+    const pad = { top: 20, bottom: 30, left: 10, right: 10 };
+    const chartW = w - pad.left - pad.right;
+    const chartH = h - pad.top - pad.bottom;
+    const barW = chartW / dayProfit.length * 0.6;
+    const gap = chartW / dayProfit.length;
+
+    if (!hasProfit) {
+      ctx.fillStyle = ct.emptyText;
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('No profit data (items may lack cost price)', w / 2, h / 2);
+      return;
+    }
+
+    dayProfit.forEach((day, i) => {
+      const x = pad.left + i * gap + (gap - barW) / 2;
+      const barH = (Math.abs(day.profit) / maxProfit) * chartH;
+      const y = day.profit >= 0
+        ? pad.top + chartH - barH
+        : pad.top + chartH;
+
+      const isPositive = day.profit >= 0;
+      const color = isPositive ? '#00B894' : '#FF6B6B';
+      const alpha = isPositive ? '4D' : '4D';
+      const grad = ctx.createLinearGradient(x, y, x, pad.top + chartH);
+      grad.addColorStop(0, color);
+      grad.addColorStop(1, color + alpha);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(x, y, barW, barH, [4, 4, 0, 0]);
+      ctx.fill();
+
+      ctx.fillStyle = ct.axisLabel;
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(day.label, x + barW / 2, h - 6);
+
+      if (day.profit !== 0) {
+        ctx.fillStyle = ct.dataValue;
+        ctx.font = '9px sans-serif';
+        ctx.fillText('₱' + Math.abs(day.profit).toFixed(0), x + barW / 2, day.profit >= 0 ? y - 4 : y + barH + 12);
+      }
     });
   }
 };
