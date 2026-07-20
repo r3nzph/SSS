@@ -1,7 +1,7 @@
 import Auth from './auth.js'; import UI from './ui.js'; import Audit from './audit.js'; import { escapeHtml, formatDate, getInputValue, clearInput } from './utils.js'; import StorageService from './storage.js';
 const Accounts = { _editingUserId:null,
   renderUsers(){const tbody=document.getElementById('usersTable');if(!tbody)return;const users=StorageService.load('users');if(!users){tbody.innerHTML='<tr><td colspan="5">No users.</td></tr>';return}tbody.innerHTML=users.map(u=>`<tr><td>${escapeHtml(u.id)}</td><td>${escapeHtml(u.username)}</td><td>${escapeHtml(u.role)}</td><td>${formatDate(u.createdAt)}</td><td><button class="btn-icon btn-sm" onclick="editUser('${u.id}')">✎</button><button class="btn-icon btn-sm" onclick="deleteUser('${u.id}')" style="color:var(--danger);">🗑</button></td></tr>`).join('')},
-  async saveUser(){const username=getInputValue('uName');const password=getInputValue('uPassword');const role=document.getElementById('uRole')?.value||'cashier';if(!username){UI.toast('Username required','error');return}if(this._editingUserId){// update existing user
+  async saveUser(){const username=getInputValue('uName');const password=getInputValue('uPassword');const role=document.getElementById('uRole')?.value||'Cashier';if(!username){UI.toast('Username required','error');return}if(this._editingUserId){// update existing user
     const user=StorageService.load('users',this._editingUserId);if(!user){UI.toast('User not found','error');return}
     const updates={username,role};if(password){updates.password=await StorageService.hashPassword(password)}
     const r=StorageService.update('users',this._editingUserId,updates);if(r.success){UI.toast('User updated!','success')}else{UI.toast(r.error||'Update failed','error')}

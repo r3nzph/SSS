@@ -1572,19 +1572,14 @@
   letter-spacing: 0.3px;
 }
 
-.audit-table .badge-admin {
-  background: color-mix(in srgb, var(--accent-primary) 15%, transparent);
-  color: var(--accent-primary);
+.audit-table .badge-Administrator {
+  background: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
 }
 
-.audit-table .badge-cashier {
+.audit-table .badge-Cashier {
   background: color-mix(in srgb, var(--info) 15%, transparent);
   color: var(--info);
-}
-
-.audit-table .badge-superadmin {
-  background: color-mix(in srgb, var(--warning) 15%, transparent);
-  color: var(--warning);
 }
 
 .audit-table .badge-action {

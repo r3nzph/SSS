@@ -92,7 +92,7 @@ const UserManager = {
   },
 
   _getRoleIcon(role) {
-    const icons = { superadmin: '👑', admin: '⚙️', cashier: '🛒', inventory: '📦', readonly: '👁️' };
+    const icons = { Administrator: '🛡️', Cashier: '🛒' };
     return icons[role] || '👤';
   },
 
@@ -107,15 +107,10 @@ const UserManager = {
     const root = getComputedStyle(document.documentElement);
     const accent = root.getPropertyValue('--accent-primary').trim() || '#6D5DFC';
     const success = root.getPropertyValue('--success').trim() || '#10B981';
-    const warning = root.getPropertyValue('--warning').trim() || '#F59E0B';
-    const danger = root.getPropertyValue('--danger').trim() || '#EF4444';
     const info = root.getPropertyValue('--info').trim() || '#74b9ff';
     const colors = {
-      superadmin: `linear-gradient(135deg, ${danger}, ${accent})`,
-      admin: `linear-gradient(135deg, ${accent}, #764ba2)`,
-      cashier: `linear-gradient(135deg, ${success}, ${info})`,
-      inventory: `linear-gradient(135deg, ${danger}, ${warning})`,
-      readonly: `linear-gradient(135deg, ${info}, ${success})`
+      Administrator: `linear-gradient(135deg, #EF4444, ${accent})`,
+      Cashier: `linear-gradient(135deg, ${success}, ${info})`
     };
     return colors[role] || `linear-gradient(135deg, ${accent}, ${info})`;
   },
@@ -189,7 +184,7 @@ const UserManager = {
   _renderRoleFilter() {
     const select = document.getElementById('umRoleFilter');
     if (!select) return;
-    const roles = ['superadmin', 'admin', 'cashier', 'inventory', 'readonly'];
+    const roles = ['Administrator', 'Cashier'];
     const currentVal = select.value;
     select.innerHTML = '<option value="">All Roles</option>' +
       roles.map(r => `<option value="${r}">${this._getRoleIcon(r)} ${r}</option>`).join('');
@@ -228,7 +223,7 @@ const UserManager = {
       hint.classList.remove('hidden');
     }
     const roleSelect = document.getElementById('umRole');
-    if (roleSelect) roleSelect.value = u.role || 'cashier';
+    if (roleSelect) roleSelect.value = u.role || 'Cashier';
     const statusSelect = document.getElementById('umStatus');
     if (statusSelect) statusSelect.value = u.status === 'archived' ? 'active' : (u.status || 'active');
     const forcePw = document.getElementById('umForcePw');
@@ -246,7 +241,7 @@ const UserManager = {
     ['umFullName', 'umUsername', 'umEmail', 'umContact', 'umPassword']
       .forEach(id => clearInput(id));
     const roleSelect = document.getElementById('umRole');
-    if (roleSelect) roleSelect.value = 'cashier';
+    if (roleSelect) roleSelect.value = 'Cashier';
     const statusSelect = document.getElementById('umStatus');
     if (statusSelect) statusSelect.value = 'active';
     const forcePw = document.getElementById('umForcePw');
@@ -261,12 +256,16 @@ const UserManager = {
     const email = getInputValue('umEmail') || '';
     const contact = getInputValue('umContact') || '';
     const password = getInputValue('umPassword');
-    const role = document.getElementById('umRole')?.value || 'cashier';
+    const role = document.getElementById('umRole')?.value || 'Cashier';
     const status = document.getElementById('umStatus')?.value || 'active';
     const forcePw = document.getElementById('umForcePw')?.checked || false;
 
     if (!username || username.length < 3) {
       UI.toast('Username is required (min 3 characters).', 'error');
+      return;
+    }
+    if (!Auth.isValidRole(role)) {
+      UI.toast(`Invalid role "${role}". Only Administrator and Cashier are allowed.`, 'error');
       return;
     }
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {

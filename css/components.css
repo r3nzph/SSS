@@ -414,11 +414,8 @@
   text-transform: capitalize;
 }
 
-.um-role-superadmin { color: var(--danger); }
-.um-role-admin { color: var(--accent-secondary); }
-.um-role-cashier { color: var(--success); }
-.um-role-inventory { color: var(--warning); }
-.um-role-readonly { color: var(--info); }
+.um-role-Administrator { color: var(--danger); }
+.um-role-Cashier { color: var(--info); }
 
 .um-status-active { color: var(--success); font-weight: var(--weight-semibold); }
 .um-status-disabled { color: var(--warning); font-weight: var(--weight-semibold); }

@@ -62,7 +62,7 @@ async function hashPassword(password) {
 function getDefaultData() {
   return {
     users: [
-      { id: 'u1', username: 'admin', password: 'admin123', role: 'admin', createdAt: new Date().toISOString(),
+      { id: 'u1', username: 'admin', password: 'admin123', role: 'Administrator', createdAt: new Date().toISOString(),
         fullName: 'Administrator', email: '', contactNumber: '', status: 'active',
         lastLogin: null, createdBy: 'system', loginAttempts: 0, lockedUntil: null,
         forcePasswordChange: false, profilePicture: '',
@@ -70,7 +70,7 @@ function getDefaultData() {
           stockReceiving: true, stockAdjustment: true, salesAudit: true, reports: true,
           userManagement: true, settings: true, cashierPOS: true, backup: true,
           restore: true, deleteRecords: true, exportReports: true } },
-      { id: 'u2', username: 'cashier', password: 'cashier123', role: 'cashier', createdAt: new Date().toISOString(),
+      { id: 'u2', username: 'cashier', password: 'cashier123', role: 'Cashier', createdAt: new Date().toISOString(),
         fullName: 'Cashier', email: '', contactNumber: '', status: 'active',
         lastLogin: null, createdBy: 'system', loginAttempts: 0, lockedUntil: null,
         forcePasswordChange: false, profilePicture: '',
@@ -96,9 +96,8 @@ function getDefaultData() {
     stockAdjustments: [],
     priceHistory: [],
     receivingTransactions: [],
-    reportHistory: [],
-    userSessions: [],
-    auditLogs: [],
+    reportHistory: [], userSessions: [], auditLogs: [],
+    // Migration: ensure existing data roles are updated
     settings: [{ id: 'main',
       storeName: 'Aking Tindahan', storeAddress: '123 Rizal St., Manila',
       receiptFooter: 'Thank you for your purchase!', taxRate: 0, currency: '₱',
@@ -153,7 +152,7 @@ function migrateIfNeeded(data) {
     data.transactions = data.sales.map(sale => ({
       id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
       items: [{ productId: sale.productId, name: sale.name, price: sale.total / sale.qty, qty: sale.qty, total: sale.total }],
-      total: sale.total, cashier: 'admin', date: sale.date || new Date().toISOString()
+      total: sale.total, cashier: 'Administrator', date: sale.date || new Date().toISOString()
     }));
     delete data.sales;
     changed = true;
@@ -190,6 +189,17 @@ function migrateIfNeeded(data) {
       if (p.lastUpdated === undefined) { p.lastUpdated = new Date().toISOString(); changed = true; }
       if (p.archived === undefined) { p.archived = false; changed = true; }
     });
+  }
+
+  // ---- Role migration: Update existing lowercase roles to new capitalized format ----
+  if (data.users) {
+    const roleMap = { admin: 'Administrator', cashier: 'Cashier', superadmin: 'Administrator', inventory: 'Cashier', readonly: 'Cashier' };
+    for (const user of data.users) {
+      if (roleMap[user.role] && user.role !== roleMap[user.role]) {
+        user.role = roleMap[user.role];
+        changed = true;
+      }
+    }
   }
 
   // ---- Demo password version migration ----

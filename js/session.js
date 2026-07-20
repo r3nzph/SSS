@@ -115,8 +115,8 @@ function clearRememberedUser() {
  * Get the correct page URL for a given role.
  */
 function getPageForRole(role) {
-  if (role === 'admin' || role === 'superadmin') return 'admin.html';
-  if (role === 'cashier') return 'cashier.html';
+  if (role === 'Administrator') return 'admin.html';
+  if (role === 'Cashier') return 'cashier.html';
   return 'index.html';
 }
 
@@ -159,14 +159,14 @@ function validatePageAccess(session) {
  * Check if the user's role allows access to the admin page.
  */
 function isAdmin(role) {
-  return role === 'admin' || role === 'superadmin';
+  return role === 'Administrator';
 }
 
 /**
  * Check if the user's role allows access to the cashier page.
  */
 function isCashier(role) {
-  return role === 'cashier';
+  return role === 'Cashier';
 }
 
 /**
@@ -174,7 +174,7 @@ function isCashier(role) {
  * Admins are allowed by default (configurable).
  */
 function canAccessCashierPage(role) {
-  return role === 'cashier' || role === 'admin' || role === 'superadmin';
+  return role === 'Cashier' || role === 'Administrator';
 }
 
 export default {

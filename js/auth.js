@@ -23,41 +23,25 @@ const Auth = {
   getState() { return this.state; },
 
   DEFAULT_PERMISSIONS: {
-    superadmin: {
+    Administrator: {
       dashboard: true, inventory: true, suppliers: true, purchaseOrders: true,
       stockReceiving: true, stockAdjustment: true, salesAudit: true, reports: true,
       userManagement: true, settings: true, cashierPOS: true, backup: true,
       restore: true, deleteRecords: true, exportReports: true
     },
-    admin: {
-      dashboard: true, inventory: true, suppliers: true, purchaseOrders: true,
-      stockReceiving: true, stockAdjustment: true, salesAudit: true, reports: true,
-      userManagement: true, settings: true, cashierPOS: false, backup: true,
-      restore: true, deleteRecords: true, exportReports: true
-    },
-    cashier: {
+    Cashier: {
       dashboard: false, inventory: false, suppliers: false, purchaseOrders: false,
       stockReceiving: false, stockAdjustment: false, salesAudit: false, reports: false,
       userManagement: false, settings: false, cashierPOS: true, backup: false,
       restore: false, deleteRecords: false, exportReports: false
-    },
-    inventory: {
-      dashboard: false, inventory: true, suppliers: false, purchaseOrders: true,
-      stockReceiving: true, stockAdjustment: true, salesAudit: false, reports: false,
-      userManagement: false, settings: false, cashierPOS: false, backup: false,
-      restore: false, deleteRecords: false, exportReports: true
-    },
-    readonly: {
-      dashboard: true, inventory: true, suppliers: true, purchaseOrders: true,
-      stockReceiving: true, stockAdjustment: true, salesAudit: true, reports: true,
-      userManagement: false, settings: false, cashierPOS: false, backup: false,
-      restore: false, deleteRecords: false, exportReports: true
     }
   },
 
   ROLES_HIERARCHY: {
-    superadmin: 100, admin: 80, inventory: 60, cashier: 40, readonly: 20
+    Administrator: 100, Cashier: 50
   },
+
+  VALID_ROLES: ['Administrator', 'Cashier'],
 
   setUser(username, role, userData = null) {
     this.state.user = username;
@@ -77,12 +61,15 @@ const Auth = {
   },
 
   hasPermission(permission) {
-    if (this.state.role === 'superadmin') return true;
     if (this.state.userData && this.state.userData.permissions) {
       return this.state.userData.permissions[permission] === true;
     }
     const defaults = this.DEFAULT_PERMISSIONS[this.state.role];
     return defaults ? defaults[permission] === true : false;
+  },
+
+  isValidRole(role) {
+    return this.VALID_ROLES.includes(role);
   },
 
   isAtLeast(role) {
@@ -91,9 +78,8 @@ const Auth = {
     return currentRank >= requiredRank;
   },
 
-  isAdmin() { return this.state.role === 'admin' || this.state.role === 'superadmin'; },
-  isSuperAdmin() { return this.state.role === 'superadmin'; },
-  isCashier() { return this.state.role === 'cashier'; },
+  isAdmin() { return this.state.role === 'Administrator'; },
+  isCashier() { return this.state.role === 'Cashier'; },
   isLoggedIn() { return this.state.role !== null; },
 
   requirePermission(permission) {
