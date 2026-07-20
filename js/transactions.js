@@ -44,7 +44,7 @@ const Sales = {
     }
 
     // --- Single source: calculateTotals() from calculator.js ---
-    const { subtotal, discountAmt: discountAmount, taxAmt: taxAmount, total } = calculateTotals(cart, discountPercent);
+    const { subtotal, discountAmt: discountAmount, taxAmt: taxAmount, total, taxRate } = calculateTotals(cart, discountPercent);
 
     // Get payment details from CashierPOS module and DOM
     let paymentMethod = 'cash';

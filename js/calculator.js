@@ -24,7 +24,7 @@ import { getStoreSettings } from './utils.js';
  *
  * @param {Array}  cart            — Array of { price, qty, total }
  * @param {number} discountPercent — 0–100 percentage
- * @returns {{ subtotal: number, discountAmt: number, taxable: number, taxAmt: number, total: number }}
+ * @returns {{ subtotal: number, discountAmt: number, taxable: number, taxAmt: number, total: number, taxRate: number, discountPercent: number }}
  */
 export function calculateTotals(cart, discountPercent) {
   const subtotal = cart.reduce((s, i) => s + (parseFloat(i.total) || 0), 0);
@@ -40,7 +40,9 @@ export function calculateTotals(cart, discountPercent) {
     discountAmt: Math.round(discountAmt * 100) / 100,
     taxable: Math.round(taxable * 100) / 100,
     taxAmt: Math.round(taxAmt * 100) / 100,
-    total: Math.round(total * 100) / 100
+    total: Math.round(total * 100) / 100,
+    taxRate: taxRate,
+    discountPercent: parseFloat(discountPercent) || 0
   };
 }
 
