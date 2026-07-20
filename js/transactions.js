@@ -7,6 +7,7 @@
 import Auth from './auth.js';
 import Audit from './audit.js';
 import { formatCurrency, formatDate, showModal, hideModal, handleError, generateId, getStoreSettings } from './utils.js';
+import { calculateTotals, calculateChange } from './calculator.js';
 import UI from './ui.js';
 import StorageService from './storage.js';
 
@@ -32,22 +33,22 @@ const Sales = {
       }
     }
 
-    // Calculate real total with discount and tax (mirrors CashierPOS.renderCart logic)
-    const subtotal = cart.reduce((sum, item) => sum + item.total, 0);
-    const discountInput = document.getElementById('posDiscountInput');
-    const discountPercent = parseFloat(discountInput?.value) || 0;
-    const discountAmount = subtotal * (discountPercent / 100);
-    const taxable = subtotal - discountAmount;
-    const s = getStoreSettings();
-    const taxRate = parseFloat(s.taxRate) || 0;
-    const taxAmount = taxable * (taxRate / 100);
-    const total = taxable + taxAmount;
+    // Guard: verify payment is sufficient before proceeding
+    const tenderedEl = document.getElementById('posTendered');
+    const amountTendered = parseFloat(tenderedEl?.value) || 0;
+    const discountPercent = parseFloat(document.getElementById('posDiscountInput')?.value) || 0;
+    const { total: totalCheck } = calculateTotals(cart, discountPercent);
+    if (amountTendered < totalCheck) {
+      UI.toast('Insufficient payment! Cannot process checkout.', 'error');
+      return;
+    }
+
+    // --- Single source: calculateTotals() from calculator.js ---
+    const { subtotal, discountAmt: discountAmount, taxAmt: taxAmount, total } = calculateTotals(cart, discountPercent);
 
     // Get payment details from CashierPOS module and DOM
     let paymentMethod = 'cash';
     let paymentRef = '';
-    let amountTendered = 0;
-    let change = 0;
     try {
       if (window.Cashier) {
         paymentMethod = window.Cashier.getPaymentMethod ? window.Cashier.getPaymentMethod() : 'cash';
@@ -55,10 +56,8 @@ const Sales = {
       }
     } catch(e) {}
 
-    // Get tendered amount from the DOM
-    const tenderedInput = document.getElementById('posTendered');
-    amountTendered = parseFloat(tenderedInput?.value) || 0;
-    change = Math.max(0, amountTendered - total);
+    // Compute change via the shared helper
+    const change = Math.max(0, calculateChange(amountTendered, total));
 
     try {
       // Build the transaction with all payment fields

@@ -10,6 +10,7 @@ import Auth from './auth.js';
 import Audit from './audit.js';
 import UI from './ui.js';
 import { escapeHtml, formatCurrency, getStoreSettings } from './utils.js';
+import { calculateTotals, calculateChange } from './calculator.js';
 
 // Held sales storage (in-memory map)
 let _heldSales = [];
@@ -219,14 +220,14 @@ const CashierPOS = {
         return;
       }
       existing.qty++;
-      existing.total = existing.qty * product.price;
+      existing.total = Math.round(existing.qty * product.price * 100) / 100;
     } else {
       cart.push({
         id: product.id,
         name: product.name,
         price: product.price,
         qty: 1,
-        total: product.price
+        total: Math.round(product.price * 100) / 100
       });
     }
 
@@ -254,12 +255,8 @@ const CashierPOS = {
     const s = getStoreSettings();
     const zero = (s.currency || '₱') + '0.00';
     const cart = Auth.getCart();
-    const subtotal = cart.reduce((s, i) => s + i.total, 0);
-    const discountAmt = subtotal * (_discountPercent / 100);
-    const taxable = subtotal - discountAmt;
+    const { subtotal, discountAmt, taxAmt, total } = calculateTotals(Auth.getCart(), _discountPercent);
     const taxRate = parseFloat(s.taxRate) || 0;
-    const taxAmt = taxable * (taxRate / 100);
-    const total = taxable + taxAmt;
 
     // Update tax label with dynamic rate
     if (taxLabel) {
@@ -353,7 +350,7 @@ const CashierPOS = {
     }
 
     item.qty = newQty;
-    item.total = newQty * item.price;
+    item.total = Math.round(newQty * item.price * 100) / 100;
     Auth.setCart(cart);
     this.renderCart();
   },
@@ -404,6 +401,9 @@ const CashierPOS = {
       changeRow.style.display = 'none';
       if (chargeLabel) chargeLabel.textContent = '💳 Pay Card';
     }
+
+    // Recalculate change to reflect method change (hides/shows change row)
+    this.calculateChange();
   },
 
   getPaymentMethod() {
@@ -419,26 +419,34 @@ const CashierPOS = {
   // PAYMENT & CHANGE
   // ============================
 
+  /**
+   * Update the Change Due display and toggle the Charge button.
+   * Called whenever: products added/removed, qty changes, discount changes,
+   * payment method changes, or amount tendered changes.
+   */
   calculateChange() {
-    const cart = Auth.getCart();
-    const subtotal = cart.reduce((s, i) => s + i.total, 0);
-    const discountAmt = subtotal * (_discountPercent / 100);
-    const taxable = subtotal - discountAmt;
-    const taxRate = Auth.state.db?.settings?.taxRate || 12;
-    const taxAmt = taxable * (taxRate / 100);
-    const total = taxable + taxAmt;
+    const { total } = calculateTotals(Auth.getCart(), _discountPercent);
 
     const tendered = parseFloat(document.getElementById('posTendered').value) || 0;
-    const change = tendered - total;
+    const change = calculateChange(tendered, total);
     const changeRow = document.getElementById('posChangeRow');
     const changeEl = document.getElementById('posChangeAmount');
+    const chargeBtn = document.getElementById('posCheckoutBtn');
 
     if (tendered > 0 && _paymentMethod === 'cash') {
       changeRow.style.display = 'flex';
-      changeEl.textContent = formatCurrency(change);
-      changeEl.style.color = change >= 0 ? 'var(--success)' : 'var(--danger)';
+      if (change >= 0) {
+        changeEl.textContent = formatCurrency(change);
+        changeEl.style.color = 'var(--success)';
+        if (chargeBtn) chargeBtn.disabled = false;
+      } else {
+        changeEl.textContent = 'Insufficient Payment';
+        changeEl.style.color = 'var(--danger)';
+        if (chargeBtn) chargeBtn.disabled = true;
+      }
     } else {
       changeRow.style.display = 'none';
+      if (chargeBtn) chargeBtn.disabled = false;
     }
   },
 
@@ -448,13 +456,10 @@ const CashierPOS = {
       el.value = amount;
       el.focus();
       this.calculateChange();
-      // Auto-charge if tendered >= total
+      // Auto-charge if tendered >= total using CONSISTENT calculation
       const cart = Auth.getCart();
       if (cart.length > 0) {
-        const subtotal = cart.reduce((s, i) => s + i.total, 0);
-        const discountAmt = subtotal * (_discountPercent / 100);
-        const taxRate = Auth.state.db?.settings?.taxRate || 12;
-        const total = (subtotal - discountAmt) * (1 + taxRate / 100);
+        const { total } = calculateTotals(Auth.getCart(), _discountPercent);
         if (amount >= total) {
           // Sales.payCart will be called via exposed global window.payCart
           if (typeof window.payCart === 'function') window.payCart();
