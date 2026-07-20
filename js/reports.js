@@ -29,6 +29,7 @@ import Auth from './auth.js';
 import Audit from './audit.js';
 import UI from './ui.js';
 import { escapeHtml, formatCurrency, formatDate, getChartTheme } from './utils.js';
+import { computeOverviewStats, computeDailyRevenue, computeDailyProfit } from './analytics.js';
 // Import Sales for receipt viewing (used in viewReceipt)
 import Sales from './transactions.js';
 
@@ -271,31 +272,8 @@ const SalesReports = {
     const transactions = this._getFilteredTransactions();
     const products = data.products || [];
 
-    // Calculate KPIs
-    const totalRevenue = transactions.reduce((s, tx) => s + (tx.total || 0), 0);
-    const totalTransactions = transactions.length;
-    const totalItemsSold = transactions.reduce((s, tx) => {
-      return s + (tx.items ? tx.items.reduce((si, item) => si + (item.qty || 0), 0) : 0);
-    }, 0);
-    const avgSaleValue = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
-
-    let totalCOGS = 0;
-    transactions.forEach(tx => {
-      if (tx.items) {
-        tx.items.forEach(item => {
-          const product = products.find(p => p.id === item.productId);
-          const cost = product ? (product.cost || 0) : 0;
-          totalCOGS += cost * (item.qty || 0);
-        });
-      }
-    });
-
-    const grossProfit = totalRevenue - totalCOGS;
-    const margin = totalRevenue > 0 ? ((grossProfit / totalRevenue) * 100).toFixed(1) : '0.0';
-
-    const activeProducts = products.filter(p => !p.archived).length;
-    const lowStockCount = products.filter(p => !p.archived && p.stock <= (p.minStock || 5)).length;
-    const inventoryValue = products.reduce((s, p) => s + (p.cost || 0) * p.stock, 0);
+    // Use centralized analytics service
+    const kpis = computeOverviewStats(transactions, products);
 
     container.innerHTML = `
       <div class="">
@@ -305,23 +283,23 @@ const SalesReports = {
             <div class="panel-kpi-icon">💰</div>
             <div class="panel-kpi-info">
               <div class="panel-kpi-label">Total Revenue</div>
-              <div class="panel-kpi-value">${formatCurrency(totalRevenue)}</div>
-              <div class="panel-kpi-sub">${totalTransactions} transactions</div>
+              <div class="panel-kpi-value">${formatCurrency(kpis.totalRevenue)}</div>
+              <div class="panel-kpi-sub">${kpis.totalTransactions} transactions</div>
             </div>
           </div>
           <div class="panel-kpi-card" style="--card-accent:var(--success);animation-delay:0.06s;">
             <div class="panel-kpi-icon">📈</div>
             <div class="panel-kpi-info">
               <div class="panel-kpi-label">Gross Profit</div>
-              <div class="panel-kpi-value">${formatCurrency(grossProfit)}</div>
-              <div class="panel-kpi-sub">${margin}% margin</div>
+              <div class="panel-kpi-value">${formatCurrency(kpis.grossProfit)}</div>
+              <div class="panel-kpi-sub">${kpis.margin}% margin</div>
             </div>
           </div>
           <div class="panel-kpi-card" style="--card-accent:var(--info);animation-delay:0.09s;">
             <div class="panel-kpi-icon">📊</div>
             <div class="panel-kpi-info">
               <div class="panel-kpi-label">COGS</div>
-              <div class="panel-kpi-value">${formatCurrency(totalCOGS)}</div>
+              <div class="panel-kpi-value">${formatCurrency(kpis.totalCOGS)}</div>
               <div class="panel-kpi-sub">cost of goods sold</div>
             </div>
           </div>
@@ -329,7 +307,7 @@ const SalesReports = {
             <div class="panel-kpi-icon">🧾</div>
             <div class="panel-kpi-info">
               <div class="panel-kpi-label">Avg Sale Value</div>
-              <div class="panel-kpi-value">${formatCurrency(avgSaleValue)}</div>
+              <div class="panel-kpi-value">${formatCurrency(kpis.avgSaleValue)}</div>
               <div class="panel-kpi-sub">per transaction</div>
             </div>
           </div>
@@ -337,16 +315,16 @@ const SalesReports = {
             <div class="panel-kpi-icon">📦</div>
             <div class="panel-kpi-info">
               <div class="panel-kpi-label">Items Sold</div>
-              <div class="panel-kpi-value">${totalItemsSold.toLocaleString()}</div>
-              <div class="panel-kpi-sub">${totalTransactions} transactions</div>
+              <div class="panel-kpi-value">${kpis.totalItemsSold.toLocaleString()}</div>
+              <div class="panel-kpi-sub">${kpis.totalTransactions} transactions</div>
             </div>
           </div>
           <div class="panel-kpi-card" style="--card-accent:var(--danger);animation-delay:0.18s;">
             <div class="panel-kpi-icon">📋</div>
             <div class="panel-kpi-info">
               <div class="panel-kpi-label">Inventory Value</div>
-              <div class="panel-kpi-value">${formatCurrency(inventoryValue)}</div>
-              <div class="panel-kpi-sub">${activeProducts} products (${lowStockCount} low)</div>
+              <div class="panel-kpi-value">${formatCurrency(kpis.inventoryValue)}</div>
+              <div class="panel-kpi-sub">${kpis.activeProducts} products (${kpis.lowStockCount} low)</div>
             </div>
           </div>
         </div>
@@ -376,37 +354,37 @@ const SalesReports = {
             <div class="sr-fin-row">
               <div class="sr-fin-item">
                 <span class="sr-fin-label">Gross Revenue</span>
-                <span class="sr-fin-value">${formatCurrency(totalRevenue)}</span>
+                <span class="sr-fin-value">${formatCurrency(kpis.totalRevenue)}</span>
               </div>
               <div class="sr-fin-item">
                 <span class="sr-fin-label">COGS</span>
-                <span class="sr-fin-value" style="color:var(--danger);">−${formatCurrency(totalCOGS)}</span>
+                <span class="sr-fin-value" style="color:var(--danger);">−${formatCurrency(kpis.totalCOGS)}</span>
               </div>
               <div class="sr-fin-item">
                 <span class="sr-fin-label">Gross Profit</span>
-                <span class="sr-fin-value" style="color:var(--success);">${formatCurrency(grossProfit)}</span>
+                <span class="sr-fin-value" style="color:var(--success);">${formatCurrency(kpis.grossProfit)}</span>
               </div>
               <div class="sr-fin-item">
                 <span class="sr-fin-label">Margin</span>
-                <span class="sr-fin-value">${margin}%</span>
+                <span class="sr-fin-value">${kpis.margin}%</span>
               </div>
             </div>
             <div class="sr-fin-row">
               <div class="sr-fin-item">
                 <span class="sr-fin-label">Transactions</span>
-                <span class="sr-fin-value">${totalTransactions}</span>
+                <span class="sr-fin-value">${kpis.totalTransactions}</span>
               </div>
               <div class="sr-fin-item">
                 <span class="sr-fin-label">Items Sold</span>
-                <span class="sr-fin-value">${totalItemsSold}</span>
+                <span class="sr-fin-value">${kpis.totalItemsSold}</span>
               </div>
               <div class="sr-fin-item">
                 <span class="sr-fin-label">Avg Item Value</span>
-                <span class="sr-fin-value">${totalItemsSold > 0 ? formatCurrency(totalRevenue / totalItemsSold) : '₱0.00'}</span>
+                <span class="sr-fin-value">${kpis.totalItemsSold > 0 ? formatCurrency(kpis.totalRevenue / kpis.totalItemsSold) : '₱0.00'}</span>
               </div>
               <div class="sr-fin-item">
                 <span class="sr-fin-label">Net Profit</span>
-                <span class="sr-fin-value" style="color:var(--success);">${formatCurrency(grossProfit)}</span>
+                <span class="sr-fin-value" style="color:var(--success);">${formatCurrency(kpis.grossProfit)}</span>
               </div>
             </div>
           </div>
@@ -458,19 +436,8 @@ const SalesReports = {
     const chartW = w - pad.left - pad.right;
     const chartH = h - pad.top - pad.bottom;
 
-    const days = [];
     const rangeEnd = new Date(this._getDateRangeEnd());
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(rangeEnd);
-      d.setDate(d.getDate() - i - 1);
-      const key = d.toISOString().slice(0, 10);
-      const label = d.toLocaleDateString('en', { month: 'short', day: 'numeric' });
-      const dayTotal = transactions
-        .filter(tx => (tx.date || '').slice(0, 10) === key)
-        .reduce((s, tx) => s + (tx.total || 0), 0);
-      days.push({ label, total: dayTotal });
-    }
-
+    const days = computeDailyRevenue(transactions, 7, rangeEnd);
     const max = Math.max(...days.map(d => d.total), 1);
     const barW = chartW / days.length * 0.55;
     const gap = chartW / days.length;
@@ -518,27 +485,8 @@ const SalesReports = {
     const chartW = w - pad.left - pad.right;
     const chartH = h - pad.top - pad.bottom;
 
-    const days = [];
     const rangeEnd = new Date(this._getDateRangeEnd());
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(rangeEnd);
-      d.setDate(d.getDate() - i - 1);
-      const key = d.toISOString().slice(0, 10);
-      const label = d.toLocaleDateString('en', { weekday: 'short' });
-      let dayProfit = 0, dayRevenue = 0;
-      transactions.filter(tx => (tx.date || '').slice(0, 10) === key).forEach(tx => {
-        dayRevenue += tx.total || 0;
-        if (tx.items) {
-          tx.items.forEach(item => {
-            const product = products.find(p => p.id === item.productId);
-            const cost = product ? (product.cost || 0) : 0;
-            dayProfit += ((item.price || 0) - cost) * (item.qty || 0);
-          });
-        }
-      });
-      days.push({ label, profit: dayProfit, revenue: dayRevenue });
-    }
-
+    const days = computeDailyProfit(transactions, products, 7, rangeEnd);
     const maxVal = Math.max(...days.map(d => Math.max(d.profit, d.revenue)), 1);
     const barW = chartW / days.length * 0.35;
     const gap = chartW / days.length;

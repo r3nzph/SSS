@@ -4,6 +4,7 @@
 
 import Auth from './auth.js';
 import { formatCurrency, getChartTheme } from './utils.js';
+import { computeAggregateStats, computeInventoryStats, computeDailyRevenue, computeDailyProfit } from './analytics.js';
 
 const Dashboard = {
   _charts: [],
@@ -84,10 +85,9 @@ const Dashboard = {
       </div>`;
       return;
     }
-    const s = data.stats || { totalRevenue: 0, totalProfit: 0, totalItemsSold: 0, totalTransactions: 0 };
     const products = data.products || [];
-    const totalValue = products.reduce((sum, p) => sum + p.price * p.stock, 0);
-    const lowStock = products.filter(p => p.stock <= (p.minStock || 5)).length;
+    const s = computeAggregateStats(data.transactions, products);
+    const inv = computeInventoryStats(products);
 
     el.innerHTML = `
       <div class="kpi-card" style="--kpi-color: var(--accent-primary);">
@@ -118,8 +118,8 @@ const Dashboard = {
         <div class="kpi-icon">⚠️</div>
         <div class="kpi-info">
           <div class="kpi-label">Low Stock Items</div>
-          <div class="kpi-value">${lowStock}</div>
-          <div class="kpi-trend ${lowStock > 0 ? 'down' : 'up'}">${lowStock > 0 ? '▼ Needs attention' : '▲ All stocked'}</div>
+          <div class="kpi-value">${inv.lowStockCount}</div>
+          <div class="kpi-trend ${inv.lowStockCount > 0 ? 'down' : 'up'}">${inv.lowStockCount > 0 ? '▼ Needs attention' : '▲ All stocked'}</div>
         </div>
       </div>
       <div class="kpi-card" style="--kpi-color: var(--accent-secondary);">
@@ -127,7 +127,7 @@ const Dashboard = {
         <div class="kpi-info">
           <div class="kpi-label">Products</div>
           <div class="kpi-value">${products.length}</div>
-          <div class="kpi-trend up">▲ ${formatCurrency(totalValue)} total value</div>
+          <div class="kpi-trend up">▲ ${formatCurrency(inv.totalValue)} total value</div>
         </div>
       </div>
       <div class="kpi-card" style="--kpi-color: var(--success);">
@@ -141,22 +141,6 @@ const Dashboard = {
   },
 
   renderCharts() { this.renderRevenueChart(); this.renderProfitChart(); },
-
-  /** Helper: get 7-day aggregated data from transactions */
-  _getLast7Days() {
-    const data = Auth.state.db;
-    const transactions = data.transactions || [];
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const key = d.toISOString().slice(0, 10);
-      const label = d.toLocaleDateString('en', { weekday: 'short' });
-      const dayTxns = transactions.filter(tx => tx.date && tx.date.slice(0, 10) === key);
-      days.push({ label, key, txns: dayTxns });
-    }
-    return days;
-  },
 
   /** Render the Revenue Chart (daily sales total) */
   renderRevenueChart() {
@@ -197,12 +181,7 @@ const Dashboard = {
       return;
     }
 
-    const days = this._getLast7Days();
-    const dayData = days.map(d => ({
-      label: d.label,
-      total: d.txns.reduce((s, tx) => s + (tx.total || 0), 0)
-    }));
-
+    const dayData = computeDailyRevenue(allTxns, 7);
     const max = Math.max(...dayData.map(d => d.total), 1);
     const pad = { top: 20, bottom: 30, left: 10, right: 10 };
     const chartW = w - pad.left - pad.right;
@@ -277,23 +256,8 @@ const Dashboard = {
       return;
     }
 
-    const days = this._getLast7Days();
-    const dayProfit = days.map(d => {
-      let profit = 0;
-      d.txns.forEach(tx => {
-        if (tx.items) {
-          tx.items.forEach(item => {
-            const product = products.find(p => p.id === item.productId);
-            const cost = product ? (parseFloat(product.cost) || 0) : 0;
-            profit += ((item.price || 0) - cost) * (item.qty || 0);
-          });
-        }
-      });
-      return { label: d.label, profit: Math.round(profit * 100) / 100 };
-    });
-
+    const dayProfit = computeDailyProfit(allTxns, products, 7);
     const maxProfit = Math.max(...dayProfit.map(d => d.profit), 1);
-    // If all days have zero profit, show a flat chart
     const hasProfit = dayProfit.some(d => d.profit !== 0);
 
     const pad = { top: 20, bottom: 30, left: 10, right: 10 };

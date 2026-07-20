@@ -13,6 +13,7 @@
 // ===============================
 
 import { StorageAdapter } from './storage-adapter.js';
+import { computeAggregateStats } from './analytics.js';
 
 // ===============================
 // INTERNAL — password hashing (only used during init)
@@ -28,7 +29,6 @@ async function _hashPassword(password) {
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   } catch (e) {
     console.error('[Storage] Password hashing failed, using fallback:', e);
-    // Fallback: simple hash when crypto is unavailable (e.g., non-HTTPS)
     let hash = 0;
     const str = 'sarisari-pos-salt-' + (password || '');
     for (let i = 0; i < str.length; i++) {
@@ -40,17 +40,11 @@ async function _hashPassword(password) {
   }
 }
 
-/**
- * Verify a password against a hash. Useful for auth modules.
- */
 async function verifyPassword(password, hash) {
   const result = await _hashPassword(password);
   return result === hash;
 }
 
-/**
- * Hash a password. Useful for auth/user modules.
- */
 async function hashPassword(password) {
   return _hashPassword(password);
 }
@@ -122,27 +116,8 @@ function getDefaultData() {
 }
 
 // ===============================
-// INTERNAL — migration & stats
+// INTERNAL — migration
 // ===============================
-
-function calculateStats(transactions, products) {
-  const stats = {
-    totalRevenue: 0, totalProfit: 0, totalItemsSold: 0,
-    totalTransactions: (transactions || []).length
-  };
-  (transactions || []).forEach(tx => {
-    stats.totalRevenue += tx.total || 0;
-    if (tx.items) {
-      tx.items.forEach(item => {
-        stats.totalItemsSold += item.qty || 0;
-        const product = products ? products.find(p => p.id === item.productId) : null;
-        const cost = product ? (product.cost || 0) : 0;
-        stats.totalProfit += ((item.price || 0) - cost) * (item.qty || 0);
-      });
-    }
-  });
-  return stats;
-}
 
 function migrateIfNeeded(data) {
   let changed = false;
@@ -166,7 +141,7 @@ function migrateIfNeeded(data) {
 
   if (!data.transactions) { data.transactions = []; changed = true; }
   if (!data.auditLogs) { data.auditLogs = []; changed = true; }
-  if (!data.stats) { data.stats = calculateStats(data.transactions, data.products); changed = true; }
+  if (!data.stats) { data.stats = computeAggregateStats(data.transactions, data.products); changed = true; }
   if (!data.users) { data.users = getDefaultData().users; changed = true; }
 
   ['suppliers', 'purchaseOrders', 'stockAdjustments', 'priceHistory', 'receivingTransactions', 'reportHistory', 'userSessions'].forEach(key => {
@@ -268,7 +243,7 @@ const StorageService = {
         try {
           const data = StorageAdapter.getFullData();
           if (data) {
-            data.stats = calculateStats(data.transactions, data.products);
+            data.stats = computeAggregateStats(data.transactions, data.products);
             StorageAdapter.setFullData(data);
           }
         } catch (e) {
@@ -372,7 +347,7 @@ const StorageService = {
   readRaw() {
     const data = StorageAdapter.getFullData();
     if (data) {
-      data.stats = calculateStats(data.transactions, data.products);
+      data.stats = computeAggregateStats(data.transactions, data.products);
     }
     return data;
   },
